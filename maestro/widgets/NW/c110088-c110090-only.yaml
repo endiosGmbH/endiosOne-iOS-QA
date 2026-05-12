@@ -1,0 +1,68 @@
+appId: de.endios.one
+---
+# C110090 + C110088 — Feeds list scroll, then RSS row → webview.
+# Focused rerun using the validated /news-list-test segment. Single launch
+# covers both cases since they share Feeds list-view entry.
+
+- launchApp:
+    appId: de.endios.one
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd: { timeout: 10000 }
+- swipe: { start: "50%, 25%", end: "50%, 75%", duration: 500 }
+- waitForAnimationToEnd: { timeout: 2000 }
+
+# Anchor on Feeds tile and tap into list view.
+- scrollUntilVisible:
+    element: { text: "Feeds" }
+    direction: DOWN
+    speed: 60
+    centerElement: true
+- tapOn: { text: "Feeds" }
+- waitForAnimationToEnd: { timeout: 5000 }
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/c110090_feeds_top_v2
+
+# C110090 — 6× down
+- swipe: { start: "50%, 80%", end: "50%, 25%", duration: 500 }
+- waitForAnimationToEnd: { timeout: 1500 }
+- swipe: { start: "50%, 80%", end: "50%, 25%", duration: 500 }
+- waitForAnimationToEnd: { timeout: 1500 }
+- swipe: { start: "50%, 80%", end: "50%, 25%", duration: 500 }
+- waitForAnimationToEnd: { timeout: 1500 }
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/c110090_feeds_mid_v2
+- swipe: { start: "50%, 80%", end: "50%, 25%", duration: 500 }
+- waitForAnimationToEnd: { timeout: 1500 }
+- swipe: { start: "50%, 80%", end: "50%, 25%", duration: 500 }
+- waitForAnimationToEnd: { timeout: 1500 }
+- swipe: { start: "50%, 80%", end: "50%, 25%", duration: 500 }
+- waitForAnimationToEnd: { timeout: 1500 }
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/c110090_feeds_bottom_v2
+
+# C110090 — 6× up
+- swipe: { start: "50%, 25%", end: "50%, 90%", duration: 500 }
+- waitForAnimationToEnd: { timeout: 1500 }
+- swipe: { start: "50%, 25%", end: "50%, 90%", duration: 500 }
+- waitForAnimationToEnd: { timeout: 1500 }
+- swipe: { start: "50%, 25%", end: "50%, 90%", duration: 500 }
+- waitForAnimationToEnd: { timeout: 1500 }
+- swipe: { start: "50%, 25%", end: "50%, 90%", duration: 500 }
+- waitForAnimationToEnd: { timeout: 1500 }
+- swipe: { start: "50%, 25%", end: "50%, 90%", duration: 500 }
+- waitForAnimationToEnd: { timeout: 1500 }
+- swipe: { start: "50%, 25%", end: "50%, 90%", duration: 500 }
+- waitForAnimationToEnd: { timeout: 1500 }
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/c110090_feeds_back_top_v2
+
+# C110088 — Tap RSS row → webview opens. Scroll the page first so the
+# screenshot captures loaded content (first frame is often blank).
+- tapOn: { point: "50%, 35%" }
+- waitForAnimationToEnd: { timeout: 5000 }
+- swipe: { start: "50%, 70%", end: "50%, 30%", duration: 1000 }
+- swipe: { start: "50%, 70%", end: "50%, 30%", duration: 1000 }
+- waitForAnimationToEnd: { timeout: 2000 }
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/c110088_webview_v2
+
+# Dismiss via sheet-dismiss gesture — Safari chrome auto-hides after scroll.
+- swipe: { start: "50%, 1%", end: "50%, 99%", duration: 800 }
+- waitForAnimationToEnd: { timeout: 2000 }
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/c110088_back_in_listview_v2

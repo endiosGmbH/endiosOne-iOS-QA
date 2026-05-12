@@ -1,0 +1,32 @@
+appId: de.endios.one
+---
+# C110084 — Tap title row of Strip variant (Quality) opens Detail.
+# Focused rerun: clean launch, anchor on subtitle "Qualiy" (typo in test data,
+# unique anchor for the Strip), then tap the title row above it.
+
+- launchApp:
+    appId: de.endios.one
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd: { timeout: 10000 }
+- swipe: { start: "50%, 25%", end: "50%, 75%", duration: 500 }
+- waitForAnimationToEnd: { timeout: 2000 }
+
+- scrollUntilVisible:
+    element: { text: "Qualiy" }
+    direction: DOWN
+    speed: 60
+    centerElement: true
+- waitForAnimationToEnd: { timeout: 1500 }
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/c110084_strip_anchored
+
+# Title row of Quality Strip sits just above the subtitle "Qualiy" — tap it.
+- tapOn: { text: "Qualiy" }
+- waitForAnimationToEnd: { timeout: 4000 }
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/c110084_listview_v2
+
+- runFlow:
+    when: { visible: "Back" }
+    commands:
+      - tapOn: { text: "Back" }
+      - waitForAnimationToEnd: { timeout: 1500 }

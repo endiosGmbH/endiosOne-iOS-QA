@@ -1,0 +1,71 @@
+appId: de.endios.one
+---
+# C110257 Focused Retest — News Article Detail: Social media buttons open URLs
+# Target article: Quality Strip ("Qualiy" typo) — confirmed to render Social network
+# section with Youtube and Twitter buttons (per prior screenshot c110092_gallery_section.png).
+#
+# Steps under test:
+# 1. Open detail with Social network section
+# 2. Verify Twitter and Youtube buttons display
+# 3. Tap Twitter -> external URL launches in SFSafariViewController
+# 4. Capture Safari screenshot to verify configured URL loaded
+#
+# Limitation: SFSafariViewController is a separate iOS process unreachable from
+# Maestro WebDriverAgent — we cannot tap Done or return to overlay via flow.
+# Flow ends after capturing Safari URL load. The "close icon returns to overlay"
+# step is not provable in automation; flagged in report.
+
+- launchApp:
+    appId: de.endios.one
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd: { timeout: 10000 }
+
+# Ensure we're on the Product tab (saved tab state may persist across launches)
+- tapOn:
+    text: "Product"
+- waitForAnimationToEnd: { timeout: 2000 }
+
+# baseline pull-to-refresh
+- swipe: { start: "50%, 25%", end: "50%, 75%", duration: 500 }
+- waitForAnimationToEnd: { timeout: 2000 }
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/c110257r_00_dashboard
+
+# Scroll DOWN to Quality Strip tile
+- scrollUntilVisible:
+    element: { text: "Qualiy" }
+    direction: DOWN
+    centerElement: true
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/c110257r_01_quality_tile
+
+# Tap Qualiy strip -> opens Nachrichten List View
+- tapOn: { text: "Qualiy" }
+- waitForAnimationToEnd: { timeout: 5000 }
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/c110257r_02_listview
+
+# Tap article (anchor "Newww" unique to Deals/Testing/Newww row that has Social section)
+- tapOn: { text: "Newww" }
+- waitForAnimationToEnd: { timeout: 5000 }
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/c110257r_03_detail_top
+
+# Scroll to Social network section
+- scrollUntilVisible:
+    element: { text: "Social network" }
+    direction: DOWN
+    centerElement: true
+- waitForAnimationToEnd: { timeout: 1500 }
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/c110257r_04_social_visible
+
+# Verify both buttons visible
+- assertVisible: "Twitter"
+- assertVisible: "Youtube"
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/c110257r_05_buttons_asserted
+
+# Tap Twitter button — should launch SFSafariViewController with configured Twitter URL
+- tapOn: { text: "Twitter" }
+- waitForAnimationToEnd: { timeout: 6000 }
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/c110257r_06_twitter_safari_launched
+
+# Wait additional time for URL to fully load
+- waitForAnimationToEnd: { timeout: 4000 }
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/c110257r_07_twitter_url_loaded

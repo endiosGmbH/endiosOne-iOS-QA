@@ -1,0 +1,474 @@
+appId: de.endios.one
+---
+# News widget — full suite (19 cases) — single-launch consolidated flow.
+#
+# Dashboard inventory (Product tab, top → bottom):
+#   1-8.  Image / Offers / Places / Wetter widgets (no News content)
+#   9.    News 2 (Basic Image, ContentHub airplane articles)
+#  10.    Nachrichten Gallery #1 (One/Create co...) + Mehr
+#  11.    Automative tile
+#  12.    Quality Strip ("Nachrichten / Qualiy" — typo unique anchor)
+#  13.    Regen weather (block)
+#  14.    Feeds (RSS Tagesschau)
+#  15.    Nachrichten Gallery #2 (Acceptance/Emerging) + Mehr
+#  16.    Engineering Carousel ← News Carousel 18769
+#
+# Scroll-state strategy: STRICTLY BOTTOM→TOP after the dashboard inventory leaves
+# us at Engineering area. We only scroll UP between cases. C110088 (RSS webview)
+# is moved LAST — SFSafariViewController runs in a separate iOS process which
+# Maestro's WebDriverAgent can't dismiss, so we relaunch the app once after C110088
+# (sanctioned secondary-launch exception) to recover for the Auto tab cases.
+#
+# C110257 verifies Twitter/Youtube buttons VISIBLE only, no taps (taps would open
+# Safari mid-flow, blocking the rest of the Product tab cases).
+#
+# Tile mapping:
+#   Engineering Carousel — C110085, C110083, C110093, C110084, C110101, C110107, C110094
+#   Quality Strip        — C110089, C110092, C110257 (anchor "Qualiy" typo)
+#   News 2 (Basic Image) — C110087, C110091, C110095
+#   Feeds (RSS)          — C110090, C110088 (LAST, before relaunch)
+#   Auto tab             — C110097, C110100, C110098
+#
+# Native modal X-close: tapOn { point: "92%, 10%" } (top-right).
+
+- launchApp:
+    appId: de.endios.one
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd: { timeout: 10000 }
+- swipe: { start: "50%, 25%", end: "50%, 75%", duration: 500 }
+- waitForAnimationToEnd: { timeout: 2000 }
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/00_dashboard_top
+
+# ===== 12903 Widget Tile =====
+
+# C110082 — Variant rendering matrix (capture all News tiles via dashboard scroll).
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/c110082_dashboard_top
+- swipe: { start: "50%, 80%", end: "50%, 20%", duration: 600 }
+- waitForAnimationToEnd: { timeout: 1500 }
+- swipe: { start: "50%, 80%", end: "50%, 20%", duration: 600 }
+- waitForAnimationToEnd: { timeout: 1500 }
+- swipe: { start: "50%, 80%", end: "50%, 20%", duration: 600 }
+- waitForAnimationToEnd: { timeout: 1500 }
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/c110082_dashboard_mid
+- swipe: { start: "50%, 80%", end: "50%, 20%", duration: 600 }
+- waitForAnimationToEnd: { timeout: 1500 }
+- swipe: { start: "50%, 80%", end: "50%, 20%", duration: 600 }
+- waitForAnimationToEnd: { timeout: 1500 }
+- swipe: { start: "50%, 80%", end: "50%, 20%", duration: 600 }
+- waitForAnimationToEnd: { timeout: 1500 }
+- swipe: { start: "50%, 80%", end: "50%, 20%", duration: 600 }
+- waitForAnimationToEnd: { timeout: 1500 }
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/c110082_dashboard_bottom
+
+# C110085 — Engineering Carousel rotation horizontal swipe (RTL then LTR balanced).
+- scrollUntilVisible:
+    element: { text: "Engineering" }
+    direction: DOWN
+    speed: 40
+    timeout: 30000
+    centerElement: true
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/c110085_engineering_initial
+- swipe: { start: "80%, 80%", end: "20%, 80%", duration: 500 }
+- waitForAnimationToEnd: { timeout: 1500 }
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/c110085_engineering_RTL_1
+- swipe: { start: "80%, 80%", end: "20%, 80%", duration: 500 }
+- waitForAnimationToEnd: { timeout: 1500 }
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/c110085_engineering_RTL_2
+- swipe: { start: "20%, 80%", end: "80%, 80%", duration: 500 }
+- waitForAnimationToEnd: { timeout: 1500 }
+- swipe: { start: "20%, 80%", end: "80%, 80%", duration: 500 }
+- waitForAnimationToEnd: { timeout: 1500 }
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/c110085_engineering_LTR_back
+
+# C110083 — Engineering Carousel preview tap → DIRECT Detail (skip List View).
+- scrollUntilVisible:
+    element: { text: "Engineering" }
+    direction: DOWN
+    speed: 40
+    timeout: 30000
+    centerElement: true
+- tapOn: { point: "50%, 80%" }
+- waitForAnimationToEnd: { timeout: 4000 }
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/c110083_direct_detail
+- tapOn: { point: "92%, 10%" }
+- waitForAnimationToEnd: { timeout: 2000 }
+- runFlow:
+    when: { visible: "Back" }
+    commands:
+      - tapOn: { text: "Back" }
+      - waitForAnimationToEnd: { timeout: 1500 }
+
+# C110093 — Engineering Carousel detail X close at TOP-RIGHT.
+- scrollUntilVisible:
+    element: { text: "Engineering" }
+    direction: DOWN
+    speed: 40
+    timeout: 30000
+    centerElement: true
+- tapOn: { point: "50%, 80%" }
+- waitForAnimationToEnd: { timeout: 4000 }
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/c110093_detail_with_x
+- tapOn: { point: "92%, 10%" }
+- waitForAnimationToEnd: { timeout: 2000 }
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/c110093_after_x_close
+- runFlow:
+    when: { visible: "Back" }
+    commands:
+      - tapOn: { text: "Back" }
+      - waitForAnimationToEnd: { timeout: 1500 }
+
+# C110084 — Gallery #2 Mehr → List View (anchor on "Engineering", Mehr just above).
+- scrollUntilVisible:
+    element: { text: "Engineering" }
+    direction: UP
+    speed: 40
+    timeout: 30000
+    centerElement: true
+- tapOn: { text: "Mehr" }
+- waitForAnimationToEnd: { timeout: 4000 }
+- assertVisible: { text: "Nachrichten" }
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/c110084_gallery_mehr_listview
+- runFlow:
+    when: { visible: "Back" }
+    commands:
+      - tapOn: { text: "Back" }
+      - waitForAnimationToEnd: { timeout: 1500 }
+
+# C110101 — AppBar + Back via Gallery #2 Mehr.
+- scrollUntilVisible:
+    element: { text: "Engineering" }
+    direction: DOWN
+    speed: 40
+    timeout: 30000
+    centerElement: true
+- tapOn: { text: "Mehr" }
+- waitForAnimationToEnd: { timeout: 4000 }
+- assertVisible: { text: "Nachrichten" }
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/c110101_appbar
+- runFlow:
+    when: { visible: "Back" }
+    commands:
+      - tapOn: { text: "Back" }
+      - waitForAnimationToEnd: { timeout: 1500 }
+
+# C110107 — Gallery #2 Mehr → Categories full toggle cycle.
+- scrollUntilVisible:
+    element: { text: "Engineering" }
+    direction: DOWN
+    speed: 40
+    timeout: 30000
+    centerElement: true
+- tapOn: { text: "Mehr" }
+- waitForAnimationToEnd: { timeout: 5000 }
+- assertVisible: { text: "Nachrichten" }
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/c110107_listview_filter
+- runFlow:
+    when: { visible: "Categories" }
+    commands:
+      - tapOn: { text: "Categories" }
+      - waitForAnimationToEnd: { timeout: 2000 }
+      - takeScreenshot: /tmp/verify-widget/run-widget-nw/c110107_dropdown_all_on
+      - runFlow:
+          when: { visible: "Regression" }
+          commands:
+            - tapOn: { text: "Regression" }
+            - waitForAnimationToEnd: { timeout: 1500 }
+            - takeScreenshot: /tmp/verify-widget/run-widget-nw/c110107_regression_disabled
+      - runFlow:
+          when: { visible: "TEST" }
+          commands:
+            - tapOn: { text: "TEST" }
+            - waitForAnimationToEnd: { timeout: 1500 }
+            - takeScreenshot: /tmp/verify-widget/run-widget-nw/c110107_only_qa_enabled
+      - runFlow:
+          when: { visible: "Regression" }
+          commands:
+            - tapOn: { text: "Regression" }
+            - waitForAnimationToEnd: { timeout: 1000 }
+      - runFlow:
+          when: { visible: "TEST" }
+          commands:
+            - tapOn: { text: "TEST" }
+            - waitForAnimationToEnd: { timeout: 1500 }
+            - takeScreenshot: /tmp/verify-widget/run-widget-nw/c110107_all_filters_reenabled
+- runFlow:
+    when: { visible: "Back" }
+    commands:
+      - tapOn: { text: "Back" }
+      - waitForAnimationToEnd: { timeout: 1500 }
+
+# C110094 — Gallery #2 → article → swipe between gallery items + full-view.
+- scrollUntilVisible:
+    element: { text: "Engineering" }
+    direction: DOWN
+    speed: 40
+    timeout: 30000
+    centerElement: true
+- tapOn: { text: "Mehr" }
+- waitForAnimationToEnd: { timeout: 4000 }
+- assertVisible: { text: "Nachrichten" }
+- tapOn: { point: "50%, 30%" }
+- waitForAnimationToEnd: { timeout: 3000 }
+- swipe: { start: "50%, 80%", end: "50%, 20%", duration: 500 }
+- waitForAnimationToEnd: { timeout: 1000 }
+- swipe: { start: "80%, 50%", end: "20%, 50%", duration: 500 }
+- waitForAnimationToEnd: { timeout: 1000 }
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/c110094_gallery_swipe
+- tapOn: { point: "50%, 50%" }
+- waitForAnimationToEnd: { timeout: 3000 }
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/c110094_fullview
+- tapOn: { point: "92%, 10%" }
+- waitForAnimationToEnd: { timeout: 2000 }
+- tapOn: { point: "92%, 10%" }
+- waitForAnimationToEnd: { timeout: 1500 }
+- runFlow:
+    when: { visible: "Back" }
+    commands:
+      - tapOn: { text: "Back" }
+      - waitForAnimationToEnd: { timeout: 1500 }
+
+# ===== 12904 + 12905 List/Detail (UP-scroll path Engineering → Feeds → Quality → News 2) =====
+
+# C110090 — Feeds list scroll up/down (NO row tap — that's C110088, deferred).
+- scrollUntilVisible:
+    element: { text: "Feeds" }
+    direction: UP
+    speed: 40
+    timeout: 30000
+    centerElement: true
+- tapOn: { text: "Feeds" }
+- waitForAnimationToEnd: { timeout: 5000 }
+- assertVisible: { text: "Nachrichten" }
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/c110090_feeds_top
+- swipe: { start: "50%, 80%", end: "50%, 25%", duration: 500 }
+- waitForAnimationToEnd: { timeout: 1000 }
+- swipe: { start: "50%, 80%", end: "50%, 25%", duration: 500 }
+- waitForAnimationToEnd: { timeout: 1000 }
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/c110090_feeds_mid
+- swipe: { start: "50%, 80%", end: "50%, 25%", duration: 500 }
+- waitForAnimationToEnd: { timeout: 1000 }
+- swipe: { start: "50%, 80%", end: "50%, 25%", duration: 500 }
+- waitForAnimationToEnd: { timeout: 1000 }
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/c110090_feeds_bottom
+- swipe: { start: "50%, 25%", end: "50%, 80%", duration: 500 }
+- waitForAnimationToEnd: { timeout: 1000 }
+- swipe: { start: "50%, 25%", end: "50%, 80%", duration: 500 }
+- waitForAnimationToEnd: { timeout: 1000 }
+- swipe: { start: "50%, 25%", end: "50%, 80%", duration: 500 }
+- waitForAnimationToEnd: { timeout: 1000 }
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/c110090_feeds_back_top
+- runFlow:
+    when: { visible: "Back" }
+    commands:
+      - tapOn: { text: "Back" }
+      - waitForAnimationToEnd: { timeout: 1500 }
+
+# C110089 — Quality Strip layout (anchor on "Qualiy" subtitle, typo is unique).
+- scrollUntilVisible:
+    element: { text: "Qualiy" }
+    direction: UP
+    speed: 40
+    timeout: 30000
+    centerElement: true
+- tapOn: { text: "Qualiy" }
+- waitForAnimationToEnd: { timeout: 4000 }
+- assertVisible: { text: "Nachrichten" }
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/c110089_quality_listview
+- runFlow:
+    when: { visible: "Back" }
+    commands:
+      - tapOn: { text: "Back" }
+      - waitForAnimationToEnd: { timeout: 1500 }
+
+# C110092 — Quality Strip → article → Detail Gallery section visibility.
+- scrollUntilVisible:
+    element: { text: "Qualiy" }
+    direction: UP
+    speed: 40
+    timeout: 30000
+    centerElement: true
+- tapOn: { text: "Qualiy" }
+- waitForAnimationToEnd: { timeout: 4000 }
+- assertVisible: { text: "Nachrichten" }
+- tapOn: { point: "50%, 30%" }
+- waitForAnimationToEnd: { timeout: 3000 }
+- swipe: { start: "50%, 80%", end: "50%, 30%", duration: 500 }
+- waitForAnimationToEnd: { timeout: 1000 }
+- swipe: { start: "50%, 80%", end: "50%, 30%", duration: 500 }
+- waitForAnimationToEnd: { timeout: 1000 }
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/c110092_gallery_section
+- tapOn: { point: "92%, 10%" }
+- waitForAnimationToEnd: { timeout: 1500 }
+- runFlow:
+    when: { visible: "Back" }
+    commands:
+      - tapOn: { text: "Back" }
+      - waitForAnimationToEnd: { timeout: 1500 }
+
+# C110257 — Quality Strip detail → social media buttons VISIBILITY only.
+# Twitter/Youtube taps would open Safari and block subsequent cases (Maestro can't
+# dismiss SFSafariViewController). Verify presence via screenshot only.
+- scrollUntilVisible:
+    element: { text: "Qualiy" }
+    direction: UP
+    speed: 40
+    timeout: 30000
+    centerElement: true
+- tapOn: { text: "Qualiy" }
+- waitForAnimationToEnd: { timeout: 4000 }
+- assertVisible: { text: "Nachrichten" }
+- tapOn: { point: "50%, 30%" }
+- waitForAnimationToEnd: { timeout: 3000 }
+- swipe: { start: "50%, 80%", end: "50%, 30%", duration: 500 }
+- waitForAnimationToEnd: { timeout: 1000 }
+- swipe: { start: "50%, 80%", end: "50%, 30%", duration: 500 }
+- waitForAnimationToEnd: { timeout: 1000 }
+- swipe: { start: "50%, 80%", end: "50%, 30%", duration: 500 }
+- waitForAnimationToEnd: { timeout: 1000 }
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/c110257_social_section
+- tapOn: { point: "92%, 10%" }
+- waitForAnimationToEnd: { timeout: 1500 }
+- runFlow:
+    when: { visible: "Back" }
+    commands:
+      - tapOn: { text: "Back" }
+      - waitForAnimationToEnd: { timeout: 1500 }
+
+# C110087 — News 2 (Basic Image, ContentHub) → List View.
+- scrollUntilVisible:
+    element: { text: "News 2" }
+    direction: UP
+    speed: 40
+    timeout: 30000
+    centerElement: true
+- tapOn: { text: "News 2" }
+- waitForAnimationToEnd: { timeout: 4000 }
+- assertVisible: { text: "Nachrichten" }
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/c110087_news2_listview
+- runFlow:
+    when: { visible: "Back" }
+    commands:
+      - tapOn: { text: "Back" }
+      - waitForAnimationToEnd: { timeout: 1500 }
+
+# C110091 — News 2 → article tap → Detail field display rule.
+- scrollUntilVisible:
+    element: { text: "News 2" }
+    direction: UP
+    speed: 40
+    timeout: 30000
+    centerElement: true
+- tapOn: { text: "News 2" }
+- waitForAnimationToEnd: { timeout: 4000 }
+- assertVisible: { text: "Nachrichten" }
+- tapOn: { point: "50%, 30%" }
+- waitForAnimationToEnd: { timeout: 3000 }
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/c110091_native_detail_fields
+- swipe: { start: "50%, 80%", end: "50%, 30%", duration: 500 }
+- waitForAnimationToEnd: { timeout: 1000 }
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/c110091_detail_scrolled
+- tapOn: { point: "92%, 10%" }
+- waitForAnimationToEnd: { timeout: 1500 }
+- runFlow:
+    when: { visible: "Back" }
+    commands:
+      - tapOn: { text: "Back" }
+      - waitForAnimationToEnd: { timeout: 1500 }
+
+# C110095 — Non-Carousel: News 2 → List View → tap article → Detail.
+- scrollUntilVisible:
+    element: { text: "News 2" }
+    direction: UP
+    speed: 40
+    timeout: 30000
+    centerElement: true
+- tapOn: { text: "News 2" }
+- waitForAnimationToEnd: { timeout: 4000 }
+- assertVisible: { text: "Nachrichten" }
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/c110095_news2_listview
+- tapOn: { point: "50%, 30%" }
+- waitForAnimationToEnd: { timeout: 4000 }
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/c110095_news2_detail_opened
+- tapOn: { point: "92%, 10%" }
+- waitForAnimationToEnd: { timeout: 1500 }
+- runFlow:
+    when: { visible: "Back" }
+    commands:
+      - tapOn: { text: "Back" }
+      - waitForAnimationToEnd: { timeout: 1500 }
+
+# ===== C110088 — RSS row tap → webview (LAST Product-tab case) =====
+# This case opens SFSafariViewController which Maestro cannot dismiss (separate
+# iOS process). After capturing the webview screenshot we relaunch the app to
+# recover for the Auto tab cases.
+
+- scrollUntilVisible:
+    element: { text: "Feeds" }
+    direction: DOWN
+    speed: 40
+    timeout: 30000
+    centerElement: true
+- tapOn: { text: "Feeds" }
+- waitForAnimationToEnd: { timeout: 5000 }
+- assertVisible: { text: "Nachrichten" }
+- tapOn: { point: "50%, 35%" }
+- waitForAnimationToEnd: { timeout: 8000 }
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/c110088_webview
+- swipe: { start: "50%, 80%", end: "50%, 30%", duration: 600 }
+- waitForAnimationToEnd: { timeout: 1500 }
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/c110088_webview_scrolled
+
+# ===== Sanctioned secondary launch — recover from Safari for Auto tab cases =====
+- launchApp:
+    appId: de.endios.one
+- waitForAnimationToEnd: { timeout: 8000 }
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/zz_after_relaunch
+
+# ===== 12909 Negative Scenarios (Auto tab) =====
+- tapOn: { text: "Auto" }
+- waitForAnimationToEnd: { timeout: 4000 }
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/auto_tab_initial
+
+# C110097 + C110100 — "No feed" tile → empty state, then pull-to-refresh retry.
+- runFlow:
+    when: { visible: "No feed" }
+    commands:
+      - tapOn: { text: "No feed" }
+      - waitForAnimationToEnd: { timeout: 6000 }
+      - takeScreenshot: /tmp/verify-widget/run-widget-nw/c110097_100_no_feed_listview
+      - swipe: { start: "50%, 25%", end: "50%, 75%", duration: 500 }
+      - waitForAnimationToEnd: { timeout: 3000 }
+      - takeScreenshot: /tmp/verify-widget/run-widget-nw/c110097_100_no_feed_after_refresh
+      - runFlow:
+          when: { visible: "Back" }
+          commands:
+            - tapOn: { text: "Back" }
+            - waitForAnimationToEnd: { timeout: 1500 }
+
+# C110098 — "RSS Feed" tile (Tagesschau, no duplicate filtering).
+- runFlow:
+    when: { visible: "RSS Feed" }
+    commands:
+      - tapOn: { text: "RSS Feed" }
+      - waitForAnimationToEnd: { timeout: 6000 }
+      - takeScreenshot: /tmp/verify-widget/run-widget-nw/c110098_rss_feed_top
+      - swipe: { start: "50%, 80%", end: "50%, 25%", duration: 500 }
+      - waitForAnimationToEnd: { timeout: 1000 }
+      - swipe: { start: "50%, 80%", end: "50%, 25%", duration: 500 }
+      - waitForAnimationToEnd: { timeout: 1000 }
+      - takeScreenshot: /tmp/verify-widget/run-widget-nw/c110098_rss_feed_mid
+      - swipe: { start: "50%, 80%", end: "50%, 25%", duration: 500 }
+      - waitForAnimationToEnd: { timeout: 1000 }
+      - swipe: { start: "50%, 80%", end: "50%, 25%", duration: 500 }
+      - waitForAnimationToEnd: { timeout: 1000 }
+      - takeScreenshot: /tmp/verify-widget/run-widget-nw/c110098_rss_feed_bottom
+      - runFlow:
+          when: { visible: "Back" }
+          commands:
+            - tapOn: { text: "Back" }
+            - waitForAnimationToEnd: { timeout: 1500 }
+
+- tapOn: { text: "Product" }
+- waitForAnimationToEnd: { timeout: 2000 }
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/zz_final_dashboard

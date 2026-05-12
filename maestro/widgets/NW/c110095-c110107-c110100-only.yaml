@@ -1,0 +1,106 @@
+appId: de.endios.one
+---
+# Focused fallback for the 3 Unclears from /run-widget News.
+#
+# - C110095 — News 2 (Basic ContentHub) tile → List View → tap manual
+#   article row → Detail View opens (covers the non-Carousel path; Carousel
+#   direct-detail is already covered by C110083).
+# - C110107 — Gallery "Mehr" → List View → "Categories" header → full
+#   toggle cycle: disable Regression, then disable TEST (only QA left),
+#   then re-enable both. Screenshot at every state.
+# - C110100 — Auto tab "No feed" tile → empty List View (canonical
+#   error/empty state evidence with retry affordance via pull-to-refresh).
+
+- launchApp:
+    appId: de.endios.one
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd: { timeout: 10000 }
+- swipe: { start: "50%, 25%", end: "50%, 75%", duration: 500 }
+- waitForAnimationToEnd: { timeout: 2000 }
+
+# ===== C110095 — News 2 (Basic) tile → List View → tap article → Detail =====
+- scrollUntilVisible:
+    element: { text: "News 2" }
+    direction: DOWN
+    speed: 60
+    centerElement: true
+- tapOn: { text: "News 2" }
+- waitForAnimationToEnd: { timeout: 4000 }
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/c110095_news2_listview
+- tapOn: { point: "50%, 30%" }
+- waitForAnimationToEnd: { timeout: 4000 }
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/c110095_news2_detail_opened
+# Detail View has an X close at top-right (92%, 10%) — Back isn't shown.
+# Dismiss the modal first, then Back out of the List View.
+- tapOn: { point: "92%, 10%" }
+- waitForAnimationToEnd: { timeout: 1500 }
+- runFlow:
+    when: { visible: "Back" }
+    commands:
+      - tapOn: { text: "Back" }
+      - waitForAnimationToEnd: { timeout: 1500 }
+
+# ===== C110107 — Gallery "Mehr" → Categories → full toggle cycle =====
+# Carousel's "Mehr" appears first when scrolling DOWN — it has only one
+# source so no Categories filter. Push past it with extra swipes before
+# the second scrollUntilVisible to land on Gallery's "Mehr".
+- scrollUntilVisible:
+    element: { text: "Mehr" }
+    direction: DOWN
+    speed: 60
+    centerElement: true
+- swipe: { start: "50%, 80%", end: "50%, 20%", duration: 500 }
+- waitForAnimationToEnd: { timeout: 1500 }
+- swipe: { start: "50%, 80%", end: "50%, 20%", duration: 500 }
+- waitForAnimationToEnd: { timeout: 1500 }
+- swipe: { start: "50%, 80%", end: "50%, 20%", duration: 500 }
+- waitForAnimationToEnd: { timeout: 1500 }
+- scrollUntilVisible:
+    element: { text: "Mehr" }
+    direction: DOWN
+    speed: 60
+    centerElement: true
+- tapOn: { text: "Mehr", index: 0 }
+- waitForAnimationToEnd: { timeout: 5000 }
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/c110107_listview_filter
+- tapOn: { text: "Categories" }
+- waitForAnimationToEnd: { timeout: 2000 }
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/c110107_dropdown_all_on
+# Disable Regression — list should drop Regression-attributed cards
+- tapOn: { text: "Regression" }
+- waitForAnimationToEnd: { timeout: 1500 }
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/c110107_regression_disabled
+# Disable TEST — only QA-attributed cards remain
+- tapOn: { text: "TEST" }
+- waitForAnimationToEnd: { timeout: 1500 }
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/c110107_only_qa_enabled
+# Re-enable both — all sources restored
+- tapOn: { text: "Regression" }
+- waitForAnimationToEnd: { timeout: 1000 }
+- tapOn: { text: "TEST" }
+- waitForAnimationToEnd: { timeout: 1500 }
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/c110107_all_filters_reenabled
+# Recover to dashboard
+- runFlow:
+    when: { visible: "Back" }
+    commands:
+      - tapOn: { text: "Back" }
+      - waitForAnimationToEnd: { timeout: 1500 }
+
+# ===== C110100 — Auto tab "No feed" → empty List View (retry affordance) =====
+- tapOn: { text: "Auto" }
+- waitForAnimationToEnd: { timeout: 4000 }
+- tapOn: { text: "No feed" }
+- waitForAnimationToEnd: { timeout: 6000 }
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/c110100_empty_listview
+# Pull-to-refresh — retry affordance. Spinner appears mid-gesture.
+- swipe: { start: "50%, 25%", end: "50%, 75%", duration: 800 }
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/c110100_refresh_in_progress
+- waitForAnimationToEnd: { timeout: 3000 }
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/c110100_after_refresh
+- runFlow:
+    when: { visible: "Back" }
+    commands:
+      - tapOn: { text: "Back" }
+      - waitForAnimationToEnd: { timeout: 1500 }

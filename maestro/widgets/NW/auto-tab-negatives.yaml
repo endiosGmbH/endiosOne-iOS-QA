@@ -1,0 +1,36 @@
+appId: de.endios.one
+---
+# C110096 / C110097 / C110099 / C110100 — Negative scenarios on Auto tab.
+# Per user: invalid-URL, empty-feed, special-char (Schussental), and connector-down
+# tiles are configured on the Auto tab (not Product).
+
+- launchApp:
+    appId: de.endios.one
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd: { timeout: 10000 }
+- swipe: { start: "50%, 25%", end: "50%, 75%", duration: 500 }
+- waitForAnimationToEnd: { timeout: 2000 }
+- takeScreenshot: /tmp/verify-widget/news-auto/00_product_tab
+
+# Switch to Auto tab (bottom right tab)
+- tapOn: { text: "Auto" }
+- waitForAnimationToEnd: { timeout: 4000 }
+- takeScreenshot: /tmp/verify-widget/news-auto/01_auto_tab_top
+
+# Scroll through Auto tab capturing every section
+- swipe: { start: "50%, 80%", end: "50%, 30%", duration: 500 }
+- waitForAnimationToEnd: { timeout: 1000 }
+- takeScreenshot: /tmp/verify-widget/news-auto/02_auto_tab_mid1
+- swipe: { start: "50%, 80%", end: "50%, 30%", duration: 500 }
+- waitForAnimationToEnd: { timeout: 1000 }
+- takeScreenshot: /tmp/verify-widget/news-auto/03_auto_tab_mid2
+- swipe: { start: "50%, 80%", end: "50%, 30%", duration: 500 }
+- waitForAnimationToEnd: { timeout: 1000 }
+- takeScreenshot: /tmp/verify-widget/news-auto/04_auto_tab_mid3
+- swipe: { start: "50%, 80%", end: "50%, 30%", duration: 500 }
+- waitForAnimationToEnd: { timeout: 1000 }
+- takeScreenshot: /tmp/verify-widget/news-auto/05_auto_tab_mid4
+- swipe: { start: "50%, 80%", end: "50%, 30%", duration: 500 }
+- waitForAnimationToEnd: { timeout: 1000 }
+- takeScreenshot: /tmp/verify-widget/news-auto/06_auto_tab_bottom

@@ -1,0 +1,137 @@
+appId: de.endios.one
+---
+# News List View — single-launch consolidated flow across multiple News tiles
+# C110087 → News 2 (Basic, ContentHub)
+# C110088, C110090, C110089 (RSS path) → Feeds (Basic Image, RSS)
+# C110101 → both News 2 and Gallery's "Mehr"
+# C110107 → checked on Feeds list
+
+- launchApp:
+    appId: de.endios.one
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd:
+    timeout: 12000
+- swipe:
+    start: 50%, 25%
+    end: 50%, 75%
+    duration: 600
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# === C110087 — Manual ContentHub displays via News 2 (Basic) ===
+- assertVisible:
+    text: "News 2"
+- takeScreenshot: /tmp/verify-widget/multi-tile/00_dashboard
+- tapOn:
+    text: "News 2"
+- waitForAnimationToEnd:
+    timeout: 5000
+- takeScreenshot: /tmp/verify-widget/multi-tile/c110087_basic_listview
+
+# === C110101 (entry path 1: Basic tile) — AppBar + Back ===
+- takeScreenshot: /tmp/verify-widget/multi-tile/c110101_appbar_basic
+- tapOn:
+    text: "Back"
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: /tmp/verify-widget/multi-tile/c110101_back_to_dashboard
+
+# === Scroll to Feeds tile ===
+- swipe:
+    start: 5%, 85%
+    end: 5%, 15%
+    duration: 700
+- swipe:
+    start: 5%, 85%
+    end: 5%, 15%
+    duration: 700
+- assertVisible:
+    text: "Feeds"
+- takeScreenshot: /tmp/verify-widget/multi-tile/feeds_visible
+
+# === C110088 / C110090 / C110089 — Tap Feeds (RSS, Basic Image) → List View ===
+- tapOn:
+    text: "Feeds"
+- waitForAnimationToEnd:
+    timeout: 6000
+- takeScreenshot: /tmp/verify-widget/multi-tile/c110088_feeds_listview
+
+# === C110089 — capture layout (heading, subline, description, date, image) ===
+- takeScreenshot: /tmp/verify-widget/multi-tile/c110089_layout_top
+
+# === C110090 — scroll down through ≥6 swipes ===
+- swipe:
+    start: 50%, 80%
+    end: 50%, 25%
+    duration: 700
+- takeScreenshot: /tmp/verify-widget/multi-tile/c110090_scroll1
+- swipe:
+    start: 50%, 80%
+    end: 50%, 25%
+    duration: 700
+- takeScreenshot: /tmp/verify-widget/multi-tile/c110090_scroll2
+- swipe:
+    start: 50%, 80%
+    end: 50%, 25%
+    duration: 700
+- takeScreenshot: /tmp/verify-widget/multi-tile/c110090_scroll3
+- swipe:
+    start: 50%, 80%
+    end: 50%, 25%
+    duration: 700
+- takeScreenshot: /tmp/verify-widget/multi-tile/c110090_scroll4
+- swipe:
+    start: 50%, 80%
+    end: 50%, 25%
+    duration: 700
+- takeScreenshot: /tmp/verify-widget/multi-tile/c110090_scroll5
+- swipe:
+    start: 50%, 80%
+    end: 50%, 25%
+    duration: 700
+- takeScreenshot: /tmp/verify-widget/multi-tile/c110090_scroll6_bottom
+
+# === C110090 — scroll back up ===
+- swipe:
+    start: 50%, 25%
+    end: 50%, 90%
+    duration: 700
+- swipe:
+    start: 50%, 25%
+    end: 50%, 90%
+    duration: 700
+- swipe:
+    start: 50%, 25%
+    end: 50%, 90%
+    duration: 700
+- swipe:
+    start: 50%, 25%
+    end: 50%, 90%
+    duration: 700
+- swipe:
+    start: 50%, 25%
+    end: 50%, 90%
+    duration: 700
+- swipe:
+    start: 50%, 25%
+    end: 50%, 90%
+    duration: 700
+- takeScreenshot: /tmp/verify-widget/multi-tile/c110090_back_at_top
+
+# === C110107 — check inline category selector visibility on Feeds ===
+- takeScreenshot: /tmp/verify-widget/multi-tile/c110107_categories_check
+
+# === C110088 — tap an RSS row → navigates to URL/Detail ===
+- tapOn:
+    point: 50%, 35%
+- waitForAnimationToEnd:
+    timeout: 5000
+- takeScreenshot: /tmp/verify-widget/multi-tile/c110088_rss_row_tap_detail
+
+# Close detail + back to dashboard
+- tapOn:
+    point: 91%, 7%
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: /tmp/verify-widget/multi-tile/after_close_detail

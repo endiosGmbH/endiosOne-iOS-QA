@@ -1,0 +1,53 @@
+appId: de.endios.one
+---
+# Tap each negative-scenario News tile on Auto tab and capture List View state.
+# "No feed" → expect empty/error state (covers C110096/C110097/C110100 — same error UX).
+# "RSS Feed" → expect articles with possible special-char URLs (covers C110099).
+
+- launchApp:
+    appId: de.endios.one
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd: { timeout: 10000 }
+- swipe: { start: "50%, 25%", end: "50%, 75%", duration: 500 }
+- waitForAnimationToEnd: { timeout: 2000 }
+- tapOn: { text: "Auto" }
+- waitForAnimationToEnd: { timeout: 4000 }
+- takeScreenshot: /tmp/verify-widget/news-auto/10_auto_tab_initial
+
+# ===== "No feed" tile — C110096/C110097/C110100 evidence =====
+- takeScreenshot: /tmp/verify-widget/news-auto/11_no_feed_tile
+- tapOn: { text: "No feed" }
+- waitForAnimationToEnd: { timeout: 6000 }
+- takeScreenshot: /tmp/verify-widget/news-auto/12_no_feed_listview
+# Wait longer in case feed loads slowly or shows error
+- waitForAnimationToEnd: { timeout: 3000 }
+- takeScreenshot: /tmp/verify-widget/news-auto/13_no_feed_listview_after_wait
+# Try pull-to-refresh to confirm the empty state persists
+- swipe: { start: "50%, 25%", end: "50%, 75%", duration: 500 }
+- waitForAnimationToEnd: { timeout: 3000 }
+- takeScreenshot: /tmp/verify-widget/news-auto/14_no_feed_listview_after_refresh
+- runFlow:
+    when: { visible: "Back" }
+    commands:
+      - tapOn: { text: "Back" }
+      - waitForAnimationToEnd: { timeout: 1500 }
+
+# ===== "RSS Feed" tile — C110099 evidence =====
+- takeScreenshot: /tmp/verify-widget/news-auto/20_rss_feed_tile
+- tapOn: { text: "RSS Feed" }
+- waitForAnimationToEnd: { timeout: 6000 }
+- takeScreenshot: /tmp/verify-widget/news-auto/21_rss_feed_listview_top
+- swipe: { start: "50%, 80%", end: "50%, 25%", duration: 500 }
+- swipe: { start: "50%, 80%", end: "50%, 25%", duration: 500 }
+- takeScreenshot: /tmp/verify-widget/news-auto/22_rss_feed_listview_mid
+- swipe: { start: "50%, 80%", end: "50%, 25%", duration: 500 }
+- swipe: { start: "50%, 80%", end: "50%, 25%", duration: 500 }
+- takeScreenshot: /tmp/verify-widget/news-auto/23_rss_feed_listview_bottom
+- runFlow:
+    when: { visible: "Back" }
+    commands:
+      - tapOn: { text: "Back" }
+      - waitForAnimationToEnd: { timeout: 1500 }
+
+- takeScreenshot: /tmp/verify-widget/news-auto/zz_final_auto_tab

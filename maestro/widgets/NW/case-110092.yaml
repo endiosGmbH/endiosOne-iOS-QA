@@ -1,0 +1,11 @@
+appId: de.endios.one
+---
+- launchApp:
+    appId: de.endios.one
+    clearState: false
+- tapOn:
+    text: "News 2"
+- takeScreenshot: /tmp/verify-widget/case-110092/01_list
+- tapOn:
+    point: "50%,35%"
+- takeScreenshot: /tmp/verify-widget/case-110092/02_article_detail_webview

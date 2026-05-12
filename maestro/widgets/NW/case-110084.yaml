@@ -1,0 +1,29 @@
+appId: de.endios.one
+---
+# C110084 — News - Tile - Tapping moreButtonText navigates to List View
+# Only Gallery variant ("Nachrichten" + "Mehr") has moreButtonText configured on this app.
+- launchApp:
+    appId: de.endios.one
+    clearState: false
+- waitForAnimationToEnd:
+    timeout: 6000
+
+# Scroll to find the Mehr button
+- swipe:
+    start: 50%, 80%
+    end: 50%, 20%
+    duration: 800
+- swipe:
+    start: 50%, 80%
+    end: 50%, 30%
+    duration: 800
+
+- assertVisible:
+    text: "Mehr"
+- takeScreenshot: /tmp/verify-widget/case-110084/01_more_button_visible
+
+- tapOn:
+    text: "Mehr"
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: /tmp/verify-widget/case-110084/02_after_tap_listview

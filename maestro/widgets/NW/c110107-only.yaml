@@ -1,0 +1,95 @@
+appId: de.endios.one
+---
+# C110107 — Gallery "Mehr" (multi-source, categories filter) — focused recovery flow
+# Standalone run because the consolidated flow failed scrollUntilVisible "Mehr" at end.
+
+- launchApp:
+    appId: de.endios.one
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd:
+    timeout: 10000
+- swipe:
+    start: 50%, 25%
+    end: 50%, 75%
+    duration: 500
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: /tmp/verify-widget/news-list-view-final/c110107_00_dashboard
+
+# Multiple large swipes down to reach bottom (Gallery is the lowest News tile)
+- swipe:
+    start: 50%, 80%
+    end: 50%, 15%
+    duration: 600
+- swipe:
+    start: 50%, 80%
+    end: 50%, 15%
+    duration: 600
+- swipe:
+    start: 50%, 80%
+    end: 50%, 15%
+    duration: 600
+- swipe:
+    start: 50%, 80%
+    end: 50%, 15%
+    duration: 600
+- swipe:
+    start: 50%, 80%
+    end: 50%, 15%
+    duration: 600
+- swipe:
+    start: 50%, 80%
+    end: 50%, 15%
+    duration: 600
+- swipe:
+    start: 50%, 80%
+    end: 50%, 15%
+    duration: 600
+- swipe:
+    start: 50%, 80%
+    end: 50%, 15%
+    duration: 600
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: /tmp/verify-widget/news-list-view-final/c110107_a_gallery_tile
+
+# Try to find Mehr (Gallery's CTA) — last visible "Mehr" should be Gallery's
+- runFlow:
+    when:
+      visible: "Mehr"
+    commands:
+      - tapOn:
+          text: "Mehr"
+          index: 0
+      - waitForAnimationToEnd:
+          timeout: 5000
+      - takeScreenshot: /tmp/verify-widget/news-list-view-final/c110107_b_listview_with_filter
+      # Tap the "Categories" header to open the configured-filters dropdown below the navbar
+      - tapOn:
+          text: "Categories"
+      - waitForAnimationToEnd:
+          timeout: 2000
+      - takeScreenshot: /tmp/verify-widget/news-list-view-final/c110107_c_categories_dropdown_all_on
+      # Disable the "Regression" filter — list should remove Regression-attributed cards
+      - tapOn:
+          text: "Regression"
+      - waitForAnimationToEnd:
+          timeout: 1500
+      - takeScreenshot: /tmp/verify-widget/news-list-view-final/c110107_d_filter_regression_disabled
+      # Disable the "TEST" filter — list should now only show QA-attributed cards
+      - tapOn:
+          text: "TEST"
+      - waitForAnimationToEnd:
+          timeout: 1500
+      - takeScreenshot: /tmp/verify-widget/news-list-view-final/c110107_e_only_qa_enabled
+      # Re-enable both — list should restore all sources
+      - tapOn:
+          text: "Regression"
+      - waitForAnimationToEnd:
+          timeout: 1000
+      - tapOn:
+          text: "TEST"
+      - waitForAnimationToEnd:
+          timeout: 1500
+      - takeScreenshot: /tmp/verify-widget/news-list-view-final/c110107_f_all_filters_reenabled

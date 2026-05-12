@@ -1,0 +1,83 @@
+appId: de.endios.one
+---
+# Negative scenario evidence: visit each News tile on the dashboard, capture tile + list state.
+# Intent: scan for empty/error states (C110096/C110097), broken images (C110099),
+# offline-state evidence (C110100). Cannot trigger backend outage.
+
+- launchApp:
+    appId: de.endios.one
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd: { timeout: 10000 }
+- swipe: { start: "50%, 25%", end: "50%, 75%", duration: 500 }
+- waitForAnimationToEnd: { timeout: 2000 }
+- takeScreenshot: /tmp/verify-widget/news-rerun/neg_00_dashboard_top
+
+# News 2 (Basic, ContentHub)
+- scrollUntilVisible:
+    element: { text: "News 2" }
+    direction: DOWN
+    speed: 60
+- takeScreenshot: /tmp/verify-widget/news-rerun/neg_news2_tile
+- tapOn: { text: "News 2" }
+- waitForAnimationToEnd: { timeout: 4000 }
+- takeScreenshot: /tmp/verify-widget/news-rerun/neg_news2_listview
+- runFlow:
+    when: { visible: "Back" }
+    commands:
+      - tapOn: { text: "Back" }
+      - waitForAnimationToEnd: { timeout: 1500 }
+
+# Quality Strip
+- scrollUntilVisible:
+    element: { text: "Qualiy" }
+    direction: DOWN
+    speed: 60
+- takeScreenshot: /tmp/verify-widget/news-rerun/neg_quality_tile
+- tapOn: { text: "Qualiy" }
+- waitForAnimationToEnd: { timeout: 4000 }
+- takeScreenshot: /tmp/verify-widget/news-rerun/neg_quality_listview
+- runFlow:
+    when: { visible: "Back" }
+    commands:
+      - tapOn: { text: "Back" }
+      - waitForAnimationToEnd: { timeout: 1500 }
+
+# Feeds (RSS Tagesschau) — primary evidence for C110099 (image rendering across many articles)
+- scrollUntilVisible:
+    element: { text: "Feeds" }
+    direction: DOWN
+    speed: 60
+- takeScreenshot: /tmp/verify-widget/news-rerun/neg_feeds_tile
+- tapOn: { text: "Feeds" }
+- waitForAnimationToEnd: { timeout: 5000 }
+- takeScreenshot: /tmp/verify-widget/news-rerun/neg_feeds_listview_top
+- swipe: { start: "50%, 80%", end: "50%, 25%", duration: 500 }
+- swipe: { start: "50%, 80%", end: "50%, 25%", duration: 500 }
+- swipe: { start: "50%, 80%", end: "50%, 25%", duration: 500 }
+- takeScreenshot: /tmp/verify-widget/news-rerun/neg_feeds_listview_mid
+- swipe: { start: "50%, 80%", end: "50%, 25%", duration: 500 }
+- swipe: { start: "50%, 80%", end: "50%, 25%", duration: 500 }
+- takeScreenshot: /tmp/verify-widget/news-rerun/neg_feeds_listview_bottom
+- runFlow:
+    when: { visible: "Back" }
+    commands:
+      - tapOn: { text: "Back" }
+      - waitForAnimationToEnd: { timeout: 1500 }
+
+# Nachrichten Gallery
+- scrollUntilVisible:
+    element: { text: "Mehr" }
+    direction: UP
+    speed: 60
+- takeScreenshot: /tmp/verify-widget/news-rerun/neg_nachrichten_tile
+- tapOn: { text: "Mehr", index: 0 }
+- waitForAnimationToEnd: { timeout: 4000 }
+- takeScreenshot: /tmp/verify-widget/news-rerun/neg_nachrichten_listview
+- runFlow:
+    when: { visible: "Back" }
+    commands:
+      - tapOn: { text: "Back" }
+      - waitForAnimationToEnd: { timeout: 1500 }
+
+- takeScreenshot: /tmp/verify-widget/news-rerun/neg_zz_final

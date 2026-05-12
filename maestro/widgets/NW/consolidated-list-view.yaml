@@ -1,0 +1,91 @@
+appId: de.endios.one
+---
+# Consolidated flow — News List View (section 12904)
+# Active cases: 110087, 110088, 110089, 110090, 110107
+# Deprecated (skipped): 110101, 110102
+
+- launchApp:
+    appId: de.endios.one
+    clearState: false
+- waitForAnimationToEnd:
+    timeout: 7000
+
+# Pull-to-refresh
+- swipe:
+    start: 50%, 25%
+    end: 50%, 75%
+    duration: 600
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# === C110087 — Navigate from Basic tile to article list ===
+- assertVisible:
+    text: "News 2"
+- takeScreenshot: /tmp/verify-widget/list-view/c110087_01_dashboard
+- tapOn:
+    text: "News 2"
+- waitForAnimationToEnd:
+    timeout: 5000
+- takeScreenshot: /tmp/verify-widget/list-view/c110087_02_listview_appbar
+
+# === C110088 — Articles ordered newest first (capture publish dates) ===
+- takeScreenshot: /tmp/verify-widget/list-view/c110088_01_top_of_list
+
+# Scroll through the list to capture more dates
+- swipe:
+    start: 50%, 80%
+    end: 50%, 25%
+    duration: 700
+- takeScreenshot: /tmp/verify-widget/list-view/c110088_02_scroll1
+- swipe:
+    start: 50%, 80%
+    end: 50%, 25%
+    duration: 700
+- takeScreenshot: /tmp/verify-widget/list-view/c110088_03_scroll2
+- swipe:
+    start: 50%, 80%
+    end: 50%, 25%
+    duration: 700
+- takeScreenshot: /tmp/verify-widget/list-view/c110088_04_scroll3
+
+# Scroll back to top
+- swipe:
+    start: 50%, 25%
+    end: 50%, 90%
+    duration: 700
+- swipe:
+    start: 50%, 25%
+    end: 50%, 90%
+    duration: 700
+- swipe:
+    start: 50%, 25%
+    end: 50%, 90%
+    duration: 700
+
+# === C110089 — Description truncation with ellipsis ===
+- takeScreenshot: /tmp/verify-widget/list-view/c110089_01_descriptions
+
+# === C110090 — defaultImageUrl fallback for imageless articles ===
+- takeScreenshot: /tmp/verify-widget/list-view/c110090_01_image_slots
+
+# Scroll through the list once more to inspect images
+- swipe:
+    start: 50%, 80%
+    end: 50%, 25%
+    duration: 700
+- takeScreenshot: /tmp/verify-widget/list-view/c110090_02_more_images
+- swipe:
+    start: 50%, 80%
+    end: 50%, 25%
+    duration: 700
+- takeScreenshot: /tmp/verify-widget/list-view/c110090_03_more_images
+
+# === C110107 — Source filter (V1.1 Source Settings) ===
+# Look for a settings icon in the top-right of the AppBar (V1.1 Source Settings)
+- takeScreenshot: /tmp/verify-widget/list-view/c110107_01_appbar_inspect
+# Try to tap a Settings/gear icon at top-right (best-guess coord)
+- tapOn:
+    point: 92%, 7%
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: /tmp/verify-widget/list-view/c110107_02_after_settings_tap

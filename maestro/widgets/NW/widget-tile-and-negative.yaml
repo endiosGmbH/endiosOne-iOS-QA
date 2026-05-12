@@ -1,0 +1,157 @@
+appId: de.endios.one
+---
+# News — Widget Tile (12903) + Negative Scenarios (12909) — single-launch consolidated flow
+#
+# C110082 — Variant rendering matrix (Carousel/Basic/BasicImage/Strip/Gallery)
+# C110083 — Tile preview tap → DIRECT Detail (Carousel + Gallery)
+# C110084 — moreButtonText "Mehr" → List View
+# C110085 — Carousel horizontal swipe rotation (right-to-left + left-to-right)
+# C110096 — Invalid RSS URL: requires dashboard config — visual evidence only if present
+# C110097 — Empty RSS feed: visual evidence only if present
+# C110098 — Duplicate articles (Tagesschau widgetId 55927): visual evidence only if present
+# C110099 — Special chars in image URLs (TWS Schussental widgetId 39143): only if present
+# C110100 — Connector unavailable: cannot reproduce without server-side outage simulation
+
+- launchApp:
+    appId: de.endios.one
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd:
+    timeout: 10000
+- swipe:
+    start: 50%, 25%
+    end: 50%, 75%
+    duration: 500
+- waitForAnimationToEnd:
+    timeout: 2000
+
+# ===== C110082 — Variant rendering matrix evidence =====
+# Capture dashboard top → bottom screenshots; each News tile variant should be visible.
+- takeScreenshot: /tmp/verify-widget/news-suite/c110082_dashboard_top
+- swipe: { start: "50%, 80%", end: "50%, 30%", duration: 500 }
+- waitForAnimationToEnd: { timeout: 1000 }
+- takeScreenshot: /tmp/verify-widget/news-suite/c110082_dashboard_mid1
+- swipe: { start: "50%, 80%", end: "50%, 30%", duration: 500 }
+- waitForAnimationToEnd: { timeout: 1000 }
+- takeScreenshot: /tmp/verify-widget/news-suite/c110082_dashboard_mid2
+- swipe: { start: "50%, 80%", end: "50%, 30%", duration: 500 }
+- waitForAnimationToEnd: { timeout: 1000 }
+- takeScreenshot: /tmp/verify-widget/news-suite/c110082_dashboard_mid3
+- swipe: { start: "50%, 80%", end: "50%, 30%", duration: 500 }
+- waitForAnimationToEnd: { timeout: 1000 }
+- takeScreenshot: /tmp/verify-widget/news-suite/c110082_dashboard_bottom
+
+# Scroll back to top for the rest of the flow
+- swipe: { start: "50%, 25%", end: "50%, 90%", duration: 500 }
+- swipe: { start: "50%, 25%", end: "50%, 90%", duration: 500 }
+- swipe: { start: "50%, 25%", end: "50%, 90%", duration: 500 }
+- swipe: { start: "50%, 25%", end: "50%, 90%", duration: 500 }
+- waitForAnimationToEnd: { timeout: 1000 }
+- takeScreenshot: /tmp/verify-widget/news-suite/c110082_dashboard_after_scroll_back
+
+# ===== C110085 — Carousel horizontal swipe (Nachrichten Carousel, top) =====
+- scrollUntilVisible:
+    element: { text: "Mehr" }
+    direction: UP
+    speed: 60
+- takeScreenshot: /tmp/verify-widget/news-suite/c110085_a_nachrichten_carousel_initial
+# Right-to-left swipe through Carousel items
+- swipe: { start: "80%, 50%", end: "20%, 50%", duration: 600 }
+- waitForAnimationToEnd: { timeout: 1000 }
+- takeScreenshot: /tmp/verify-widget/news-suite/c110085_b_carousel_after_swipe1_RTL
+- swipe: { start: "80%, 50%", end: "20%, 50%", duration: 600 }
+- waitForAnimationToEnd: { timeout: 1000 }
+- takeScreenshot: /tmp/verify-widget/news-suite/c110085_c_carousel_after_swipe2_RTL
+- swipe: { start: "80%, 50%", end: "20%, 50%", duration: 600 }
+- waitForAnimationToEnd: { timeout: 1000 }
+- takeScreenshot: /tmp/verify-widget/news-suite/c110085_d_carousel_after_swipe3_RTL
+# Left-to-right swipe back to first item
+- swipe: { start: "20%, 50%", end: "80%, 50%", duration: 600 }
+- waitForAnimationToEnd: { timeout: 1000 }
+- swipe: { start: "20%, 50%", end: "80%, 50%", duration: 600 }
+- waitForAnimationToEnd: { timeout: 1000 }
+- swipe: { start: "20%, 50%", end: "80%, 50%", duration: 600 }
+- waitForAnimationToEnd: { timeout: 1000 }
+- takeScreenshot: /tmp/verify-widget/news-suite/c110085_e_carousel_after_LTR_back
+
+# ===== C110085 — Gallery horizontal swipe =====
+- scrollUntilVisible:
+    element: { text: "Mehr" }
+    direction: DOWN
+    speed: 60
+- takeScreenshot: /tmp/verify-widget/news-suite/c110085_f_gallery_initial
+- swipe: { start: "80%, 50%", end: "20%, 50%", duration: 600 }
+- waitForAnimationToEnd: { timeout: 1000 }
+- takeScreenshot: /tmp/verify-widget/news-suite/c110085_g_gallery_after_swipe1_RTL
+- swipe: { start: "80%, 50%", end: "20%, 50%", duration: 600 }
+- waitForAnimationToEnd: { timeout: 1000 }
+- takeScreenshot: /tmp/verify-widget/news-suite/c110085_h_gallery_after_swipe2_RTL
+# Swipe back
+- swipe: { start: "20%, 50%", end: "80%, 50%", duration: 600 }
+- waitForAnimationToEnd: { timeout: 1000 }
+- swipe: { start: "20%, 50%", end: "80%, 50%", duration: 600 }
+- waitForAnimationToEnd: { timeout: 1000 }
+- takeScreenshot: /tmp/verify-widget/news-suite/c110085_i_gallery_after_LTR_back
+
+# ===== C110083 — Tile preview tap → DIRECT Detail (Gallery example) =====
+# Tap a Gallery preview article (anchor on a unique gallery item)
+- takeScreenshot: /tmp/verify-widget/news-suite/c110083_a_gallery_pre_tap
+- tapOn: { point: "28%, 50%" }
+- waitForAnimationToEnd: { timeout: 4000 }
+- takeScreenshot: /tmp/verify-widget/news-suite/c110083_b_after_gallery_preview_tap
+# Close
+- tapOn: { point: "92%, 10%" }
+- waitForAnimationToEnd: { timeout: 1500 }
+- runFlow:
+    when: { visible: "Back" }
+    commands:
+      - tapOn: { text: "Back" }
+      - waitForAnimationToEnd: { timeout: 1500 }
+
+# ===== C110084 — moreButtonText "Mehr" → List View (Gallery's Mehr) =====
+- scrollUntilVisible:
+    element: { text: "Mehr" }
+    direction: DOWN
+    speed: 60
+- takeScreenshot: /tmp/verify-widget/news-suite/c110084_a_mehr_visible
+- tapOn: { text: "Mehr", index: 0 }
+- waitForAnimationToEnd: { timeout: 4000 }
+- takeScreenshot: /tmp/verify-widget/news-suite/c110084_b_listview_opened
+- runFlow:
+    when: { visible: "Back" }
+    commands:
+      - tapOn: { text: "Back" }
+      - waitForAnimationToEnd: { timeout: 1500 }
+
+# ===== Negative Scenarios — best-effort evidence from existing tiles =====
+# C110098 — Duplicate filtering: scroll Feeds list (RSS) and screenshot for visual de-dup check
+- scrollUntilVisible:
+    element: { text: "Feeds" }
+    direction: DOWN
+    speed: 60
+- tapOn: { text: "Feeds" }
+- waitForAnimationToEnd: { timeout: 5000 }
+- takeScreenshot: /tmp/verify-widget/news-suite/c110098_a_feeds_listview_top
+- swipe: { start: "50%, 80%", end: "50%, 25%", duration: 500 }
+- swipe: { start: "50%, 80%", end: "50%, 25%", duration: 500 }
+- takeScreenshot: /tmp/verify-widget/news-suite/c110098_b_feeds_listview_mid
+- swipe: { start: "50%, 80%", end: "50%, 25%", duration: 500 }
+- swipe: { start: "50%, 80%", end: "50%, 25%", duration: 500 }
+- takeScreenshot: /tmp/verify-widget/news-suite/c110098_c_feeds_listview_bottom
+
+# C110099 — Special chars: scan for any imageless / placeholder rows in current feed
+- swipe: { start: "50%, 25%", end: "50%, 90%", duration: 500 }
+- swipe: { start: "50%, 25%", end: "50%, 90%", duration: 500 }
+- swipe: { start: "50%, 25%", end: "50%, 90%", duration: 500 }
+- takeScreenshot: /tmp/verify-widget/news-suite/c110099_a_feeds_back_top_imagecheck
+
+# C110097 — Empty feed evidence: there's no empty-feed tile on this dashboard
+# C110096 — Invalid URL evidence: there's no invalid-URL tile on this dashboard
+# C110100 — Connector unavailable: cannot simulate
+
+- runFlow:
+    when: { visible: "Back" }
+    commands:
+      - tapOn: { text: "Back" }
+      - waitForAnimationToEnd: { timeout: 1500 }
+- takeScreenshot: /tmp/verify-widget/news-suite/zz_final_dashboard

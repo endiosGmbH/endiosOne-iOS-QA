@@ -1,0 +1,33 @@
+appId: de.endios.one
+---
+# C110082 — News - Tile - Renders tile type, image, title, subtitle per variant
+# This Claude Automation app only configures Basic ("News 2") + Gallery ("Nachrichten") tiles.
+# Carousel, Basic Image, Strip variants are NOT configured on the dashboard → out of scope.
+- launchApp:
+    appId: de.endios.one
+    clearState: false
+- waitForAnimationToEnd:
+    timeout: 6000
+
+# Basic variant: News 2 tile (icon + title only)
+- assertVisible:
+    text: "News 2"
+- takeScreenshot: /tmp/verify-widget/case-110082/01_basic_news2
+
+# Scroll down to find the Gallery variant header "Nachrichten"
+- swipe:
+    start: 50%, 80%
+    end: 50%, 20%
+    duration: 800
+- swipe:
+    start: 50%, 80%
+    end: 50%, 30%
+    duration: 800
+- assertVisible:
+    text: "Nachrichten"
+- assertVisible:
+    text: "Mehr"
+- takeScreenshot: /tmp/verify-widget/case-110082/02_gallery_nachrichten_header
+
+# Capture article previews inside the gallery
+- takeScreenshot: /tmp/verify-widget/case-110082/03_gallery_articles

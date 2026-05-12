@@ -1,0 +1,45 @@
+appId: de.endios.one
+---
+# C110085 — News - Tile - Carousel rotation works for variants with horizontal swipe
+# Carousel variant NOT configured → only Gallery ("Nachrichten") is in scope here.
+- launchApp:
+    appId: de.endios.one
+    clearState: false
+- waitForAnimationToEnd:
+    timeout: 6000
+
+# Scroll to bring Gallery into view
+- swipe:
+    start: 50%, 80%
+    end: 50%, 20%
+    duration: 800
+- swipe:
+    start: 50%, 80%
+    end: 50%, 30%
+    duration: 800
+
+- assertVisible:
+    text: "Nachrichten"
+- takeScreenshot: /tmp/verify-widget/case-110085/01_initial
+
+# Horizontal swipe across the gallery items collection (the article-preview row, mid-tile)
+- swipe:
+    start: 80%, 75%
+    end: 20%, 75%
+    duration: 600
+- takeScreenshot: /tmp/verify-widget/case-110085/02_after_swipe_1
+- swipe:
+    start: 80%, 75%
+    end: 20%, 75%
+    duration: 600
+- takeScreenshot: /tmp/verify-widget/case-110085/03_after_swipe_2
+- swipe:
+    start: 80%, 75%
+    end: 20%, 75%
+    duration: 600
+- takeScreenshot: /tmp/verify-widget/case-110085/04_after_swipe_3
+- swipe:
+    start: 80%, 75%
+    end: 20%, 75%
+    duration: 600
+- takeScreenshot: /tmp/verify-widget/case-110085/05_after_swipe_4

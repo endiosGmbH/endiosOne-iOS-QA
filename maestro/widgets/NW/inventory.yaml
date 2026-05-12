@@ -1,0 +1,33 @@
+appId: de.endios.one
+---
+- launchApp:
+    appId: de.endios.one
+    clearState: false
+- waitForAnimationToEnd:
+    timeout: 6000
+- takeScreenshot: /tmp/verify-widget/inventory/p1
+- swipe:
+    start: 50%, 80%
+    end: 50%, 20%
+    duration: 800
+- takeScreenshot: /tmp/verify-widget/inventory/p2
+- swipe:
+    start: 50%, 80%
+    end: 50%, 20%
+    duration: 800
+- takeScreenshot: /tmp/verify-widget/inventory/p3
+- swipe:
+    start: 50%, 80%
+    end: 50%, 20%
+    duration: 800
+- takeScreenshot: /tmp/verify-widget/inventory/p4
+- swipe:
+    start: 50%, 80%
+    end: 50%, 20%
+    duration: 800
+- takeScreenshot: /tmp/verify-widget/inventory/p5
+- swipe:
+    start: 50%, 80%
+    end: 50%, 20%
+    duration: 800
+- takeScreenshot: /tmp/verify-widget/inventory/p6

@@ -1,0 +1,56 @@
+appId: de.endios.one
+---
+# Hard-refresh + try Basic Image tile "Automotive" — also a list-view tile per spec
+- launchApp:
+    appId: de.endios.one
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd:
+    timeout: 12000
+- swipe:
+    start: 50%, 25%
+    end: 50%, 75%
+    duration: 600
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- assertVisible:
+    text: "Automotive"
+- takeScreenshot: /tmp/verify-widget/list-view-18770/00_dashboard
+- tapOn:
+    text: "Automotive"
+- waitForAnimationToEnd:
+    timeout: 6000
+- takeScreenshot: /tmp/verify-widget/list-view-18770/01_after_basicimage_tap
+
+# If list view opened, scroll through to count items
+- swipe:
+    start: 50%, 80%
+    end: 50%, 25%
+    duration: 700
+- takeScreenshot: /tmp/verify-widget/list-view-18770/02_scroll1
+- swipe:
+    start: 50%, 80%
+    end: 50%, 25%
+    duration: 700
+- takeScreenshot: /tmp/verify-widget/list-view-18770/03_scroll2
+- swipe:
+    start: 50%, 80%
+    end: 50%, 25%
+    duration: 700
+- takeScreenshot: /tmp/verify-widget/list-view-18770/04_scroll3
+- swipe:
+    start: 50%, 80%
+    end: 50%, 25%
+    duration: 700
+- takeScreenshot: /tmp/verify-widget/list-view-18770/05_scroll4
+- swipe:
+    start: 50%, 80%
+    end: 50%, 25%
+    duration: 700
+- takeScreenshot: /tmp/verify-widget/list-view-18770/06_scroll5
+- swipe:
+    start: 50%, 80%
+    end: 50%, 25%
+    duration: 700
+- takeScreenshot: /tmp/verify-widget/list-view-18770/07_scroll6

@@ -1,0 +1,209 @@
+appId: de.endios.one
+---
+# News Article Detail View — single-launch consolidated flow (6 cases, 4 News tiles)
+# C110091 → News 2 (Basic ContentHub)            → field-display rule
+# C110092 → Quality (Strip ContentHub)            → Gallery section visibility
+# C110095 → Nachrichten Carousel (tile preview)   → direct → Detail (skip List View)
+# C110093 → Nachrichten Carousel via "Mehr"       → close X + pull-down close
+# C110094 → Nachrichten Gallery via "Mehr"        → Gallery swipe + full-view close
+# C110257 → Nachrichten Gallery article re-used   → social media overlay
+# Feeds (RSS/webview) NOT applicable — covered by C110088 in List View section.
+
+- launchApp:
+    appId: de.endios.one
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd:
+    timeout: 10000
+- swipe:
+    start: 50%, 25%
+    end: 50%, 75%
+    duration: 500
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: /tmp/verify-widget/news-article-detail/00_dashboard_top
+
+# ===== C110091 — News 2 (Basic) → field-display rule =====
+- scrollUntilVisible:
+    element: { text: "News 2" }
+    direction: DOWN
+    speed: 60
+- tapOn: { text: "News 2" }
+- waitForAnimationToEnd: { timeout: 4000 }
+- takeScreenshot: /tmp/verify-widget/news-article-detail/c110091_a_listview
+- tapOn: { point: "50%, 30%" }
+- waitForAnimationToEnd: { timeout: 3000 }
+- takeScreenshot: /tmp/verify-widget/news-article-detail/c110091_b_native_detail_fields
+- swipe: { start: "50%, 80%", end: "50%, 30%", duration: 500 }
+- takeScreenshot: /tmp/verify-widget/news-article-detail/c110091_c_native_detail_scrolled
+- tapOn: { point: "92%, 10%" }
+- waitForAnimationToEnd: { timeout: 1500 }
+- runFlow:
+    when: { visible: "Back" }
+    commands:
+      - tapOn: { text: "Back" }
+      - waitForAnimationToEnd: { timeout: 1500 }
+
+# ===== C110092 — Quality (Strip) → Gallery section visibility =====
+# Quality Strip article subtitle is "Qualiy" (typo in test data) — use as anchor.
+- scrollUntilVisible:
+    element: { text: "Qualiy" }
+    direction: DOWN
+    speed: 60
+- takeScreenshot: /tmp/verify-widget/news-article-detail/c110092_a_quality_tile
+- tapOn: { text: "Qualiy" }
+- waitForAnimationToEnd: { timeout: 4000 }
+- takeScreenshot: /tmp/verify-widget/news-article-detail/c110092_b_quality_listview
+- tapOn: { point: "50%, 30%" }
+- waitForAnimationToEnd: { timeout: 3000 }
+- takeScreenshot: /tmp/verify-widget/news-article-detail/c110092_c_article_top
+- swipe: { start: "50%, 80%", end: "50%, 30%", duration: 500 }
+- swipe: { start: "50%, 80%", end: "50%, 30%", duration: 500 }
+- takeScreenshot: /tmp/verify-widget/news-article-detail/c110092_d_gallery_section
+- tapOn: { point: "92%, 10%" }
+- waitForAnimationToEnd: { timeout: 1500 }
+- runFlow:
+    when: { visible: "Back" }
+    commands:
+      - tapOn: { text: "Back" }
+      - waitForAnimationToEnd: { timeout: 1500 }
+
+# ===== C110095 — Carousel TILE PREVIEW tap → direct Detail (skip List View) =====
+- scrollUntilVisible:
+    element: { text: "Mehr" }
+    direction: UP
+    speed: 60
+- takeScreenshot: /tmp/verify-widget/news-article-detail/c110095_a_carousel_tile
+# Tap on the Carousel article preview image (NOT the "Mehr" CTA button).
+# Carousel preview articles sit at ~(28%, 48%) and (75%, 48%) on the tile.
+- tapOn: { point: "28%, 48%" }
+- waitForAnimationToEnd: { timeout: 4000 }
+- takeScreenshot: /tmp/verify-widget/news-article-detail/c110095_b_after_preview_tap
+# Spec expects DIRECT Detail; iOS may show List View. Tap an article inside if so.
+- tapOn: { point: "50%, 30%" }
+- waitForAnimationToEnd: { timeout: 3000 }
+- takeScreenshot: /tmp/verify-widget/news-article-detail/c110095_c_detail
+# Close: try X first (for Detail), then Back (for List)
+- tapOn: { point: "92%, 10%" }
+- waitForAnimationToEnd: { timeout: 1500 }
+- runFlow:
+    when: { visible: "Back" }
+    commands:
+      - tapOn: { text: "Back" }
+      - waitForAnimationToEnd: { timeout: 1500 }
+
+# ===== C110093 — Carousel via "Mehr" → close X + pull-down =====
+- scrollUntilVisible:
+    element: { text: "Mehr" }
+    direction: UP
+    speed: 60
+- tapOn: { text: "Mehr", index: 0 }
+- waitForAnimationToEnd: { timeout: 4000 }
+- takeScreenshot: /tmp/verify-widget/news-article-detail/c110093_a_carousel_listview
+- tapOn: { point: "50%, 30%" }
+- waitForAnimationToEnd: { timeout: 3000 }
+- takeScreenshot: /tmp/verify-widget/news-article-detail/c110093_b_detail_with_x
+- swipe: { start: "50%, 80%", end: "50%, 30%", duration: 500 }
+- takeScreenshot: /tmp/verify-widget/news-article-detail/c110093_c_x_visible_while_scrolled
+# Test 1: X close
+- tapOn: { point: "92%, 10%" }
+- waitForAnimationToEnd: { timeout: 2000 }
+- takeScreenshot: /tmp/verify-widget/news-article-detail/c110093_d_after_x_close
+# Test 2: re-open and try pull-down
+- tapOn: { point: "50%, 30%" }
+- waitForAnimationToEnd: { timeout: 3000 }
+- swipe: { start: "50%, 8%", end: "50%, 90%", duration: 1200 }
+- waitForAnimationToEnd: { timeout: 2000 }
+- takeScreenshot: /tmp/verify-widget/news-article-detail/c110093_e_after_pulldown
+# Recover regardless of pull-down result
+- tapOn: { point: "92%, 10%" }
+- waitForAnimationToEnd: { timeout: 1500 }
+- runFlow:
+    when: { visible: "Back" }
+    commands:
+      - tapOn: { text: "Back" }
+      - waitForAnimationToEnd: { timeout: 1500 }
+
+# ===== C110094 — Gallery via "Mehr" → Gallery swipe + full-view close =====
+- scrollUntilVisible:
+    element: { text: "Mehr" }
+    direction: DOWN
+    speed: 60
+- takeScreenshot: /tmp/verify-widget/news-article-detail/c110094_a_gallery_tile
+- tapOn: { text: "Mehr", index: 0 }
+- waitForAnimationToEnd: { timeout: 4000 }
+- takeScreenshot: /tmp/verify-widget/news-article-detail/c110094_b_gallery_listview
+- tapOn: { point: "50%, 30%" }
+- waitForAnimationToEnd: { timeout: 3000 }
+# Scroll to find Gallery section in the article detail
+- swipe: { start: "50%, 80%", end: "50%, 20%", duration: 500 }
+- swipe: { start: "50%, 80%", end: "50%, 30%", duration: 500 }
+- takeScreenshot: /tmp/verify-widget/news-article-detail/c110094_c_gallery_section
+# Horizontal swipe through gallery
+- swipe: { start: "80%, 50%", end: "20%, 50%", duration: 500 }
+- takeScreenshot: /tmp/verify-widget/news-article-detail/c110094_d_gallery_after_swipe
+# Tap an image to open full-view
+- tapOn: { point: "50%, 50%" }
+- waitForAnimationToEnd: { timeout: 3000 }
+- takeScreenshot: /tmp/verify-widget/news-article-detail/c110094_e_fullview
+# Close full-view via close icon at top-right
+- tapOn: { point: "92%, 10%" }
+- waitForAnimationToEnd: { timeout: 2000 }
+- takeScreenshot: /tmp/verify-widget/news-article-detail/c110094_f_after_fullview_close
+# ===== C110257 — Quality Strip article (has Twitter + Youtube social buttons) =====
+# Recover to dashboard from previous Gallery state
+- tapOn: { point: "92%, 10%" }
+- waitForAnimationToEnd: { timeout: 1500 }
+- runFlow:
+    when: { visible: "Back" }
+    commands:
+      - tapOn: { text: "Back" }
+      - waitForAnimationToEnd: { timeout: 1500 }
+- runFlow:
+    when: { visible: "Back" }
+    commands:
+      - tapOn: { text: "Back" }
+      - waitForAnimationToEnd: { timeout: 1500 }
+# Re-visit Quality via "Qualiy" anchor (different entry path than C110092)
+- scrollUntilVisible:
+    element: { text: "Qualiy" }
+    direction: UP
+    speed: 60
+- tapOn: { text: "Qualiy" }
+- waitForAnimationToEnd: { timeout: 4000 }
+- tapOn: { point: "50%, 30%" }
+- waitForAnimationToEnd: { timeout: 3000 }
+# Scroll to social section (below Gallery)
+- swipe: { start: "50%, 80%", end: "50%, 30%", duration: 500 }
+- swipe: { start: "50%, 80%", end: "50%, 30%", duration: 500 }
+- swipe: { start: "50%, 80%", end: "50%, 30%", duration: 500 }
+- waitForAnimationToEnd: { timeout: 1500 }
+- takeScreenshot: /tmp/verify-widget/news-article-detail/c110257_a_social_section
+- runFlow:
+    when: { visible: "Twitter" }
+    commands:
+      - tapOn: { text: "Twitter" }
+      - waitForAnimationToEnd: { timeout: 4000 }
+      - takeScreenshot: /tmp/verify-widget/news-article-detail/c110257_b_twitter_url
+      # Close webview (X at top-left ~10%, 9%) → returns to article
+      - tapOn: { point: "10%, 9%" }
+      - waitForAnimationToEnd: { timeout: 2000 }
+      - takeScreenshot: /tmp/verify-widget/news-article-detail/c110257_c_after_twitter_close
+- runFlow:
+    when: { visible: "Youtube" }
+    commands:
+      - tapOn: { text: "Youtube" }
+      - waitForAnimationToEnd: { timeout: 4000 }
+      - takeScreenshot: /tmp/verify-widget/news-article-detail/c110257_d_youtube_url
+      - tapOn: { point: "10%, 9%" }
+      - waitForAnimationToEnd: { timeout: 2000 }
+      - takeScreenshot: /tmp/verify-widget/news-article-detail/c110257_e_after_youtube_close
+# Final recovery — close article
+- tapOn: { point: "92%, 10%" }
+- waitForAnimationToEnd: { timeout: 1500 }
+- runFlow:
+    when: { visible: "Back" }
+    commands:
+      - tapOn: { text: "Back" }
+      - waitForAnimationToEnd: { timeout: 1500 }
+- takeScreenshot: /tmp/verify-widget/news-article-detail/zz_final_dashboard

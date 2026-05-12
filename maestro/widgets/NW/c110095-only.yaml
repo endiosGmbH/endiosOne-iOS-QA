@@ -1,0 +1,51 @@
+appId: de.endios.one
+---
+# C110095 — Carousel preview tap → DIRECT Detail (skip List View)
+# Target: Carousel widget id 18769 — the LAST News tile on the Product tab.
+# Scroll all the way down to reach it, then tap a preview article.
+
+- launchApp:
+    appId: de.endios.one
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd:
+    timeout: 10000
+- swipe:
+    start: 50%, 25%
+    end: 50%, 75%
+    duration: 500
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: /tmp/verify-widget/news-article-detail/c110095_v2_00_dashboard
+
+# Scroll to the very bottom of the Product tab — Carousel 18769 is the last tile
+- swipe: { start: "50%, 80%", end: "50%, 15%", duration: 600 }
+- swipe: { start: "50%, 80%", end: "50%, 15%", duration: 600 }
+- swipe: { start: "50%, 80%", end: "50%, 15%", duration: 600 }
+- swipe: { start: "50%, 80%", end: "50%, 15%", duration: 600 }
+- swipe: { start: "50%, 80%", end: "50%, 15%", duration: 600 }
+- swipe: { start: "50%, 80%", end: "50%, 15%", duration: 600 }
+- swipe: { start: "50%, 80%", end: "50%, 15%", duration: 600 }
+- swipe: { start: "50%, 80%", end: "50%, 15%", duration: 600 }
+- swipe: { start: "50%, 80%", end: "50%, 15%", duration: 600 }
+- waitForAnimationToEnd: { timeout: 1500 }
+- takeScreenshot: /tmp/verify-widget/news-article-detail/c110095_v2_a_carousel_at_bottom
+
+# Tap the Carousel preview article (left preview ~28%, 50% on the tile)
+- tapOn: { point: "28%, 50%" }
+- waitForAnimationToEnd: { timeout: 4000 }
+- takeScreenshot: /tmp/verify-widget/news-article-detail/c110095_v2_b_after_preview_tap
+
+# Scroll the article to confirm we're in Detail (not List)
+- swipe: { start: "50%, 80%", end: "50%, 30%", duration: 500 }
+- takeScreenshot: /tmp/verify-widget/news-article-detail/c110095_v2_c_article_scrolled
+
+# Close via X at top-right
+- tapOn: { point: "92%, 10%" }
+- waitForAnimationToEnd: { timeout: 2000 }
+- takeScreenshot: /tmp/verify-widget/news-article-detail/c110095_v2_d_after_close
+- runFlow:
+    when: { visible: "Back" }
+    commands:
+      - tapOn: { text: "Back" }
+      - waitForAnimationToEnd: { timeout: 1500 }

@@ -1,0 +1,82 @@
+appId: de.endios.one
+---
+# C110257 — Social media buttons open URLs; overlay close returns
+# Target: Quality Strip article (has Twitter + Youtube buttons per C110092_d evidence)
+
+- launchApp:
+    appId: de.endios.one
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd:
+    timeout: 10000
+- swipe:
+    start: 50%, 25%
+    end: 50%, 75%
+    duration: 500
+- waitForAnimationToEnd:
+    timeout: 2000
+
+# Find Quality Strip — anchor on its unique subtitle text "Qualiy" (typo in test data)
+- scrollUntilVisible:
+    element:
+      text: "Qualiy"
+    direction: DOWN
+    speed: 60
+- takeScreenshot: /tmp/verify-widget/news-article-detail/c110257_00_quality_tile
+- tapOn:
+    text: "Qualiy"
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: /tmp/verify-widget/news-article-detail/c110257_01_listview
+- tapOn:
+    point: 50%, 30%
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: /tmp/verify-widget/news-article-detail/c110257_02_article_top
+# Scroll to find Social network section (typically below Gallery section)
+- swipe:
+    start: 50%, 80%
+    end: 50%, 30%
+    duration: 500
+- swipe:
+    start: 50%, 80%
+    end: 50%, 30%
+    duration: 500
+- swipe:
+    start: 50%, 80%
+    end: 50%, 30%
+    duration: 500
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: /tmp/verify-widget/news-article-detail/c110257_03_social_section_pre_tap
+# Tap the Twitter social button
+- runFlow:
+    when:
+      visible: "Twitter"
+    commands:
+      - tapOn:
+          text: "Twitter"
+      - waitForAnimationToEnd:
+          timeout: 4000
+      - takeScreenshot: /tmp/verify-widget/news-article-detail/c110257_04_after_twitter_tap
+# Webview is a modal sheet — dismiss via long swipe-down from top edge
+- tapOn:
+    point: 10%, 9%
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: /tmp/verify-widget/news-article-detail/c110257_05_after_x_close
+# Also try Youtube (second social button)
+- runFlow:
+    when:
+      visible: "Youtube"
+    commands:
+      - tapOn:
+          text: "Youtube"
+      - waitForAnimationToEnd:
+          timeout: 4000
+      - takeScreenshot: /tmp/verify-widget/news-article-detail/c110257_06_after_youtube_tap
+- tapOn:
+    point: 10%, 9%
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: /tmp/verify-widget/news-article-detail/c110257_07_final

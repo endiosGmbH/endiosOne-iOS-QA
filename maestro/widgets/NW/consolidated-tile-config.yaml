@@ -1,0 +1,88 @@
+appId: de.endios.one
+---
+# Consolidated flow — News Widget Tile — Dashboard Configuration
+# Runs C110082 + C110083 + C110084 + C110085 in a single app launch.
+# Begins with a clean relaunch + pull-to-refresh so newly configured widgets are picked up.
+
+- launchApp:
+    appId: de.endios.one
+    clearState: false
+- waitForAnimationToEnd:
+    timeout: 7000
+
+# Refresh the dashboard so any newly configured widgets are loaded
+- swipe:
+    start: 50%, 25%
+    end: 50%, 75%
+    duration: 600
+- waitForAnimationToEnd:
+    timeout: 5000
+- takeScreenshot: /tmp/verify-widget/consolidated/_post_refresh
+
+# === C110082 — Basic variant render (News 2, 4x4, icon + title only) ===
+- assertVisible:
+    text: "News 2"
+- takeScreenshot: /tmp/verify-widget/consolidated/c110082_01_basic_news2
+
+# Scroll to bring Gallery into view
+- swipe:
+    start: 50%, 80%
+    end: 50%, 20%
+    duration: 800
+- swipe:
+    start: 50%, 80%
+    end: 50%, 30%
+    duration: 800
+
+# === C110082 — Gallery + Strip variants render ===
+- assertVisible:
+    text: "Nachrichten"
+- assertVisible:
+    text: "Mehr"
+- takeScreenshot: /tmp/verify-widget/consolidated/c110082_02_gallery_strip
+
+# === C110085 — Carousel rotation (Gallery horizontal swipe) ===
+- takeScreenshot: /tmp/verify-widget/consolidated/c110085_01_initial
+
+- swipe:
+    start: 80%, 78%
+    end: 20%, 78%
+    duration: 600
+- takeScreenshot: /tmp/verify-widget/consolidated/c110085_02_swipe1
+
+- swipe:
+    start: 80%, 78%
+    end: 20%, 78%
+    duration: 600
+- takeScreenshot: /tmp/verify-widget/consolidated/c110085_03_swipe2
+
+- swipe:
+    start: 80%, 78%
+    end: 20%, 78%
+    duration: 600
+- takeScreenshot: /tmp/verify-widget/consolidated/c110085_04_swipe3
+
+# === C110084 — Tap Mehr → List View ===
+- assertVisible:
+    text: "Mehr"
+- tapOn:
+    text: "Mehr"
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: /tmp/verify-widget/consolidated/c110084_01_listview
+
+# === C110083 — Back to dashboard, then tap an article preview on the Gallery ===
+- tapOn:
+    text: "Back"
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: /tmp/verify-widget/consolidated/c110083_00_back_to_dashboard
+
+- assertVisible:
+    text: "Nachrichten"
+
+- tapOn:
+    point: 25%, 78%
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: /tmp/verify-widget/consolidated/c110083_01_article_detail_direct

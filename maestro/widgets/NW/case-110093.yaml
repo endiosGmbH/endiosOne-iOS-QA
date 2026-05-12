@@ -1,0 +1,18 @@
+appId: de.endios.one
+---
+- launchApp:
+    appId: de.endios.one
+    clearState: false
+- tapOn:
+    text: "News 2"
+- tapOn:
+    point: "50%,35%"
+- takeScreenshot: /tmp/verify-widget/case-110093/01_detail_before_scroll
+- swipe:
+    start: 50%, 70%
+    end: 50%, 30%
+    duration: 500
+- takeScreenshot: /tmp/verify-widget/case-110093/02_detail_after_scroll_X_still_visible
+- tapOn:
+    point: "92%,8%"
+- takeScreenshot: /tmp/verify-widget/case-110093/03_after_X_tap

@@ -1,0 +1,41 @@
+appId: de.endios.one
+---
+- launchApp:
+    appId: de.endios.one
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd:
+    timeout: 12000
+- swipe:
+    start: 50%, 25%
+    end: 50%, 75%
+    duration: 600
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- takeScreenshot: /tmp/verify-widget/locate-feeds/00_top
+- swipe:
+    start: 5%, 85%
+    end: 5%, 15%
+    duration: 700
+- takeScreenshot: /tmp/verify-widget/locate-feeds/01
+- swipe:
+    start: 5%, 85%
+    end: 5%, 15%
+    duration: 700
+- takeScreenshot: /tmp/verify-widget/locate-feeds/02
+- swipe:
+    start: 5%, 85%
+    end: 5%, 15%
+    duration: 700
+- takeScreenshot: /tmp/verify-widget/locate-feeds/03
+- swipe:
+    start: 5%, 85%
+    end: 5%, 15%
+    duration: 700
+- takeScreenshot: /tmp/verify-widget/locate-feeds/04
+- swipe:
+    start: 5%, 85%
+    end: 5%, 15%
+    duration: 700
+- takeScreenshot: /tmp/verify-widget/locate-feeds/05

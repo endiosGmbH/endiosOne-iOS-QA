@@ -1,0 +1,66 @@
+appId: de.endios.one
+---
+# Full inventory — find every News tile on the Product and Neue Seite tabs
+- launchApp:
+    appId: de.endios.one
+    clearState: false
+- waitForAnimationToEnd:
+    timeout: 7000
+
+# Pull to refresh
+- swipe:
+    start: 50%, 25%
+    end: 50%, 75%
+    duration: 600
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# Scroll all the way back to top first (multiple downward swipes)
+- swipe:
+    start: 50%, 30%
+    end: 50%, 90%
+    duration: 600
+- swipe:
+    start: 50%, 30%
+    end: 50%, 90%
+    duration: 600
+- swipe:
+    start: 50%, 30%
+    end: 50%, 90%
+    duration: 600
+- takeScreenshot: /tmp/verify-widget/full-inv/01_top
+- swipe:
+    start: 50%, 80%
+    end: 50%, 20%
+    duration: 700
+- takeScreenshot: /tmp/verify-widget/full-inv/02
+- swipe:
+    start: 50%, 80%
+    end: 50%, 20%
+    duration: 700
+- takeScreenshot: /tmp/verify-widget/full-inv/03
+- swipe:
+    start: 50%, 80%
+    end: 50%, 20%
+    duration: 700
+- takeScreenshot: /tmp/verify-widget/full-inv/04
+- swipe:
+    start: 50%, 80%
+    end: 50%, 20%
+    duration: 700
+- takeScreenshot: /tmp/verify-widget/full-inv/05
+- swipe:
+    start: 50%, 80%
+    end: 50%, 20%
+    duration: 700
+- takeScreenshot: /tmp/verify-widget/full-inv/06
+- swipe:
+    start: 50%, 80%
+    end: 50%, 20%
+    duration: 700
+- takeScreenshot: /tmp/verify-widget/full-inv/07
+- swipe:
+    start: 50%, 80%
+    end: 50%, 20%
+    duration: 700
+- takeScreenshot: /tmp/verify-widget/full-inv/08

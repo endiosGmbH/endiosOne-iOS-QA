@@ -1,0 +1,229 @@
+appId: de.endios.one
+---
+# News List View — single-launch consolidated flow, one News tile per case
+# Hard refresh: clearState + clearKeychain on launch + pull-to-refresh
+# C110087 → "News 2"          (Basic small, ContentHub)
+# C110101 → "Nachrichten" top "Mehr"  (Carousel + moreButtonText)
+# C110089 → Quality Strip      (large scroll + point-tap)
+# C110090 → "Feeds"           (Basic Image, RSS — scroll up/down)
+# C110088 → row-tap inside Feeds list view (RSS → URL navigation)
+# C110107 → Gallery "Mehr"     (multi-source — categories filter)
+
+- launchApp:
+    appId: de.endios.one
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd:
+    timeout: 10000
+- swipe:
+    start: 50%, 25%
+    end: 50%, 75%
+    duration: 500
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: /tmp/verify-widget/news-list-view-final/00_dashboard_top
+
+# ===== C110087 — News 2 (Basic, ContentHub) =====
+- scrollUntilVisible:
+    element:
+      text: "News 2"
+    direction: DOWN
+    speed: 60
+- takeScreenshot: /tmp/verify-widget/news-list-view-final/c110087_a_tile_visible
+- tapOn:
+    text: "News 2"
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: /tmp/verify-widget/news-list-view-final/c110087_b_listview
+- swipe:
+    start: 50%, 80%
+    end: 50%, 30%
+    duration: 500
+- takeScreenshot: /tmp/verify-widget/news-list-view-final/c110087_c_listview_scrolled
+- tapOn:
+    text: "Back"
+- waitForAnimationToEnd:
+    timeout: 1500
+
+# ===== C110101 — Nachrichten "Mehr" top (Carousel + moreButtonText), AppBar + Back =====
+- scrollUntilVisible:
+    element:
+      text: "Mehr"
+    direction: UP
+    speed: 60
+- takeScreenshot: /tmp/verify-widget/news-list-view-final/c110101_a_carousel_visible
+- tapOn:
+    text: "Mehr"
+    index: 0
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: /tmp/verify-widget/news-list-view-final/c110101_b_appbar_title
+- tapOn:
+    text: "Back"
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: /tmp/verify-widget/news-list-view-final/c110101_c_back_to_dashboard
+
+# ===== C110089 — Nachrichten Quality (Strip) — large scroll then tap =====
+- scrollUntilVisible:
+    element:
+      text: "News 2"
+    direction: DOWN
+    speed: 60
+# Scroll down further so Quality Strip enters mid-screen
+- swipe:
+    start: 50%, 80%
+    end: 50%, 5%
+    duration: 600
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: /tmp/verify-widget/news-list-view-final/c110089_a_quality_tile
+# Quality Strip is now visible — tap mid-screen (Strip spans full width)
+- tapOn:
+    point: 50%, 35%
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: /tmp/verify-widget/news-list-view-final/c110089_b_layout_top
+- swipe:
+    start: 50%, 75%
+    end: 50%, 30%
+    duration: 500
+- takeScreenshot: /tmp/verify-widget/news-list-view-final/c110089_c_layout_scrolled
+- runFlow:
+    when:
+      visible: "Back"
+    commands:
+      - tapOn:
+          text: "Back"
+      - waitForAnimationToEnd:
+          timeout: 1500
+
+# ===== C110090 + C110088 — Feeds (RSS) — scroll + RSS row tap =====
+- scrollUntilVisible:
+    element:
+      text: "Feeds"
+    direction: DOWN
+    speed: 60
+- takeScreenshot: /tmp/verify-widget/news-list-view-final/c110090_a_feeds_tile
+- tapOn:
+    text: "Feeds"
+- waitForAnimationToEnd:
+    timeout: 5000
+- takeScreenshot: /tmp/verify-widget/news-list-view-final/c110090_b_top
+- swipe:
+    start: 50%, 80%
+    end: 50%, 25%
+    duration: 500
+- swipe:
+    start: 50%, 80%
+    end: 50%, 25%
+    duration: 500
+- swipe:
+    start: 50%, 80%
+    end: 50%, 25%
+    duration: 500
+- takeScreenshot: /tmp/verify-widget/news-list-view-final/c110090_c_mid
+- swipe:
+    start: 50%, 80%
+    end: 50%, 25%
+    duration: 500
+- swipe:
+    start: 50%, 80%
+    end: 50%, 25%
+    duration: 500
+- swipe:
+    start: 50%, 80%
+    end: 50%, 25%
+    duration: 500
+- takeScreenshot: /tmp/verify-widget/news-list-view-final/c110090_d_bottom
+- swipe:
+    start: 50%, 25%
+    end: 50%, 90%
+    duration: 500
+- swipe:
+    start: 50%, 25%
+    end: 50%, 90%
+    duration: 500
+- swipe:
+    start: 50%, 25%
+    end: 50%, 90%
+    duration: 500
+- swipe:
+    start: 50%, 25%
+    end: 50%, 90%
+    duration: 500
+- swipe:
+    start: 50%, 25%
+    end: 50%, 90%
+    duration: 500
+- swipe:
+    start: 50%, 25%
+    end: 50%, 90%
+    duration: 500
+- takeScreenshot: /tmp/verify-widget/news-list-view-final/c110090_e_back_to_top
+# C110088 — tap an RSS row → webview opens. Full URL rendering NOT required:
+# scroll the webview for ~2s, take screenshot, then tap the close button at the
+# TOP-LEFT corner to dismiss the webview and return to the list view.
+- tapOn:
+    point: 50%, 35%
+- waitForAnimationToEnd:
+    timeout: 5000
+- swipe:
+    start: 50%, 70%
+    end: 50%, 30%
+    duration: 1000
+- swipe:
+    start: 50%, 70%
+    end: 50%, 30%
+    duration: 1000
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: /tmp/verify-widget/news-list-view-final/c110088_b_webview_opened
+# Dismiss the modal webview. After scrolling, iOS Safari hides its chrome —
+# tap once near the top to reveal it, then tap the X close button at top-left.
+# DO NOT swipe from the screen edge — that triggers system gestures (lock screen).
+- tapOn:
+    point: 50%, 7%
+- waitForAnimationToEnd:
+    timeout: 1000
+- tapOn:
+    point: 5%, 6%
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: /tmp/verify-widget/news-list-view-final/c110088_c_back_in_listview
+- runFlow:
+    when:
+      visible: "Back"
+    commands:
+      - tapOn:
+          text: "Back"
+      - waitForAnimationToEnd:
+          timeout: 1500
+
+# ===== C110107 — Gallery "Mehr" (multi-source, categories filter) =====
+- scrollUntilVisible:
+    element:
+      text: "Mehr"
+    direction: DOWN
+    speed: 60
+- takeScreenshot: /tmp/verify-widget/news-list-view-final/c110107_a_gallery_tile
+- tapOn:
+    text: "Mehr"
+    index: 0
+- waitForAnimationToEnd:
+    timeout: 5000
+- takeScreenshot: /tmp/verify-widget/news-list-view-final/c110107_b_listview_with_filter
+- swipe:
+    start: 50%, 75%
+    end: 50%, 30%
+    duration: 500
+- takeScreenshot: /tmp/verify-widget/news-list-view-final/c110107_c_listview_scrolled
+- runFlow:
+    when:
+      visible: "Back"
+    commands:
+      - tapOn:
+          text: "Back"
+      - waitForAnimationToEnd:
+          timeout: 1500
+- takeScreenshot: /tmp/verify-widget/news-list-view-final/zz_final_dashboard

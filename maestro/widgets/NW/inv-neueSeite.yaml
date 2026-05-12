@@ -1,0 +1,40 @@
+appId: de.endios.one
+---
+- launchApp:
+    appId: de.endios.one
+    clearState: false
+- waitForAnimationToEnd:
+    timeout: 7000
+- swipe:
+    start: 50%, 25%
+    end: 50%, 75%
+    duration: 600
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# Switch to Neue Seite tab
+- tapOn:
+    text: "Neue Seite"
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: /tmp/verify-widget/neueSeite/01_top
+- swipe:
+    start: 50%, 80%
+    end: 50%, 20%
+    duration: 700
+- takeScreenshot: /tmp/verify-widget/neueSeite/02
+- swipe:
+    start: 50%, 80%
+    end: 50%, 20%
+    duration: 700
+- takeScreenshot: /tmp/verify-widget/neueSeite/03
+- swipe:
+    start: 50%, 80%
+    end: 50%, 20%
+    duration: 700
+- takeScreenshot: /tmp/verify-widget/neueSeite/04
+- swipe:
+    start: 50%, 80%
+    end: 50%, 20%
+    duration: 700
+- takeScreenshot: /tmp/verify-widget/neueSeite/05

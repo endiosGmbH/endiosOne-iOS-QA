@@ -1,0 +1,100 @@
+appId: de.endios.one
+---
+# Focused fallback flow — exercises C110257 (social URLs) + 12909 Negative
+# Scenarios (C110097, C110098, C110100). Used because the consolidated flow
+# previously aborted after the C110083 X close (couldn't find "Qualiy" via UP
+# direction on a fresh-top dashboard) and after sheet-dismiss took the sim to
+# the lock screen. Single, contained launch makes recovery deterministic.
+
+- launchApp:
+    appId: de.endios.one
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd: { timeout: 10000 }
+- swipe: { start: "50%, 25%", end: "50%, 75%", duration: 500 }
+- waitForAnimationToEnd: { timeout: 2000 }
+
+# C110257 — Quality (Strip) detail → social URLs (Twitter, Youtube)
+- scrollUntilVisible:
+    element: { text: "Qualiy" }
+    direction: DOWN
+    speed: 60
+    centerElement: true
+- tapOn: { text: "Qualiy" }
+- waitForAnimationToEnd: { timeout: 4000 }
+- tapOn: { point: "50%, 30%" }
+- waitForAnimationToEnd: { timeout: 3000 }
+- swipe: { start: "50%, 80%", end: "50%, 30%", duration: 500 }
+- waitForAnimationToEnd: { timeout: 1000 }
+- swipe: { start: "50%, 80%", end: "50%, 30%", duration: 500 }
+- waitForAnimationToEnd: { timeout: 1000 }
+- swipe: { start: "50%, 80%", end: "50%, 30%", duration: 500 }
+- waitForAnimationToEnd: { timeout: 1000 }
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/c110257_social_section
+- runFlow:
+    when: { visible: "Twitter" }
+    commands:
+      - tapOn: { text: "Twitter" }
+      - waitForAnimationToEnd: { timeout: 4000 }
+      - takeScreenshot: /tmp/verify-widget/run-widget-nw/c110257_twitter_url
+      # Scroll up to bring Safari chrome back, then tap close at top-left
+      - swipe: { start: "50%, 30%", end: "50%, 80%", duration: 800 }
+      - waitForAnimationToEnd: { timeout: 1500 }
+      - tapOn: { point: "10%, 9%" }
+      - waitForAnimationToEnd: { timeout: 2000 }
+- runFlow:
+    when: { visible: "Youtube" }
+    commands:
+      - tapOn: { text: "Youtube" }
+      - waitForAnimationToEnd: { timeout: 4000 }
+      - takeScreenshot: /tmp/verify-widget/run-widget-nw/c110257_youtube_url
+      - swipe: { start: "50%, 30%", end: "50%, 80%", duration: 800 }
+      - waitForAnimationToEnd: { timeout: 1500 }
+      - tapOn: { point: "10%, 9%" }
+      - waitForAnimationToEnd: { timeout: 2000 }
+- tapOn: { point: "92%, 10%" }
+- waitForAnimationToEnd: { timeout: 1500 }
+- runFlow:
+    when: { visible: "Back" }
+    commands:
+      - tapOn: { text: "Back" }
+      - waitForAnimationToEnd: { timeout: 1500 }
+
+# ===== 12909 Negative Scenarios (Auto tab) =====
+- tapOn: { text: "Auto" }
+- waitForAnimationToEnd: { timeout: 4000 }
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/auto_tab_initial
+
+# C110097 + C110100 — "No feed" tile → empty list view + pull-refresh retry
+- tapOn: { text: "No feed" }
+- waitForAnimationToEnd: { timeout: 6000 }
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/c110097_100_no_feed_listview
+- swipe: { start: "50%, 25%", end: "50%, 75%", duration: 500 }
+- waitForAnimationToEnd: { timeout: 3000 }
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/c110097_100_no_feed_after_refresh
+- runFlow:
+    when: { visible: "Back" }
+    commands:
+      - tapOn: { text: "Back" }
+      - waitForAnimationToEnd: { timeout: 1500 }
+
+# C110098 — "RSS Feed" tile (Tagesschau) — no duplicate filtering
+- tapOn: { text: "RSS Feed" }
+- waitForAnimationToEnd: { timeout: 6000 }
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/c110098_rss_feed_top
+- swipe: { start: "50%, 80%", end: "50%, 25%", duration: 500 }
+- waitForAnimationToEnd: { timeout: 1000 }
+- swipe: { start: "50%, 80%", end: "50%, 25%", duration: 500 }
+- waitForAnimationToEnd: { timeout: 1000 }
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/c110098_rss_feed_mid
+- swipe: { start: "50%, 80%", end: "50%, 25%", duration: 500 }
+- waitForAnimationToEnd: { timeout: 1000 }
+- swipe: { start: "50%, 80%", end: "50%, 25%", duration: 500 }
+- waitForAnimationToEnd: { timeout: 1000 }
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/c110098_rss_feed_bottom
+- runFlow:
+    when: { visible: "Back" }
+    commands:
+      - tapOn: { text: "Back" }
+      - waitForAnimationToEnd: { timeout: 1500 }
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/zz_final_dashboard

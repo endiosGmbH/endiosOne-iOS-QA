@@ -1,0 +1,29 @@
+appId: de.endios.one
+---
+# C110083 — News - Tile - Tapping an article preview opens Article Detail directly (skips List View)
+# Carousel NOT configured → only Gallery is in scope.
+- launchApp:
+    appId: de.endios.one
+    clearState: false
+- waitForAnimationToEnd:
+    timeout: 6000
+
+- swipe:
+    start: 50%, 80%
+    end: 50%, 20%
+    duration: 800
+- swipe:
+    start: 50%, 80%
+    end: 50%, 30%
+    duration: 800
+
+- assertVisible:
+    text: "Nachrichten"
+- takeScreenshot: /tmp/verify-widget/case-110083/01_gallery_visible
+
+# Tap the first article preview by coordinate (left half of the article row, ~75% down screen)
+- tapOn:
+    point: 25%, 78%
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: /tmp/verify-widget/case-110083/02_after_tap_article

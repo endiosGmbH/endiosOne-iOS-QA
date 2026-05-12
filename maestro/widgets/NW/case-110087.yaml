@@ -1,0 +1,14 @@
+appId: de.endios.one
+---
+- launchApp:
+    appId: de.endios.one
+    clearState: false
+- takeScreenshot: /tmp/verify-widget/case-110087/01_product_tab
+- tapOn:
+    text: "News 2"
+- takeScreenshot: /tmp/verify-widget/case-110087/02_list_view_immediate
+- extendedWaitUntil:
+    visible:
+      text: ".*"
+    timeout: 8000
+- takeScreenshot: /tmp/verify-widget/case-110087/03_list_view_after_wait
