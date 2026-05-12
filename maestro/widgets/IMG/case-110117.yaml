@@ -1,0 +1,25 @@
+appId: de.endios.one
+name: "[IMG] 110117 - Invalid or unreachable image URL does not crash"
+tags:
+  - image
+---
+- launchApp:
+    appId: de.endios.one
+    stopApp: true
+- waitForAnimationToEnd:
+    timeout: 6000
+- takeScreenshot: /tmp/verify-widget/IMG/110117_01_dashboard_with_invalid
+- scroll
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: /tmp/verify-widget/IMG/110117_02_scrolled
+- scroll
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: /tmp/verify-widget/IMG/110117_03_scrolled_further
+- scrollUntilVisible:
+    element:
+      text: "Bild invalidUrl"
+    direction: UP
+- takeScreenshot: /tmp/verify-widget/IMG/110117_04_back_to_invalid
+- assertVisible: "Bild invalidUrl"

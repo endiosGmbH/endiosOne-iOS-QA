@@ -1,0 +1,23 @@
+appId: de.endios.one
+name: "[IMG] 110115 - Close image viewer returns to dashboard"
+tags:
+  - image
+---
+- launchApp:
+    appId: de.endios.one
+    stopApp: true
+- waitForAnimationToEnd:
+    timeout: 6000
+- takeScreenshot: /tmp/verify-widget/IMG/110115_01_dashboard_before
+- tapOn: "Bild clickable"
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: /tmp/verify-widget/IMG/110115_02_viewer_open
+- swipe:
+    start: 50%, 5%
+    end: 50%, 95%
+    duration: 600
+- waitForAnimationToEnd:
+    timeout: 2500
+- takeScreenshot: /tmp/verify-widget/IMG/110115_03_after_close
+- assertVisible: "Bild clickable"

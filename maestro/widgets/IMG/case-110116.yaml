@@ -1,0 +1,20 @@
+appId: de.endios.one
+name: "[IMG] 110116 - notClickable=true blocks core view"
+tags:
+  - image
+---
+- launchApp:
+    appId: de.endios.one
+    stopApp: true
+- waitForAnimationToEnd:
+    timeout: 6000
+- takeScreenshot: /tmp/verify-widget/IMG/110116_01_dashboard
+- tapOn: "Bild notClickable"
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: /tmp/verify-widget/IMG/110116_02_after_first_tap
+- tapOn: "Bild notClickable"
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: /tmp/verify-widget/IMG/110116_03_after_second_tap
+- assertVisible: "Bild notClickable"

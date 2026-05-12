@@ -1,0 +1,15 @@
+appId: de.endios.one
+name: "[IMG] 110110 - TextTop variant renders with title at top"
+tags:
+  - image
+---
+- launchApp:
+    appId: de.endios.one
+    stopApp: true
+- waitForAnimationToEnd:
+    timeout: 6000
+- takeScreenshot: /tmp/verify-widget/IMG/110110_01_dashboard
+- scroll
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: /tmp/verify-widget/IMG/110110_02_dashboard_scrolled

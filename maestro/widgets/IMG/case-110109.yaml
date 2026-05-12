@@ -1,0 +1,14 @@
+appId: de.endios.one
+name: "[IMG] 110109 - TextBottom variant renders with title at bottom"
+tags:
+  - image
+---
+- launchApp:
+    appId: de.endios.one
+    stopApp: true
+- waitForAnimationToEnd:
+    timeout: 6000
+- takeScreenshot: /tmp/verify-widget/IMG/110109_01_dashboard
+- assertVisible: "Bild clickable"
+- assertVisible: "Bild testing"
+- takeScreenshot: /tmp/verify-widget/IMG/110109_02_titles_visible

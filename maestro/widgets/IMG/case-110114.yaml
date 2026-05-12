@@ -1,0 +1,15 @@
+appId: de.endios.one
+name: "[IMG] 110114 - Tap widget opens full image viewer"
+tags:
+  - image
+---
+- launchApp:
+    appId: de.endios.one
+    stopApp: true
+- waitForAnimationToEnd:
+    timeout: 6000
+- takeScreenshot: /tmp/verify-widget/IMG/110114_01_dashboard
+- tapOn: "Bild clickable"
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: /tmp/verify-widget/IMG/110114_02_viewer_open

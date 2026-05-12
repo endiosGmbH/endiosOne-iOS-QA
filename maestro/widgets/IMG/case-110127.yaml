@@ -1,0 +1,23 @@
+appId: de.endios.one
+name: "[IMG] 110127 - Plain carousel rotation across url1/url2/url3 with dashboard rhythm"
+tags:
+  - image
+---
+- launchApp:
+    appId: de.endios.one
+    stopApp: true
+- waitForAnimationToEnd:
+    timeout: 6000
+- takeScreenshot: /tmp/verify-widget/IMG/110127_01_initial_url1
+- waitForAnimationToEnd:
+    timeout: 10000
+- takeScreenshot: /tmp/verify-widget/IMG/110127_02_after_10s_expect_url2
+- waitForAnimationToEnd:
+    timeout: 10000
+- takeScreenshot: /tmp/verify-widget/IMG/110127_03_after_20s_expect_url3
+- waitForAnimationToEnd:
+    timeout: 10000
+- takeScreenshot: /tmp/verify-widget/IMG/110127_04_after_30s_expect_back_to_url1
+- waitForAnimationToEnd:
+    timeout: 10000
+- takeScreenshot: /tmp/verify-widget/IMG/110127_05_after_40s_expect_url2_again

@@ -1,0 +1,15 @@
+appId: de.endios.one
+name: "[IMG] 110108 - Plain variant renders at configured sizes"
+tags:
+  - image
+---
+- launchApp:
+    appId: de.endios.one
+    stopApp: true
+- waitForAnimationToEnd:
+    timeout: 6000
+- takeScreenshot: /tmp/verify-widget/IMG/110108_01_dashboard_top
+- scroll
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: /tmp/verify-widget/IMG/110108_02_dashboard_scrolled

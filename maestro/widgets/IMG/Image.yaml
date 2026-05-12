@@ -1,0 +1,235 @@
+appId: de.endios.one
+name: "[IMG] Image widget — full suite (single launch, different tile per case)"
+tags:
+  - image
+
+# Tile mapping (different tile per case where dashboard variety allows):
+#   110127 (rotation rhythm)        → top-middle UNLABELED Plain (multi-URL rotator) — passive watch
+#   110114 (tap opens viewer)       → "Bild clickable"      (Plain, top-left — single-URL; renders rainbow icons cleanly)
+#   110115 (close viewer to home)   → close from 110114 — chained sequence (same viewer instance)
+#   110295 (swipe nav in viewer)    → top-middle UNLABELED Plain (tap by coord 50%,15% — multi-URL)
+#   110116 (notClickable=true)      → "Images not clickable" (TextTop, 8x4 wide)
+#   110117 (invalid URL no crash)   → "Invalid url" (Plain, top-left small, below Images not clickable)
+#   110108 (variant rendering)      → panorama scroll covering all visible Image tiles (last)
+#
+# Tile bounds (a11y dump at fresh top, viewport ~402x874):
+#   Bild clickable          [  3, 63][133,193]   (4x4 small Plain, single-URL)
+#   Top-middle (unlabeled)  [135, 63][266,193]   (4x4 small Plain, MULTI-URL — coord tap 50%,15%)
+#   Top-right (unlabeled)   [268, 63][399,326]   (4x8 tall TextBottom, multi-URL)
+#   Images not clickable    [  3,195][266,326]   (8x4 TextTop notClickable)
+#   Invalid url             [  3,328][133,392]   (4x2 Plain — 110117 target)
+#   Testing QA              [  3,394][266,525]   (8x4 — NEWS tile, NOT image; do not reuse)
+#
+# Hard rules:
+#   * exactly ONE launchApp (clearState + clearKeychain) at top
+#   * exactly ONE pull-to-refresh swipe (the baseline immediately after launch)
+#   * NO between-case PTRs — repositioning uses scrollUntilVisible only
+#   * recovery from open viewer = X-button coord-tap at 93%, 15%
+#   * extendedWaitUntil with missing element = guaranteed sleep (waitForAnimationToEnd returns early)
+---
+- launchApp:
+    appId: de.endios.one
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd:
+    timeout: 6000
+
+# === Baseline pull-to-refresh + dashboard top screenshot ===
+- swipe:
+    start: 50%, 25%
+    end: 50%, 75%
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: /tmp/verify-widget/run-widget-img/00_baseline_top
+
+# ============================================================
+# 110127 — Plain image rotation across url1/url2/url3
+# Tile: top-middle UNLABELED Plain (multi-URL rotator).
+# Passive watch: capture top-of-dashboard at +0s, +10s, +20s, +30s, +40s.
+# Use extendedWaitUntil on a never-visible element for guaranteed sleep
+# (waitForAnimationToEnd returns immediately when no animations run).
+# ============================================================
+- assertVisible: "Bild clickable"
+- takeScreenshot: /tmp/verify-widget/run-widget-img/110127_01_initial_url1
+- extendedWaitUntil:
+    visible: "__SLEEP_PLACEHOLDER__"
+    timeout: 10000
+    optional: true
+- takeScreenshot: /tmp/verify-widget/run-widget-img/110127_02_after_10s_url2
+- extendedWaitUntil:
+    visible: "__SLEEP_PLACEHOLDER__"
+    timeout: 10000
+    optional: true
+- takeScreenshot: /tmp/verify-widget/run-widget-img/110127_03_after_20s_url3
+- extendedWaitUntil:
+    visible: "__SLEEP_PLACEHOLDER__"
+    timeout: 10000
+    optional: true
+- takeScreenshot: /tmp/verify-widget/run-widget-img/110127_04_after_30s_back_to_url1
+- extendedWaitUntil:
+    visible: "__SLEEP_PLACEHOLDER__"
+    timeout: 10000
+    optional: true
+- takeScreenshot: /tmp/verify-widget/run-widget-img/110127_05_after_40s_url2_again
+
+# ============================================================
+# 110114 — Tap opens image viewer when notClickable=false
+# Tile: "Bild clickable" (Plain, single-URL, top-left).
+# Different tile from 110127 (this is single-URL, that was multi-URL rotator).
+# Leaves viewer OPEN — chained into 110115.
+# ============================================================
+- assertVisible: "Bild clickable"
+- takeScreenshot: /tmp/verify-widget/run-widget-img/110114_01_dashboard
+- tapOn: "Bild clickable"
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: /tmp/verify-widget/run-widget-img/110114_02_viewer_open
+
+# ============================================================
+# 110115 — Close image viewer returns to dashboard
+# Chained from 110114: viewer is open. Tap X (modal exit, top-right).
+# ============================================================
+- takeScreenshot: /tmp/verify-widget/run-widget-img/110115_01_viewer_open_from_110114
+- tapOn:
+    point: 93%, 15%
+- waitForAnimationToEnd:
+    timeout: 2500
+- takeScreenshot: /tmp/verify-widget/run-widget-img/110115_02_after_close
+- assertVisible: "Bild clickable"
+
+# ============================================================
+# 110295 — Swipe in image viewer cycles configured images
+# Tile: top-middle UNLABELED Plain (multi-URL rotator) — needed for swipe.
+# Tap by coords (no a11y label). Bounds [135,63][266,193] in 402x874 → ~50%,15%.
+# ============================================================
+- assertVisible: "Bild clickable"
+- takeScreenshot: /tmp/verify-widget/run-widget-img/110295_01_dashboard_before
+- tapOn:
+    point: 50%, 15%
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: /tmp/verify-widget/run-widget-img/110295_02_viewer_url1
+- swipe:
+    start: 80%, 50%
+    end: 20%, 50%
+    duration: 400
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: /tmp/verify-widget/run-widget-img/110295_03_after_swipe_left_expect_url2
+- swipe:
+    start: 80%, 50%
+    end: 20%, 50%
+    duration: 400
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: /tmp/verify-widget/run-widget-img/110295_04_after_swipe_left_expect_url3
+- swipe:
+    start: 20%, 50%
+    end: 80%, 50%
+    duration: 400
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: /tmp/verify-widget/run-widget-img/110295_05_after_swipe_right_back_to_url2
+- tapOn:
+    point: 93%, 15%
+- waitForAnimationToEnd:
+    timeout: 2500
+- takeScreenshot: /tmp/verify-widget/run-widget-img/110295_06_after_close
+
+# ============================================================
+# 110116 — Tap blocked when notClickable=true
+# Tile: "Images not clickable" (TextTop, 8x4).
+# Tap twice — both should remain on dashboard with the tile visible.
+# ============================================================
+- assertVisible: "Images not clickable"
+- takeScreenshot: /tmp/verify-widget/run-widget-img/110116_01_dashboard
+- tapOn: "Images not clickable"
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: /tmp/verify-widget/run-widget-img/110116_02_after_first_tap
+- assertVisible: "Images not clickable"
+- tapOn: "Images not clickable"
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: /tmp/verify-widget/run-widget-img/110116_03_after_second_tap
+- assertVisible: "Images not clickable"
+
+# ============================================================
+# 110117 — Invalid / unreachable URL does not crash
+# Tile: "Invalid url" (Plain, [3,328][133,392], lower top region).
+# Per case spec: observe ≥15s, scroll off-screen and back; verify no crash.
+# Use scrollUntilVisible DOWN as defensive guard if tile not in current view.
+# ============================================================
+- scrollUntilVisible:
+    element:
+      text: "Invalid url"
+    direction: DOWN
+    timeout: 4000
+- takeScreenshot: /tmp/verify-widget/run-widget-img/110117_01_invalid_visible
+# Soft observation: 15s on the tile (no actions). Use extendedWaitUntil sleep.
+- extendedWaitUntil:
+    visible: "__SLEEP_PLACEHOLDER__"
+    timeout: 15000
+    optional: true
+- takeScreenshot: /tmp/verify-widget/run-widget-img/110117_02_after_15s_observation
+- assertVisible: "Invalid url"
+# Scroll off-screen then back (per case spec step 5).
+- swipe:
+    start: 50%, 80%
+    end: 50%, 20%
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: /tmp/verify-widget/run-widget-img/110117_03_scrolled_off
+- scrollUntilVisible:
+    element:
+      text: "Invalid url"
+    direction: UP
+    timeout: 6000
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: /tmp/verify-widget/run-widget-img/110117_04_scrolled_back
+- assertVisible: "Invalid url"
+
+# ============================================================
+# 110108 — Tile rendering across configured variants (panorama)
+# Last case: scroll top → bottom capturing all Image tile variants.
+# We're currently below top after 110117. Scroll back up first.
+# ============================================================
+- scrollUntilVisible:
+    element:
+      text: "Bild clickable"
+    direction: UP
+    timeout: 6000
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: /tmp/verify-widget/run-widget-img/110108_01_top
+- swipe:
+    start: 50%, 80%
+    end: 50%, 20%
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: /tmp/verify-widget/run-widget-img/110108_02_scroll1
+- swipe:
+    start: 50%, 80%
+    end: 50%, 20%
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: /tmp/verify-widget/run-widget-img/110108_03_scroll2
+- swipe:
+    start: 50%, 80%
+    end: 50%, 20%
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: /tmp/verify-widget/run-widget-img/110108_04_scroll3
+- swipe:
+    start: 50%, 80%
+    end: 50%, 20%
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: /tmp/verify-widget/run-widget-img/110108_05_scroll4
+- swipe:
+    start: 50%, 80%
+    end: 50%, 20%
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: /tmp/verify-widget/run-widget-img/110108_06_bottom

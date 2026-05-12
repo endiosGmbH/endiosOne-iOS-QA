@@ -1,0 +1,28 @@
+appId: de.endios.one
+---
+- launchApp:
+    appId: de.endios.one
+    stopApp: false
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: /tmp/verify-widget/run-widget-img/recon/01-product-top
+- scroll
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: /tmp/verify-widget/run-widget-img/recon/02-product-mid1
+- scroll
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: /tmp/verify-widget/run-widget-img/recon/03-product-mid2
+- scroll
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: /tmp/verify-widget/run-widget-img/recon/04-product-mid3
+- scroll
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: /tmp/verify-widget/run-widget-img/recon/05-product-mid4
+- scroll
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: /tmp/verify-widget/run-widget-img/recon/06-product-bottom
