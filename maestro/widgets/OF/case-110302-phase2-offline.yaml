@@ -1,0 +1,30 @@
+appId: de.endios.one
+name: "[OF] 110302 phase 2 — Offline (Wi-Fi off on host)"
+tags:
+  - offers
+# Phase 2: simulator inherits the Mac network. Host Wi-Fi has just been
+# disabled by the wrapper; relaunching forces the app to attempt network
+# calls that will fail. Capture whatever the app shows (error / cached /
+# empty) and prove the app survives the offline boot.
+---
+- launchApp:
+    appId: de.endios.one
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd:
+    timeout: 6000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110302_03_dashboard_offline
+- swipe:
+    start: 50%, 25%
+    end: 50%, 75%
+- waitForAnimationToEnd:
+    timeout: 5000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110302_04_dashboard_after_ptr_offline
+- runFlow:
+    when:
+      visible: "Offer test"
+    commands:
+      - tapOn: "Offer test"
+      - waitForAnimationToEnd:
+          timeout: 5000
+      - takeScreenshot: /tmp/verify-widget/run-widget-of/110302_05_feed_offline

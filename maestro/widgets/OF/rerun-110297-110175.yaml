@@ -1,0 +1,98 @@
+appId: de.endios.one
+name: "[OF] Rerun 110297 (carousel widget 18783) + 110175 (empty bucket widget 18789)"
+tags:
+  - offers
+---
+- launchApp:
+    appId: de.endios.one
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd:
+    timeout: 6000
+- swipe:
+    start: 50%, 25%
+    end: 50%, 75%
+- waitForAnimationToEnd:
+    timeout: 4000
+
+# ============================================================
+# 110297 — Carousel Tile Type Left Right Swipe
+# Widget ID 18783 — BILL/DEAL carousel mid-dashboard.
+# ============================================================
+- scrollUntilVisible:
+    element:
+      text: "BILL"
+    direction: DOWN
+    timeout: 20000
+    centerElement: true
+    visibilityPercentage: 50
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110297_01_carousel_initial
+# Right-to-left swipe = advance (LEFT direction in finger movement)
+- swipe:
+    start: 80%, 50%
+    end: 20%, 50%
+    duration: 400
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110297_02_after_advance1
+- swipe:
+    start: 80%, 50%
+    end: 20%, 50%
+    duration: 400
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110297_03_after_advance2
+# Left-to-right swipe = previous
+- swipe:
+    start: 20%, 50%
+    end: 80%, 50%
+    duration: 400
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110297_04_after_back1
+- swipe:
+    start: 20%, 50%
+    end: 80%, 50%
+    duration: 400
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110297_05_back_to_first
+
+# ============================================================
+# 110175 — Empty list (widget 18789)
+# Tile is named "Verify" with subtitle "Currently there are no offers available.".
+# ============================================================
+- scrollUntilVisible:
+    element:
+      text: "Verify"
+    direction: UP
+    timeout: 10000
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110175_01_dashboard_with_empty_tile
+# Tap the "Mehr" button inside the Verify tile (index-1; Angebote/Mehr is index 0)
+- tapOn:
+    text: "Mehr"
+    index: 1
+- waitForAnimationToEnd:
+    timeout: 5000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110175_02_empty_feed
+# Verify Filterfunktion remains accessible from the empty Feed View
+- runFlow:
+    when:
+      visible: "Filterfunktion"
+    commands:
+      - tapOn: "Filterfunktion"
+      - waitForAnimationToEnd:
+          timeout: 3000
+      - takeScreenshot: /tmp/verify-widget/run-widget-of/110175_03_filter_accessible
+      - runFlow:
+          when:
+            visible: "Abbrechen"
+          commands:
+            - tapOn: "Abbrechen"
+      - waitForAnimationToEnd:
+          timeout: 2000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110175_04_after_filter_closed

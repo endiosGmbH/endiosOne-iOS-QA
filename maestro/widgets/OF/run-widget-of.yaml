@@ -1,0 +1,476 @@
+appId: de.endios.one
+name: "[OF] Full suite — R784 regression (19 cases, single launch)"
+tags:
+  - offers
+# Consolidated single-launch flow for Offers Widget [OF] — TestRail Run R784.
+# Last regenerated 2026-05-11.
+#
+# Pre-req (set BEFORE running):
+#   xcrun simctl location booted set 53.5511,9.9937       (Hamburg, persists)
+#
+# Tile mapping (Claude Automation 1020, TEST):
+#   Dashboard tile scan                     → 110164 (all tile types render)
+#   QA Carousel cards (in-tile, ~y=85%)     → 110297 (in-tile swipe RTL/LTR)
+#   QA Mehr (text:"Mehr" index:0) → Feed    → 110165, 110166, 110298, 110167,
+#                                              110300, 110301, 110169, 110299,
+#                                              110168
+#   QA Detail (Usage offer)                 → 110170, 110304, 110305, 110306,
+#                                              110307 (close X attempt — Fail
+#                                              evidence per known bug), 110303
+#   V tile (text "V...")                    → 110175 (empty/partial state)
+#
+# Cases NOT in this consolidated flow (fallback flows generated separately):
+#   110296 (article preview → Detail) — Detail has no close affordance in
+#          this build; covered by maestro/widgets/OF/case-110296-only.yaml
+#   110302 (airplane mode)            — sim cannot reliably toggle device-
+#          level airplane; Blocked.
+#
+# Coord notes (402x874 viewport):
+#   QA Mehr             text:"Mehr" index:0
+#   V tile Mehr         coord (22%, 66%)
+#   Map toggle (right)  coord (92%, 7%)
+#   Filter Min toggle   (85%, 78%)
+#   Date Ab Beliebig    (50%, 62%)
+#   Ab pill X-close     (92%, 30%)
+#   Apple Maps row      (50%, 85%) on map picker
+#   Location arrow      (90%, 85%) on Detail
+#   WEB row             (50%, 27%)
+#   Phone row           (50%, 34%)
+#   Mail row            (50%, 41%)
+#   Galerie 1st image   (28%, 60%)
+#   Galerie viewer X    (92%, 11%) — top-RIGHT
+#   SFSafari close X    (10%, 9%)  — top-LEFT
+#   Detail close X      (92%, 9%)  — top-RIGHT (known bug: may not register)
+#   Social expand       (50%, 94%)
+#
+# Known defects (re-confirm each run):
+#   AGENCY-7333 — Carousel tile (widget 18783) overlapping text
+#   Detail close-icon (110307) — historically Fail
+#   AGENCY-7344 — Map View KATEGORIEN toggle doesn't update pins
+---
+- launchApp:
+    appId: de.endios.one
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd:
+    timeout: 6000
+# Sanctioned baseline pull-to-refresh (the ONLY one in this flow)
+- swipe:
+    start: 50%, 25%
+    end: 50%, 75%
+- waitForAnimationToEnd:
+    timeout: 4000
+# === 110164 — Dashboard tile inventory ===
+- takeScreenshot: /tmp/verify-widget/run-widget-of/00_dashboard
+- swipe:
+    start: 50%, 70%
+    end: 50%, 30%
+    duration: 600
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: /tmp/verify-widget/run-widget-of/00b_dashboard_lower
+- swipe:
+    start: 50%, 30%
+    end: 50%, 70%
+    duration: 600
+- waitForAnimationToEnd:
+    timeout: 1500
+
+# === 110297 — Carousel swipe within QA tile (in-place RTL then LTR) ===
+- swipe:
+    start: 80%, 85%
+    end: 30%, 85%
+    duration: 600
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110297a_carousel_rtl
+- swipe:
+    start: 30%, 85%
+    end: 80%, 85%
+    duration: 600
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110297b_carousel_ltr
+
+# === 110175 — V tile (truncated to "V...") → Feed empty/partial state ===
+# Tap directly by coord (text matcher unreliable as label is truncated).
+- tapOn:
+    point: 22%, 66%
+- waitForAnimationToEnd:
+    timeout: 5000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110175a_v_feed_empty_state
+- runFlow:
+    when:
+      visible: "Back"
+    commands:
+      - tapOn: "Back"
+      - waitForAnimationToEnd:
+          timeout: 2000
+
+# === 110165 + 110166 + 110298 — Enter QA Feed via Mehr index 0 ===
+- tapOn:
+    text: "Mehr"
+    index: 0
+- waitForAnimationToEnd:
+    timeout: 5000
+- extendedWaitUntil:
+    visible: "Filterfunktion"
+    timeout: 10000
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: /tmp/verify-widget/run-widget-of/01_feed_initial
+
+# === 110167 — Scroll feed (down then back up) ===
+- swipe:
+    start: 50%, 70%
+    end: 50%, 30%
+    duration: 600
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110167a_scrolled_down
+- swipe:
+    start: 50%, 30%
+    end: 50%, 70%
+    duration: 600
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110167b_scrolled_up
+
+# === 110300 — Filter category toggle ===
+- tapOn: "Filterfunktion"
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/02a_filter_open
+- tapOn:
+    point: 85%, 78%
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: /tmp/verify-widget/run-widget-of/02b_toggled_off
+- swipe:
+    start: 50%, 30%
+    end: 50%, 95%
+    duration: 400
+- waitForAnimationToEnd:
+    timeout: 2500
+- takeScreenshot: /tmp/verify-widget/run-widget-of/02c_feed_filtered
+- tapOn: "Filterfunktion"
+- waitForAnimationToEnd:
+    timeout: 3000
+- tapOn:
+    point: 85%, 78%
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: /tmp/verify-widget/run-widget-of/02d_toggle_restored
+- swipe:
+    start: 50%, 30%
+    end: 50%, 95%
+    duration: 400
+- waitForAnimationToEnd:
+    timeout: 2500
+- takeScreenshot: /tmp/verify-widget/run-widget-of/02e_feed_all_restored
+
+# === 110301 — Date Picker + Übernehmen + X-close ===
+- tapOn: "Filterfunktion"
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/03a_filter_open
+- tapOn:
+    point: 50%, 62%
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/03b_picker_open
+- tapOn: "Übernehmen"
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/03c_after_uebernehmen
+- tapOn:
+    point: 92%, 30%
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: /tmp/verify-widget/run-widget-of/03d_after_x_close
+- swipe:
+    start: 50%, 30%
+    end: 50%, 95%
+    duration: 400
+- waitForAnimationToEnd:
+    timeout: 2500
+- takeScreenshot: /tmp/verify-widget/run-widget-of/03e_feed_restored
+
+# === 110169 — Map sequence ===
+# Step 1 — Feed → Map
+- tapOn:
+    point: 92%, 7%
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110169a_map_view
+# Step 2 — Tap Usage pin → Detail
+- tapOn: "Usage"
+- waitForAnimationToEnd:
+    timeout: 4000
+- runFlow:
+    when:
+      visible: "Usage"
+    commands:
+      - tapOn: "Usage"
+      - waitForAnimationToEnd:
+          timeout: 4000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110169b_pin_detail
+# Step 3 — Close Detail (top-RIGHT X)
+- tapOn:
+    point: 92%, 9%
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110169c_back_to_map
+# Step 9 — Open map-type popup
+- tapOn:
+    point: 92%, 94%
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110169d_popup_open
+# Step 10 — Select Map (default)
+- runFlow:
+    when:
+      visible: "Map"
+    commands:
+      - tapOn: "Map"
+      - waitForAnimationToEnd:
+          timeout: 2000
+# Step 11 — Select Satellite
+- tapOn:
+    point: 32%, 94%
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110169e_satellite_view
+# Step 13 — Re-open + X-close
+- tapOn:
+    point: 92%, 94%
+- waitForAnimationToEnd:
+    timeout: 2000
+- tapOn:
+    point: 92%, 94%
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110169f_after_x_close
+# Step 14 — Current location
+- tapOn:
+    point: 92%, 87%
+- waitForAnimationToEnd:
+    timeout: 3000
+- runFlow:
+    when:
+      visible: "Allow While Using App"
+    commands:
+      - tapOn: "Allow While Using App"
+      - waitForAnimationToEnd:
+          timeout: 1500
+- runFlow:
+    when:
+      visible: "Allow Once"
+    commands:
+      - tapOn: "Allow Once"
+      - waitForAnimationToEnd:
+          timeout: 1500
+- runFlow:
+    when:
+      visible: "Beim Verwenden der App erlauben"
+    commands:
+      - tapOn: "Beim Verwenden der App erlauben"
+      - waitForAnimationToEnd:
+          timeout: 1500
+- runFlow:
+    when:
+      visible: "Einmal erlauben"
+    commands:
+      - tapOn: "Einmal erlauben"
+      - waitForAnimationToEnd:
+          timeout: 1500
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110169g_current_location_precise
+# Step 15 — Overview switcher → List View
+- tapOn:
+    point: 92%, 7%
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110169h_back_to_list_view
+
+# === 110299 — Back from Feed → Homepage ===
+- tapOn: "Back"
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110299_homepage
+
+# === Re-enter QA Feed for Detail-based cases ===
+- tapOn:
+    text: "Mehr"
+    index: 0
+- waitForAnimationToEnd:
+    timeout: 5000
+- extendedWaitUntil:
+    visible: "Filterfunktion"
+    timeout: 10000
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: /tmp/verify-widget/run-widget-of/04_feed_for_detail
+
+# === 110168 — Tap list item → Detail ===
+- tapOn:
+    point: 50%, 35%
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110168_detail_view
+
+# === 110170 — Detail sections top → mid → bot ===
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110170a_detail_top
+- swipe:
+    start: 50%, 75%
+    end: 50%, 25%
+    duration: 800
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110170b_detail_mid
+- swipe:
+    start: 50%, 75%
+    end: 50%, 25%
+    duration: 800
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110170c_detail_bot
+
+# === 110304 — Kontakt rows ===
+- tapOn:
+    point: 50%, 27%
+- waitForAnimationToEnd:
+    timeout: 5000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110304a_browser_open
+- tapOn:
+    point: 10%, 9%
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110304b_back_after_web
+- tapOn:
+    point: 50%, 34%
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110304c_after_phone_tap
+- tapOn:
+    point: 50%, 41%
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110304e_after_mail_tap
+
+# === 110305 — Galerie image viewer ===
+- tapOn:
+    point: 28%, 60%
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110305a_viewer_open
+- tapOn:
+    point: 92%, 11%
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110305b_back_after_viewer
+
+# === 110306 — Social Media expand/collapse + per-row tap ===
+- swipe:
+    start: 50%, 75%
+    end: 50%, 25%
+    duration: 800
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110306a_social_3rows_initial
+- tapOn:
+    point: 50%, 94%
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110306b_after_expand
+- swipe:
+    start: 50%, 75%
+    end: 50%, 25%
+    duration: 600
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110306c_4rows_visible
+- tapOn:
+    point: 50%, 94%
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110306d_after_collapse
+- swipe:
+    start: 50%, 5%
+    end: 50%, 6%
+    duration: 100
+- waitForAnimationToEnd:
+    timeout: 1500
+- tapOn:
+    point: 50%, 74%
+- waitForAnimationToEnd:
+    timeout: 5000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110306e_after_yt_tap
+- tapOn:
+    point: 10%, 9%
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110306f_back_after_yt
+- runFlow:
+    when:
+      visible: "Twitter"
+    commands:
+      - tapOn: "Twitter"
+      - waitForAnimationToEnd:
+          timeout: 5000
+      - takeScreenshot: /tmp/verify-widget/run-widget-of/110306g_after_twitter_tap
+      - tapOn:
+          point: 10%, 9%
+      - waitForAnimationToEnd:
+          timeout: 2000
+      - takeScreenshot: /tmp/verify-widget/run-widget-of/110306h_back_after_twitter
+- runFlow:
+    when:
+      visible: "Facebook"
+    commands:
+      - tapOn: "Facebook"
+      - waitForAnimationToEnd:
+          timeout: 5000
+      - takeScreenshot: /tmp/verify-widget/run-widget-of/110306i_after_facebook_tap
+      - tapOn:
+          point: 10%, 9%
+      - waitForAnimationToEnd:
+          timeout: 2000
+      - takeScreenshot: /tmp/verify-widget/run-widget-of/110306j_back_after_facebook
+
+# Scroll Detail back to top for 110307 + 110303
+- swipe:
+    start: 50%, 25%
+    end: 50%, 80%
+    duration: 800
+- waitForAnimationToEnd:
+    timeout: 1500
+- swipe:
+    start: 50%, 25%
+    end: 50%, 80%
+    duration: 800
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: /tmp/verify-widget/run-widget-of/05_detail_top
+
+# === 110307 — Detail close X attempt (Fail-evidence per known bug) ===
+- tapOn:
+    point: 92%, 9%
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110307a_after_close_x
+
+# === 110303 — Location → Map picker → Apple Maps → Home (FLOW ENDS) ===
+- tapOn:
+    point: 90%, 85%
+- waitForAnimationToEnd:
+    timeout: 1200
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110303b_picker
+- tapOn:
+    point: 50%, 85%
+- waitForAnimationToEnd:
+    timeout: 5000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110303c_apple_maps
+- pressKey: Home
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110303d_home_after_maps

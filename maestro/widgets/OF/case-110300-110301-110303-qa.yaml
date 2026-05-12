@@ -1,0 +1,161 @@
+appId: de.endios.one
+name: "[OF] 110300 + 110301 + 110303 via QA tile (widget 18788)"
+tags:
+  - offers
+# QA tile (widget 18788) — Mehr index 0 (V...Mehr is index 1 = Verify).
+# Filter sheet bounds (verified via hierarchy dump on 402x874 viewport):
+#   Ab Beliebig (date row)    bounds [20,513][382,565]   centre (50%, 62%)
+#   Alle  toggle pill         bounds [318,619][369,650]  centre (85%, 73%)
+#   MAX   toggle pill         bounds [318,664][369,695]  centre (85%, 78%)
+#   Min   toggle pill         bounds [318,710][369,740]  centre (85%, 83%)
+---
+- launchApp:
+    appId: de.endios.one
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd:
+    timeout: 6000
+- swipe:
+    start: 50%, 25%
+    end: 50%, 75%
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110300q_00_dashboard
+
+# Enter QA Feed — Mehr index 0
+- tapOn:
+    text: "Mehr"
+    index: 0
+- waitForAnimationToEnd:
+    timeout: 5000
+- extendedWaitUntil:
+    visible: "Filterfunktion"
+    timeout: 10000
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110300q_01_feed_initial_all_categories
+
+# ===== 110300 — Category filter toggle (MAX) =====
+- tapOn: "Filterfunktion"
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110300q_02_filter_open_all_on
+# Toggle MAX off (correct coord 85%, 78%)
+- tapOn:
+    point: 85%, 78%
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110300q_03_max_toggled_off
+# Dismiss filter sheet
+- swipe:
+    start: 50%, 30%
+    end: 50%, 95%
+    duration: 400
+- waitForAnimationToEnd:
+    timeout: 2500
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110300q_04_feed_max_disabled
+# Re-open filter, re-enable MAX
+- tapOn: "Filterfunktion"
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110300q_05_filter_reopen_max_off
+- tapOn:
+    point: 85%, 78%
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110300q_06_max_toggled_back_on
+# Also toggle Min for additional evidence
+- tapOn:
+    point: 85%, 83%
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110300q_07_min_toggled_off
+- swipe:
+    start: 50%, 30%
+    end: 50%, 95%
+    duration: 400
+- waitForAnimationToEnd:
+    timeout: 2500
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110300q_08_feed_min_disabled
+# Re-open and restore all
+- tapOn: "Filterfunktion"
+- waitForAnimationToEnd:
+    timeout: 3000
+- tapOn:
+    point: 85%, 83%
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110300q_09_all_restored
+- swipe:
+    start: 50%, 30%
+    end: 50%, 95%
+    duration: 400
+- waitForAnimationToEnd:
+    timeout: 2500
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110300q_10_feed_all_restored
+
+# ===== 110301 — Date Picker (Gültigkeit) =====
+- tapOn: "Filterfunktion"
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110301q_01_filter_open
+# Tap "Ab Beliebig" row at correct centre (50%, 62%)
+- tapOn:
+    point: 50%, 62%
+- waitForAnimationToEnd:
+    timeout: 2500
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110301q_02_after_row_tap
+- runFlow:
+    when:
+      visible: "OK"
+    commands:
+      - tapOn: "OK"
+      - waitForAnimationToEnd:
+          timeout: 1500
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110301q_03_after_ok_or_inline
+- swipe:
+    start: 50%, 30%
+    end: 50%, 95%
+    duration: 400
+- waitForAnimationToEnd:
+    timeout: 2500
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110301q_04_feed_after_date_pick
+
+# ===== 110303 — Location card → Map picker =====
+- tapOn:
+    point: 50%, 35%
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110303q_01_detail_top
+# Tap location card direction arrow at multiple plausible coords
+- tapOn:
+    point: 88%, 65%
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110303q_02_after_arrow_tap_88_65
+- runFlow:
+    when:
+      notVisible: "Apple"
+    commands:
+      - tapOn:
+          point: 50%, 65%
+      - waitForAnimationToEnd:
+          timeout: 3000
+      - takeScreenshot: /tmp/verify-widget/run-widget-of/110303q_03_after_row_tap_50_65
+- runFlow:
+    when:
+      visible: "Abbrechen"
+    commands:
+      - tapOn: "Abbrechen"
+      - waitForAnimationToEnd:
+          timeout: 2000
+      - takeScreenshot: /tmp/verify-widget/run-widget-of/110303q_04_after_cancel
+- runFlow:
+    when:
+      visible: "Apple"
+    commands:
+      - tapOn:
+          text: "Apple"
+      - waitForAnimationToEnd:
+          timeout: 4000
+      - takeScreenshot: /tmp/verify-widget/run-widget-of/110303q_05_apple_maps_launched

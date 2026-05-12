@@ -1,0 +1,268 @@
+appId: de.endios.one
+name: "[OF] C110169 — Full 15-step Map View suite"
+tags:
+  - offers
+# C110169 — full case per TestRail revision 1777552944.
+#
+# Pre-req: simulator location set to Hamburg via
+#   xcrun simctl location booted set 53.5511,9.9937
+# (run BEFORE this flow). Without it, current-location step shows blank
+# ocean instead of city detail.
+#
+# Coord cheatsheet (402×874 viewport):
+#   Map / view toggle (nav bar)     (92%, 7%)
+#   Filter icon (nav bar)           "Filterfunktion" text matcher
+#   Detail X close                  (92%, 9%)
+#   Current location icon           (92%, 87%) — white circle
+#   Map type icon (popup closed)    (92%, 94%) — green circle (TOGGLE)
+#   Popup buttons (popup open):
+#     Map        (17%, 94%)
+#     Satellite  (40%, 94%)
+#     Hybrid     (67%, 94%)
+#     X-close    (92%, 94%)  ← same as map-type icon (toggle)
+#   Filter modal:
+#     Date row "Ab Beliebig"        (50%, 62%)
+#     Category toggle (one row)     (85%, 78%)
+#     Übernehmen                    text matcher
+#     Abbrechen                     text matcher
+#     "Ab" pill X-close             (92%, 30%)
+---
+- launchApp:
+    appId: de.endios.one
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd:
+    timeout: 6000
+- swipe:
+    start: 50%, 25%
+    end: 50%, 75%
+- waitForAnimationToEnd:
+    timeout: 4000
+
+# Enter QA Feed via Mehr index 0
+- tapOn:
+    text: "Mehr"
+    index: 0
+- waitForAnimationToEnd:
+    timeout: 8000
+- extendedWaitUntil:
+    visible: "Filterfunktion"
+    timeout: 20000
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: /tmp/verify-widget/run-widget-of-c110169/00_feed
+
+# === Step 1 — Toggle Feed → Map View ===
+- tapOn:
+    point: 92%, 7%
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: /tmp/verify-widget/run-widget-of-c110169/01_map_view
+
+# === Step 2 — Tap Usage pin → Detail View ===
+- tapOn: "Usage"
+- waitForAnimationToEnd:
+    timeout: 4000
+- runFlow:
+    when:
+      visible: "Usage"
+    commands:
+      - tapOn: "Usage"
+      - waitForAnimationToEnd:
+          timeout: 4000
+- takeScreenshot: /tmp/verify-widget/run-widget-of-c110169/02_pin_detail
+
+# === Step 3 — Close Detail (top-RIGHT X) → returns to Map ===
+- tapOn:
+    point: 92%, 9%
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: /tmp/verify-widget/run-widget-of-c110169/03_back_to_map
+
+# === Step 4 — Filter icon → KATEGORIEN toggle (immediate apply on Map View) ===
+- tapOn: "Filterfunktion"
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: /tmp/verify-widget/run-widget-of-c110169/04a_filter_open
+# Toggle one category off
+- tapOn:
+    point: 85%, 78%
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: /tmp/verify-widget/run-widget-of-c110169/04b_kategorie_toggled_off
+# Dismiss filter modal back to Map (swipe down to close, or tap outside)
+- swipe:
+    start: 50%, 30%
+    end: 50%, 95%
+    duration: 400
+- waitForAnimationToEnd:
+    timeout: 2500
+- takeScreenshot: /tmp/verify-widget/run-widget-of-c110169/04c_map_with_filter_applied
+# Re-open filter, re-enable category
+- tapOn: "Filterfunktion"
+- waitForAnimationToEnd:
+    timeout: 3000
+- tapOn:
+    point: 85%, 78%
+- waitForAnimationToEnd:
+    timeout: 1500
+- swipe:
+    start: 50%, 30%
+    end: 50%, 95%
+    duration: 400
+- waitForAnimationToEnd:
+    timeout: 2500
+- takeScreenshot: /tmp/verify-widget/run-widget-of-c110169/04d_map_filter_restored
+
+# === Step 5 — Open Filter, date picker → LATER date, Übernehmen ===
+# Modal STAYS OPEN after Übernehmen — steps 6-8 operate on the still-open
+# modal (no re-open needed).
+- tapOn: "Filterfunktion"
+- waitForAnimationToEnd:
+    timeout: 3000
+- tapOn:
+    point: 50%, 62%
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: /tmp/verify-widget/run-widget-of-c110169/05a_date_picker_open
+- tapOn: "Übernehmen"
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: /tmp/verify-widget/run-widget-of-c110169/05b_after_uebernehmen_later
+
+# === Step 6 — Date picker → CURRENT-week date, Übernehmen (modal still open) ===
+- tapOn:
+    point: 50%, 62%
+- waitForAnimationToEnd:
+    timeout: 3000
+- tapOn: "Übernehmen"
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: /tmp/verify-widget/run-widget-of-c110169/06_after_uebernehmen_current
+
+# === Step 7 — Date picker → change date, Abbrechen → filter unchanged ===
+- tapOn:
+    point: 50%, 62%
+- waitForAnimationToEnd:
+    timeout: 3000
+- runFlow:
+    when:
+      visible: "Abbrechen"
+    commands:
+      - tapOn: "Abbrechen"
+      - waitForAnimationToEnd:
+          timeout: 2000
+- takeScreenshot: /tmp/verify-widget/run-widget-of-c110169/07_after_abbrechen
+
+# === Step 8 — X-close on "Ab" pill (within modal) → date clears to default ===
+- tapOn:
+    point: 92%, 30%
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: /tmp/verify-widget/run-widget-of-c110169/08_after_ab_pill_x_close
+
+# Dismiss the filter modal back to Map View for the next steps
+- swipe:
+    start: 50%, 30%
+    end: 50%, 95%
+    duration: 400
+- waitForAnimationToEnd:
+    timeout: 2500
+- takeScreenshot: /tmp/verify-widget/run-widget-of-c110169/08b_back_to_map_after_filter
+
+# === Step 9 — Open map type popup (3 view types listed) ===
+- tapOn:
+    point: 92%, 94%
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: /tmp/verify-widget/run-widget-of-c110169/09_popup_open_with_3_types
+
+# === Step 10 — Select Map (text matcher) ===
+# Map is the default active selection — this tap is a no-op (no state change).
+# DO NOT tap (92%, 94%) afterwards: that's the toggle, and since popup is
+# still OPEN from step 9, the toggle would CLOSE it. Leave popup open so the
+# next selection (Satellite) lands on a popup-still-open state.
+- tapOn: "Map"
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: /tmp/verify-widget/run-widget-of-c110169/10_popup_MAP_highlighted
+
+# === Step 11 — Select Satellite (coord; popup still open from step 10) ===
+# UISegmentedControl segments are auto-sized by text length. Satellite center
+# is around x=32% (Map=3 chars / Satellite=9 / Hybrid=6).
+- tapOn:
+    point: 32%, 94%
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: /tmp/verify-widget/run-widget-of-c110169/11_satellite_view_selected
+# Re-open popup to capture "Satellite highlighted" state (proves selection).
+- tapOn:
+    point: 92%, 94%
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: /tmp/verify-widget/run-widget-of-c110169/11b_popup_SATELLITE_highlighted
+
+# === Step 12 — Select Hybrid (coord; popup still open from step 11b) ===
+- tapOn:
+    point: 67%, 94%
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: /tmp/verify-widget/run-widget-of-c110169/12_hybrid_view_selected
+# Re-open popup to capture "Hybrid highlighted" state.
+- tapOn:
+    point: 92%, 94%
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: /tmp/verify-widget/run-widget-of-c110169/12b_popup_HYBRID_highlighted
+
+# === Step 13 — Re-open popup, tap X close → popup dismissed, view unchanged ===
+# Popup is currently OPEN. Tap (92%, 94%) again to close (toggle = X).
+- tapOn:
+    point: 92%, 94%
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: /tmp/verify-widget/run-widget-of-c110169/13_after_x_close_view_persists
+
+# === Step 14 — Current location icon → user's precise location ===
+# OS permission prompt may appear on first tap — handle EN + DE.
+- tapOn:
+    point: 92%, 87%
+- waitForAnimationToEnd:
+    timeout: 3000
+- runFlow:
+    when:
+      visible: "Allow While Using App"
+    commands:
+      - tapOn: "Allow While Using App"
+      - waitForAnimationToEnd:
+          timeout: 1500
+- runFlow:
+    when:
+      visible: "Allow Once"
+    commands:
+      - tapOn: "Allow Once"
+      - waitForAnimationToEnd:
+          timeout: 1500
+- runFlow:
+    when:
+      visible: "Beim Verwenden der App erlauben"
+    commands:
+      - tapOn: "Beim Verwenden der App erlauben"
+      - waitForAnimationToEnd:
+          timeout: 1500
+- runFlow:
+    when:
+      visible: "Einmal erlauben"
+    commands:
+      - tapOn: "Einmal erlauben"
+      - waitForAnimationToEnd:
+          timeout: 1500
+- takeScreenshot: /tmp/verify-widget/run-widget-of-c110169/14_current_location_precise
+
+# === Step 15 — Overview control via view-switcher → List View ===
+# Same nav-bar control as Feed→Map toggle (top-right) — toggles back to List.
+- tapOn:
+    point: 92%, 7%
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: /tmp/verify-widget/run-widget-of-c110169/15_back_to_list_view

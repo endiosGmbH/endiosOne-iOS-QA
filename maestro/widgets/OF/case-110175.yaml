@@ -1,0 +1,16 @@
+appId: de.endios.one
+name: "[OF] 110175 — Negative: empty list / missing optional fields"
+---
+# NOTE: This case requires two distinct widget instances:
+#   (a) Offers widget pointed at an empty ContentHub bucket
+#   (b) Offers widget with an offer missing optional fields
+# The current Test dashboard exposes a single widget instance with one
+# fully-populated offer, so neither scenario can be exercised here.
+# Code-check verdict substitutes for runtime verdict.
+- launchApp:
+    clearState: false
+- tapOn: "Offer test"
+- extendedWaitUntil:
+    visible: "Angebote"
+    timeout: 10000
+- takeScreenshot: /tmp/verify-widget/OF/case-110175/step_1_feed_current_state

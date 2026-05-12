@@ -1,0 +1,32 @@
+appId: de.endios.one
+name: "[OF] 110296 — Article preview tap → Detail (focused fallback)"
+tags:
+  - offers
+# Focused flow because the direct-tile Detail View has no automation-friendly
+# close affordance (no X visible in a11y, edge-swipe and pull-down-from-top
+# do not dismiss in this build). Run separately so we can verify the open
+# behaviour without breaking the consolidated suite.
+---
+- launchApp:
+    appId: de.endios.one
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd:
+    timeout: 6000
+- swipe:
+    start: 50%, 25%
+    end: 50%, 75%
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110296_01_dashboard_with_preview
+- assertVisible: "Usage"
+- tapOn: "Usage"
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110296_02_detail_from_preview
+- swipe:
+    start: 50%, 80%
+    end: 50%, 20%
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110296_03_detail_scrolled

@@ -1,0 +1,79 @@
+appId: de.endios.one
+name: "[OF] 110305 — Gallery viewer: open → swipe → close → scroll restored"
+tags:
+  - offers
+# Expected (TestRail): tap image opens viewer, right-to-left advances,
+# left-to-right returns, close returns to Detail at the same scroll position.
+---
+- launchApp:
+    appId: de.endios.one
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd:
+    timeout: 6000
+- swipe:
+    start: 50%, 25%
+    end: 50%, 75%
+- waitForAnimationToEnd:
+    timeout: 4000
+- tapOn: "Offer test"
+- extendedWaitUntil:
+    visible: "Angebote"
+    timeout: 10000
+- tapOn:
+    point: 50%, 35%
+- waitForAnimationToEnd:
+    timeout: 4000
+- swipe:
+    start: 50%, 80%
+    end: 50%, 20%
+- waitForAnimationToEnd:
+    timeout: 1500
+- swipe:
+    start: 50%, 80%
+    end: 50%, 20%
+- waitForAnimationToEnd:
+    timeout: 1500
+- assertVisible: "Galerie"
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110305_01_galerie_visible
+- tapOn:
+    point: 27%, 60%
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110305_02_viewer_open
+# Advance: right-to-left swipe
+- swipe:
+    start: 80%, 50%
+    end: 20%, 50%
+    duration: 400
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110305_03_viewer_after_swipe_advance
+# Return: left-to-right swipe
+- swipe:
+    start: 20%, 50%
+    end: 80%, 50%
+    duration: 400
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110305_04_viewer_after_swipe_back
+# Close — viewer X. Prior 92%,8% missed. Try a more central coord and
+# fall back to swipe-down dismiss if still open.
+- tapOn:
+    point: 90%, 10%
+- waitForAnimationToEnd:
+    timeout: 1500
+- runFlow:
+    when:
+      notVisible: "Galerie"
+    commands:
+      - swipe:
+          start: 50%, 10%
+          end: 50%, 90%
+          duration: 400
+      - waitForAnimationToEnd:
+          timeout: 1500
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110305_05_after_close
+- assertVisible: "Galerie"

@@ -1,0 +1,18 @@
+appId: de.endios.one
+name: "[OF] 110166 — Feed list rendering"
+---
+- launchApp:
+    clearState: false
+- tapOn: "Offer test"
+- extendedWaitUntil:
+    visible: "Angebote"
+    timeout: 10000
+- takeScreenshot: /tmp/verify-widget/OF/case-110166/step_1_feed_top
+- swipe:
+    direction: UP
+    duration: 800
+- takeScreenshot: /tmp/verify-widget/OF/case-110166/step_2_feed_mid
+- swipe:
+    direction: UP
+    duration: 800
+- takeScreenshot: /tmp/verify-widget/OF/case-110166/step_3_feed_bottom

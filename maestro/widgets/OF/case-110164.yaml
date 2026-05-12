@@ -1,0 +1,8 @@
+appId: de.endios.one
+name: "[OF] 110164 — Widget tile renders title, defaultImageUrl & style fields"
+---
+- launchApp:
+    clearState: false
+- takeScreenshot: step_1_dashboard
+- assertVisible: "Offer test"
+- takeScreenshot: step_2_tile_visible

@@ -1,0 +1,201 @@
+appId: de.endios.one
+name: "[OF] Interactive 110304/305/306 — full button coverage in one go"
+tags:
+  - offers
+# Per user spec (2026-04-29):
+#   110304 Kontakt — All 3 rows present after fresh launch.
+#     • WEB → SFSafari → close top-LEFT (10%, 9%) → back to Detail
+#     • Phone → popup with phone number → tap Cancel → back to Detail
+#       (NOTE: iOS simulator has no Phone app; tap registers but no popup
+#       appears. On real device, popup with Cancel/Anrufen renders.)
+#     • Mail → Mail app composer → top-LEFT Cancel → "Delete Draft"
+#       popup → confirm → back to Detail
+#       (NOTE: simulator may not have Mail account configured; tap
+#       registers but composer may not open.)
+#   110305 Galerie — single-image viewer (NOT pager). Close top-RIGHT
+#     (92%, 11%). Confirmed 2026-04-29 (run 3).
+#   110306 Social Media — 4 entries configured; 3 rendered initially.
+#     Tap expand chevron (50%, 96%) → 4th row "Insta" appears → tap
+#     collapse chevron (50%, 96% in scrolled state) → per-row tap opens
+#     webview/app → top-LEFT close (10%, 9%) → back to Detail.
+#
+# Verified coords (Detail-bot scroll state, 402x874 viewport):
+#   ✅ Kontakt rows (CORRECTED 2026-04-30 — y was shifted later than estimated):
+#      WEB row:  (50%, 27%)  — confirmed 2026-04-30 by accidental Phone-tap
+#                              hitting WEB and opening endios.de
+#      Phone row: (50%, 34%)
+#      Mail row:  (50%, 41%)
+#   ✅ Galerie 1st image: (28%, 60%)
+#   ✅ Galerie viewer X (top-RIGHT): (92%, 11%)
+#   ✅ SFSafari close (top-LEFT): (10%, 9%)
+#   ✅ Social-bot view (after extra scroll for 110306):
+#      Expand chevron "v": (50%, 96%)
+#   ✅ Post-expand+scroll view (4 rows visible):
+#      Collapse chevron "^": (50%, 96%)
+#      YT/Twitter/Facebook rows: (50%, 66%/74%/82%) post-collapse
+---
+- launchApp:
+    appId: de.endios.one
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd:
+    timeout: 6000
+- swipe:
+    start: 50%, 25%
+    end: 50%, 75%
+- waitForAnimationToEnd:
+    timeout: 4000
+
+# Enter QA Feed → tap first list item → Detail
+- tapOn:
+    text: "Mehr"
+    index: 0
+- waitForAnimationToEnd:
+    timeout: 5000
+- extendedWaitUntil:
+    visible: "Filterfunktion"
+    timeout: 10000
+- tapOn:
+    point: 50%, 35%
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/INT_01_detail_top
+
+# Scroll to expose Kontakt
+- swipe:
+    start: 50%, 75%
+    end: 50%, 25%
+    duration: 800
+- waitForAnimationToEnd:
+    timeout: 1500
+- swipe:
+    start: 50%, 75%
+    end: 50%, 25%
+    duration: 800
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: /tmp/verify-widget/run-widget-of/INT_02_detail_bot_3rows
+
+# === 110304 — WEB / Phone / Mail ===
+
+# --- WEB → SFSafari → top-LEFT close ---
+- tapOn:
+    point: 50%, 27%
+- waitForAnimationToEnd:
+    timeout: 5000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110304a_browser_open
+- tapOn:
+    point: 10%, 9%
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110304b_back_after_web
+
+# --- Phone row tap (clickability check) ---
+# Sim has no Phone app — popup won't render. Verify tap is clickable
+# (no crash); screenshot stays on Detail.
+- tapOn:
+    point: 50%, 34%
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110304c_after_phone_tap
+
+# --- Mail row tap (clickability check) ---
+# Sim Mail not configured — composer won't render. Verify tap is
+# clickable; screenshot stays on Detail.
+- tapOn:
+    point: 50%, 41%
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110304e_after_mail_tap
+
+# === 110305 — Galerie single-image viewer, top-RIGHT close (92%, 11%) ===
+- takeScreenshot: /tmp/verify-widget/run-widget-of/INT_03_pre_galerie
+- tapOn:
+    point: 28%, 60%
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110305a_viewer_open
+- tapOn:
+    point: 92%, 11%
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110305b_back_after_viewer
+
+# === 110306 — Social Media expand/collapse + per-row tap ===
+- swipe:
+    start: 50%, 75%
+    end: 50%, 25%
+    duration: 800
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110306a_social_3rows_initial
+
+# Expand chevron "v" at y=96% in this scroll state
+- tapOn:
+    point: 50%, 94%
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110306b_after_expand
+
+# Scroll once more so 4th row + collapse chevron are clearly visible
+- swipe:
+    start: 50%, 75%
+    end: 50%, 25%
+    duration: 600
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110306c_4rows_visible
+
+# Collapse chevron "^" at y=94% (very bottom of expanded section)
+- tapOn:
+    point: 50%, 94%
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110306d_after_collapse
+
+# Post-collapse layout snaps back to INT_02-like scroll: Social rows at
+# y=82/89/96% (Facebook cut off). Use text matchers — labels "YT",
+# "Twitter", "Facebook" are accessible.
+
+# Tap YT row — UITapGestureRecognizer container with accessibilityLabel
+# "<platformName>, <handle>". Post-collapse gesture state needs settle.
+# Tiny swipe at top (status-bar area, no interactive content) to wake up
+# the gesture recognizer, then tap YT.
+- swipe:
+    start: 50%, 5%
+    end: 50%, 6%
+    duration: 100
+- waitForAnimationToEnd:
+    timeout: 1500
+- tapOn:
+    point: 50%, 74%
+- waitForAnimationToEnd:
+    timeout: 5000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110306e_after_yt_tap
+- tapOn:
+    point: 10%, 9%
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110306f_back_after_yt
+
+# Tap Twitter row
+- tapOn: "Twitter"
+- waitForAnimationToEnd:
+    timeout: 5000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110306g_after_twitter_tap
+- tapOn:
+    point: 10%, 9%
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110306h_back_after_twitter
+
+# Tap Facebook row
+- tapOn: "Facebook"
+- waitForAnimationToEnd:
+    timeout: 5000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110306i_after_facebook_tap
+- tapOn:
+    point: 10%, 9%
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110306j_back_after_facebook

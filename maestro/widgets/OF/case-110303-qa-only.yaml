@@ -1,0 +1,63 @@
+appId: de.endios.one
+name: "[OF] 110303 — Location card → Map picker on QA (18788)"
+tags:
+  - offers
+# Hamburg row direction arrow ~ (90%, 85%) on Detail screen.
+# Picker is built in EOFoundation/Application+Map.swift (openRoutes):
+#   - "GoogleMaps" row only if canOpenURL("comgooglemaps://...") — requires
+#     an installed app registering that scheme. The iOS Simulator has no
+#     Google Maps and cannot install App Store apps, so the row is absent
+#     on this simulator and CANNOT be tested here. Verify on a physical
+#     device with Google Maps installed.
+#   - "Maps" row (Apple Maps) — always available.
+#   - "Abbrechen" cancel row.
+# Picker layout WITHOUT GoogleMaps row (measured from open-picker
+# screenshot, 1206x2622 pixels):
+#   "Maps"       row centre  y=2245/2622 = 85.5%
+#   "Abbrechen"  pill centre y=2430/2622 = 92.7%
+# Auto-launches "Maps" after ~3.5s with no interaction; coord taps fire
+# after 1200ms settle to beat the race.
+# After Apple Maps launches we press HOME to return to the springboard
+# (main screen), per the test plan.
+---
+- launchApp:
+    appId: de.endios.one
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd:
+    timeout: 6000
+- swipe:
+    start: 50%, 25%
+    end: 50%, 75%
+- waitForAnimationToEnd:
+    timeout: 4000
+- tapOn:
+    text: "Mehr"
+    index: 0
+- waitForAnimationToEnd:
+    timeout: 5000
+- extendedWaitUntil:
+    visible: "Filterfunktion"
+    timeout: 10000
+- tapOn:
+    point: 50%, 35%
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110303coord_01_detail_top
+
+# === Apple Maps via coord tap → HOME ===
+- tapOn:
+    point: 90%, 85%
+- waitForAnimationToEnd:
+    timeout: 1200
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110303coord_02_picker_for_maps
+# Coord tap on the "Maps" row (measured at y=85.5%)
+- tapOn:
+    point: 50%, 85%
+- waitForAnimationToEnd:
+    timeout: 5000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110303coord_03_apple_maps_launched
+- pressKey: Home
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110303coord_04_home_after_maps

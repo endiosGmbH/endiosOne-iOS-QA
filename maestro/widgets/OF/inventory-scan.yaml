@@ -1,0 +1,41 @@
+appId: de.endios.one
+name: "[OF] Dashboard inventory — find widgets 18748 + 18788"
+tags:
+  - offers
+---
+- launchApp:
+    appId: de.endios.one
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd:
+    timeout: 6000
+- swipe:
+    start: 50%, 25%
+    end: 50%, 75%
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/inv3/01-top
+- swipe:
+    start: 50%, 80%
+    end: 50%, 20%
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: /tmp/verify-widget/run-widget-of/inv3/02-mid1
+- swipe:
+    start: 50%, 80%
+    end: 50%, 20%
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: /tmp/verify-widget/run-widget-of/inv3/03-mid2
+- swipe:
+    start: 50%, 80%
+    end: 50%, 20%
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: /tmp/verify-widget/run-widget-of/inv3/04-mid3
+- swipe:
+    start: 50%, 80%
+    end: 50%, 20%
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: /tmp/verify-widget/run-widget-of/inv3/05-bottom

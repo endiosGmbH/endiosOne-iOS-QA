@@ -1,0 +1,17 @@
+appId: de.endios.one
+name: "[OF] 110174 — Gültigkeit date picker filter"
+---
+- launchApp:
+    clearState: false
+- tapOn: "Offer test"
+- extendedWaitUntil:
+    visible: "Angebote"
+    timeout: 10000
+- tapOn: "Filterfunktion"
+- waitForAnimationToEnd:
+    timeout: 5000
+- takeScreenshot: /tmp/verify-widget/OF/case-110174/step_1_drawer
+- tapOn: "Beliebig"
+- waitForAnimationToEnd:
+    timeout: 5000
+- takeScreenshot: /tmp/verify-widget/OF/case-110174/step_2_date_picker

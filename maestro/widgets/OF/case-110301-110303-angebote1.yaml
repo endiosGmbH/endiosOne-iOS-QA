@@ -1,0 +1,153 @@
+appId: de.endios.one
+name: "[OF] 110301 + 110303 via Angebote1 (widget 18788)"
+tags:
+  - offers
+# Angebote1 is widget 18788 (Mehr index 1; V...Mehr is index 0).
+# 110301: Feed → Filter → GÜLTIGKEIT row → pick date → confirm → observe.
+# 110303: Feed → tap list item → Detail → location card → map picker.
+---
+- launchApp:
+    appId: de.endios.one
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd:
+    timeout: 6000
+- swipe:
+    start: 50%, 25%
+    end: 50%, 75%
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110301n_00_dashboard
+
+# Tap "Mehr" index 0 — Angebote1 (widget 18788). Tested: index 1 maps to
+# Verify (V...) feed, so index 0 is Angebote1's Mehr.
+- tapOn:
+    text: "Mehr"
+    index: 0
+- waitForAnimationToEnd:
+    timeout: 5000
+- extendedWaitUntil:
+    visible: "Filterfunktion"
+    timeout: 10000
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110301n_01_feed_initial
+
+# ===== 110301 — Date Picker (Gültigkeit) =====
+# Open filter sheet
+- tapOn: "Filterfunktion"
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110301n_02_filter_open
+# Coord-tap GÜLTIGKEIT row (Ab Beliebig) at y~55%
+- tapOn:
+    point: 50%, 55%
+- waitForAnimationToEnd:
+    timeout: 2500
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110301n_03_datepicker_open
+# Confirm via OK if visible
+- runFlow:
+    when:
+      visible: "OK"
+    commands:
+      - tapOn: "OK"
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110301n_04_after_ok
+# Dismiss filter sheet via swipe-down on drag handle
+- swipe:
+    start: 50%, 30%
+    end: 50%, 95%
+    duration: 400
+- waitForAnimationToEnd:
+    timeout: 2500
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110301n_05_feed_filtered
+
+# Cancel path: re-open filter, change date, cancel
+- runFlow:
+    when:
+      visible: "Filterfunktion"
+    commands:
+      - tapOn: "Filterfunktion"
+      - waitForAnimationToEnd:
+          timeout: 3000
+      - tapOn:
+          point: 50%, 55%
+      - waitForAnimationToEnd:
+          timeout: 2500
+      - takeScreenshot: /tmp/verify-widget/run-widget-of/110301n_06_datepicker_reopen
+      - runFlow:
+          when:
+            visible: "Abbrechen"
+          commands:
+            - tapOn: "Abbrechen"
+      - waitForAnimationToEnd:
+          timeout: 2000
+      # Dismiss filter sheet
+      - swipe:
+          start: 50%, 30%
+          end: 50%, 95%
+          duration: 400
+      - waitForAnimationToEnd:
+          timeout: 2500
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110301n_07_feed_after_cancel
+
+# ===== 110303 — Location card → Map picker =====
+# Tap a list item to enter Detail
+- tapOn:
+    point: 50%, 35%
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110303n_01_detail_top
+# Hamburg location row sits ~y=60% in Detail layout (below validity card).
+# Coord-tap the direction arrow on the right side of the row.
+- tapOn:
+    point: 88%, 60%
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110303n_03_map_picker
+# Try Abbrechen first
+- runFlow:
+    when:
+      visible: "Abbrechen"
+    commands:
+      - tapOn: "Abbrechen"
+      - waitForAnimationToEnd:
+          timeout: 2000
+      - takeScreenshot: /tmp/verify-widget/run-widget-of/110303n_04_after_cancel
+# Re-tap location to test tap-outside dismiss
+- tapOn:
+    point: 88%, 60%
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110303n_05_map_picker_reopen
+# Tap-outside (top of screen above sheet)
+- tapOn:
+    point: 50%, 10%
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110303n_06_after_tap_outside
+# Re-tap and try selecting Apple Maps if surfaced (sim has no Google Maps)
+- tapOn:
+    point: 88%, 60%
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110303n_07_map_picker_for_select
+- runFlow:
+    when:
+      visible: "Apple"
+    commands:
+      - tapOn:
+          text: "Apple"
+      - waitForAnimationToEnd:
+          timeout: 4000
+      - takeScreenshot: /tmp/verify-widget/run-widget-of/110303n_08_apple_maps_launched
+- runFlow:
+    when:
+      visible: "Google"
+    commands:
+      - tapOn:
+          text: "Google"
+      - waitForAnimationToEnd:
+          timeout: 4000
+      - takeScreenshot: /tmp/verify-widget/run-widget-of/110303n_09_google_maps_launched

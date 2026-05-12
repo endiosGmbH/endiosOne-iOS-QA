@@ -1,0 +1,26 @@
+appId: de.endios.one
+name: "[OF] 110170 — Detail view field rendering"
+---
+- launchApp:
+    clearState: false
+- tapOn: "Offer test"
+- extendedWaitUntil:
+    visible: "Angebote"
+    timeout: 10000
+- tapOn:
+    point: "50%,50%"
+- waitForAnimationToEnd:
+    timeout: 6000
+- takeScreenshot: /tmp/verify-widget/OF/case-110170/step_1_detail_top
+- swipe:
+    direction: UP
+    duration: 800
+- takeScreenshot: /tmp/verify-widget/OF/case-110170/step_2_detail_mid
+- swipe:
+    direction: UP
+    duration: 800
+- takeScreenshot: /tmp/verify-widget/OF/case-110170/step_3_detail_bottom
+- swipe:
+    direction: UP
+    duration: 800
+- takeScreenshot: /tmp/verify-widget/OF/case-110170/step_4_detail_further

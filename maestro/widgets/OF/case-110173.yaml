@@ -1,0 +1,30 @@
+appId: de.endios.one
+name: "[OF] 110173 — Category filter toggle"
+---
+- launchApp:
+    clearState: false
+- tapOn: "Offer test"
+- extendedWaitUntil:
+    visible: "Angebote"
+    timeout: 10000
+- tapOn: "Filterfunktion"
+- waitForAnimationToEnd:
+    timeout: 5000
+- takeScreenshot: /tmp/verify-widget/OF/case-110173/step_1_filter_drawer_open
+- tapOn: "QA"
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: /tmp/verify-widget/OF/case-110173/step_2_qa_toggled_off
+- swipe:
+    direction: DOWN
+    duration: 1200
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: /tmp/verify-widget/OF/case-110173/step_3_feed_after_filter
+- tapOn: "Filterfunktion"
+- waitForAnimationToEnd:
+    timeout: 5000
+- tapOn: "QA"
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: /tmp/verify-widget/OF/case-110173/step_4_qa_toggled_on

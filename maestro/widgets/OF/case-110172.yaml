@@ -1,0 +1,28 @@
+appId: de.endios.one
+name: "[OF] 110172 — Detail close: X sticky + pull-down"
+---
+- launchApp:
+    clearState: false
+- tapOn: "Offer test"
+- extendedWaitUntil:
+    visible: "Angebote"
+    timeout: 10000
+- tapOn:
+    point: "50%,50%"
+- waitForAnimationToEnd:
+    timeout: 6000
+- takeScreenshot: /tmp/verify-widget/OF/case-110172/step_1_detail_top_x_visible
+- swipe:
+    direction: UP
+    duration: 800
+- swipe:
+    direction: UP
+    duration: 800
+- takeScreenshot: /tmp/verify-widget/OF/case-110172/step_2_scrolled_x_still
+- swipe:
+    direction: DOWN
+    duration: 1200
+- swipe:
+    direction: DOWN
+    duration: 1200
+- takeScreenshot: /tmp/verify-widget/OF/case-110172/step_3_after_pull_down

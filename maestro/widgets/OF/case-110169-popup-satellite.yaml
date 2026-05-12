@@ -1,0 +1,66 @@
+appId: de.endios.one
+name: "[OF] C110169 — Popup Satellite-only verification"
+tags:
+  - offers
+# Companion to case-110169-only.yaml. Focused on proving the SATELLITE
+# popup selection registers — runs in isolation so the Satellite tap is
+# the FIRST and ONLY popup-button interaction (most reliable timing).
+#
+# Use alongside case-110169-popup-hybrid.yaml (which proves Hybrid in the
+# same way) since attempting both Satellite AND Hybrid in a single flow
+# is unreliable: whichever is tapped second after a popup re-open often
+# fails to register.
+#
+# Pre-req: simulator location set to Hamburg via
+#   xcrun simctl location booted set 53.5511,9.9937
+---
+- launchApp:
+    appId: de.endios.one
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd:
+    timeout: 6000
+- swipe:
+    start: 50%, 25%
+    end: 50%, 75%
+- waitForAnimationToEnd:
+    timeout: 4000
+
+# Enter QA Feed → Map View
+- tapOn:
+    text: "Mehr"
+    index: 0
+- waitForAnimationToEnd:
+    timeout: 8000
+- extendedWaitUntil:
+    visible: "Filterfunktion"
+    timeout: 20000
+- waitForAnimationToEnd:
+    timeout: 1500
+- tapOn:
+    point: 92%, 7%
+- waitForAnimationToEnd:
+    timeout: 4000
+
+# Open popup (Map highlighted by default)
+- tapOn:
+    point: 92%, 94%
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: /tmp/verify-widget/run-widget-of-popup-sat/01_popup_open_MAP_default
+
+# === Tap Satellite — FIRST popup interaction (reliable) ===
+# Coord (32%, 94%) hits the Satellite segment based on UISegmentedControl's
+# auto-sized layout (Map=3 chars, Satellite=9, Hybrid=6).
+- tapOn:
+    point: 32%, 94%
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: /tmp/verify-widget/run-widget-of-popup-sat/02_satellite_view_no_popup
+
+# Re-open popup → Satellite should be highlighted (proves selection)
+- tapOn:
+    point: 92%, 94%
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: /tmp/verify-widget/run-widget-of-popup-sat/03_popup_SATELLITE_highlighted

@@ -1,0 +1,87 @@
+appId: de.endios.one
+name: "[OF] 110169 (Map toggle) + 110175 (Verify tile) — final precise coords"
+tags:
+  - offers
+# 110175 — V (Verify) tile Mehr at coord (22%, 66%) — confirmed working.
+#   V Feed shows "Verify" title + "Currently there are no offers available."
+#
+# 110169 — Map toggle is the green "Map" text in the nav bar trailing area.
+#   "Map" is NOT queryable by text accessibility (likely a SwiftUI Image
+#   button with green color). Use coord. Earlier y=5-6% missed (status bar
+#   territory). Try y=7-8% which is solidly inside the nav bar.
+---
+- launchApp:
+    appId: de.endios.one
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd:
+    timeout: 6000
+- swipe:
+    start: 50%, 25%
+    end: 50%, 75%
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/RT_00_dashboard
+
+# === 110175 — V (Verify) tile Mehr → V Feed (empty state) ===
+- tapOn:
+    point: 22%, 66%
+- waitForAnimationToEnd:
+    timeout: 5000
+- extendedWaitUntil:
+    visible: "Verify"
+    timeout: 8000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110175_v_feed_PASS
+- tapOn: "Back"
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110175_back_to_dashboard
+
+# === 110169 — Map View toggle on QA Feed ===
+- tapOn:
+    text: "Mehr"
+    index: 0
+- waitForAnimationToEnd:
+    timeout: 5000
+- extendedWaitUntil:
+    visible: "Filterfunktion"
+    timeout: 10000
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110169_feed_before_map
+
+# Try (92%, 7%) — solidly inside nav bar
+- tapOn:
+    point: 92%, 7%
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110169_attempt1_92_7
+# If still on Feed (Filterfunktion visible), try (92%, 8%)
+- runFlow:
+    when:
+      visible: "Filterfunktion"
+    commands:
+      - tapOn:
+          point: 92%, 8%
+      - waitForAnimationToEnd:
+          timeout: 4000
+      - takeScreenshot: /tmp/verify-widget/run-widget-of/110169_attempt2_92_8
+- runFlow:
+    when:
+      visible: "Filterfunktion"
+    commands:
+      - tapOn:
+          point: 90%, 6%
+      - waitForAnimationToEnd:
+          timeout: 4000
+      - takeScreenshot: /tmp/verify-widget/run-widget-of/110169_attempt3_90_6
+- runFlow:
+    when:
+      visible: "Filterfunktion"
+    commands:
+      - tapOn:
+          point: 88%, 7%
+      - waitForAnimationToEnd:
+          timeout: 4000
+      - takeScreenshot: /tmp/verify-widget/run-widget-of/110169_attempt4_88_7
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110169_final_state

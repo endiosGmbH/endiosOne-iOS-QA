@@ -1,0 +1,46 @@
+appId: de.endios.one
+name: "[OF] 110306 — Social Media row tap launches external app"
+tags:
+  - offers
+---
+- launchApp:
+    appId: de.endios.one
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd:
+    timeout: 6000
+- swipe:
+    start: 50%, 25%
+    end: 50%, 75%
+- waitForAnimationToEnd:
+    timeout: 4000
+- tapOn: "Offer test"
+- extendedWaitUntil:
+    visible: "Angebote"
+    timeout: 10000
+- tapOn:
+    point: 50%, 35%
+- waitForAnimationToEnd:
+    timeout: 4000
+# Scroll to Social Media (further down than Kontakt)
+- swipe:
+    start: 50%, 80%
+    end: 50%, 20%
+- swipe:
+    start: 50%, 80%
+    end: 50%, 20%
+- swipe:
+    start: 50%, 80%
+    end: 50%, 20%
+- waitForAnimationToEnd:
+    timeout: 1500
+- assertVisible: "Social Media"
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110306_01_social_media_section
+- runFlow:
+    when:
+      visible: "Facebook"
+    commands:
+      - tapOn: "Facebook"
+      - waitForAnimationToEnd:
+          timeout: 4000
+      - takeScreenshot: /tmp/verify-widget/run-widget-of/110306_02_after_facebook_tap

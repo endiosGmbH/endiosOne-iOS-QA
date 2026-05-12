@@ -1,0 +1,14 @@
+appId: de.endios.one
+name: "[OF] 110165 — Tile tap opens Feed View"
+---
+- launchApp:
+    clearState: false
+- takeScreenshot: /tmp/verify-widget/OF/case-110165/step_1_dashboard
+- tapOn: "Offer test"
+- waitForAnimationToEnd:
+    timeout: 8000
+- extendedWaitUntil:
+    visible: "Angebote"
+    timeout: 10000
+    optional: true
+- takeScreenshot: /tmp/verify-widget/OF/case-110165/step_2_feed_view

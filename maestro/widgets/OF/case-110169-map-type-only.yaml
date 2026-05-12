@@ -1,0 +1,174 @@
+appId: de.endios.one
+name: "[OF] C110169 — All 3 map view types + per-view current-location"
+tags:
+  - offers
+# C110169 steps 4-7 (per TestRail revision 1777547771).
+#
+# Goals:
+#   - Cycle through ALL THREE view types (Map / Satellite / Hybrid).
+#   - For EACH view type, capture an explicit "popup-open with [type]
+#     highlighted" screenshot — this is the visual proof that the click
+#     registered, since the popup auto-closes on selection.
+#   - For each view type, also tap current-location and verify the active
+#     view persists.
+#   - Verify (92%, 94%) is a TOGGLE (same coord opens AND closes the popup).
+#
+# Pre-req: simulator location set to Hamburg via
+#   xcrun simctl location booted set 53.5511,9.9937
+# (run BEFORE this flow). Without it, current-location centres on the sim
+# default (open ocean) — visually inconclusive regardless of view type.
+#
+# Verified popup layout:
+#   Horizontal bottom segmented bar with three options + X close:
+#     [ Map | Satellite | Hybrid ] (X)
+#   Map type icon (popup closed) (92%, 94%) — green circle, map-stack
+#   Current location icon         (92%, 87%) — white circle
+#   Inside popup: text matchers — coord taps at y=95% miss the row.
+---
+- launchApp:
+    appId: de.endios.one
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd:
+    timeout: 6000
+- swipe:
+    start: 50%, 25%
+    end: 50%, 75%
+- waitForAnimationToEnd:
+    timeout: 4000
+
+# Enter QA Feed → Map View
+- tapOn:
+    text: "Mehr"
+    index: 0
+- waitForAnimationToEnd:
+    timeout: 8000
+- extendedWaitUntil:
+    visible: "Filterfunktion"
+    timeout: 20000
+- waitForAnimationToEnd:
+    timeout: 1500
+- tapOn:
+    point: 92%, 7%
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: /tmp/verify-widget/run-widget-of-maptype/00_map_default
+
+# Grant location permission up-front so per-view current-location taps work
+# without the OS prompt interrupting the cycle.
+- tapOn:
+    point: 92%, 87%
+- waitForAnimationToEnd:
+    timeout: 3000
+- runFlow:
+    when:
+      visible: "Allow While Using App"
+    commands:
+      - tapOn: "Allow While Using App"
+      - waitForAnimationToEnd:
+          timeout: 1500
+- runFlow:
+    when:
+      visible: "Allow Once"
+    commands:
+      - tapOn: "Allow Once"
+      - waitForAnimationToEnd:
+          timeout: 1500
+- runFlow:
+    when:
+      visible: "Beim Verwenden der App erlauben"
+    commands:
+      - tapOn: "Beim Verwenden der App erlauben"
+      - waitForAnimationToEnd:
+          timeout: 1500
+- runFlow:
+    when:
+      visible: "Einmal erlauben"
+    commands:
+      - tapOn: "Einmal erlauben"
+      - waitForAnimationToEnd:
+          timeout: 1500
+- takeScreenshot: /tmp/verify-widget/run-widget-of-maptype/01_current_location_on_map
+
+# === Cycle 1 — Map (default) ===
+# Open popup; the active "Map" button should be highlighted.
+- tapOn:
+    point: 92%, 94%
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: /tmp/verify-widget/run-widget-of-maptype/02_popup_MAP_highlighted
+# Close popup (toggle).
+- tapOn:
+    point: 92%, 94%
+- waitForAnimationToEnd:
+    timeout: 2000
+
+# === Cycle 2 — Satellite ===
+# Open popup, click Satellite (popup auto-closes on selection).
+- tapOn:
+    point: 92%, 94%
+- waitForAnimationToEnd:
+    timeout: 2000
+- tapOn:
+    point: 42%, 94%
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: /tmp/verify-widget/run-widget-of-maptype/03_satellite_view_no_popup
+# Re-open popup → SATELLITE should now be highlighted (proof the click registered).
+- tapOn:
+    point: 92%, 94%
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: /tmp/verify-widget/run-widget-of-maptype/04_popup_SATELLITE_highlighted
+# Close popup (toggle).
+- tapOn:
+    point: 92%, 94%
+- waitForAnimationToEnd:
+    timeout: 2000
+# Per-view current-location: Satellite should persist.
+- tapOn:
+    point: 92%, 87%
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: /tmp/verify-widget/run-widget-of-maptype/05_current_location_on_SATELLITE
+
+# === Cycle 3 — Hybrid ===
+# Open popup, click Hybrid (popup auto-closes on selection).
+- tapOn:
+    point: 92%, 94%
+- waitForAnimationToEnd:
+    timeout: 2000
+- tapOn:
+    point: 67%, 94%
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: /tmp/verify-widget/run-widget-of-maptype/06_hybrid_view_no_popup
+# Re-open popup → HYBRID should now be highlighted (proof the click registered).
+- tapOn:
+    point: 92%, 94%
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: /tmp/verify-widget/run-widget-of-maptype/07_popup_HYBRID_highlighted
+# Close popup via toggle (this is the X-close test).
+- tapOn:
+    point: 92%, 94%
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: /tmp/verify-widget/run-widget-of-maptype/08_after_x_close_view_unchanged
+# Per-view current-location: Hybrid should persist.
+- tapOn:
+    point: 92%, 87%
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: /tmp/verify-widget/run-widget-of-maptype/09_current_location_on_HYBRID
+
+# === Restore Map (Standard) for next consolidated runs ===
+- tapOn:
+    point: 92%, 94%
+- waitForAnimationToEnd:
+    timeout: 3000
+- tapOn:
+    point: 17%, 94%
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: /tmp/verify-widget/run-widget-of-maptype/10_back_to_map_default

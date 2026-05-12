@@ -1,0 +1,22 @@
+appId: de.endios.one
+name: "[OF] 110171 — Social media actions render and open"
+---
+- launchApp:
+    clearState: false
+- tapOn: "Offer test"
+- extendedWaitUntil:
+    visible: "Angebote"
+    timeout: 10000
+- tapOn:
+    point: "50%,50%"
+- waitForAnimationToEnd:
+    timeout: 6000
+- scrollUntilVisible:
+    element: "Social Media"
+    direction: DOWN
+    timeout: 8000
+- takeScreenshot: /tmp/verify-widget/OF/case-110171/step_1_social_section
+- tapOn: "Facebook"
+- waitForAnimationToEnd:
+    timeout: 6000
+- takeScreenshot: /tmp/verify-widget/OF/case-110171/step_2_after_social_tap

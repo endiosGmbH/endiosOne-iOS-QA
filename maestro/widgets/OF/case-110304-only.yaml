@@ -1,0 +1,46 @@
+appId: de.endios.one
+name: "[OF] 110304 — Contact section taps (WEB / Phone / Mail) launch external apps"
+tags:
+  - offers
+# Each tap launches an external app. We capture before/after and accept that
+# Maestro context is lost; the screenshot proves the launch happened.
+# Telephone label is rendered as an accessibility-grouped row, not a discrete
+# text node — coord-tap the row instead of tapOn text.
+---
+- launchApp:
+    appId: de.endios.one
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd:
+    timeout: 6000
+- swipe:
+    start: 50%, 25%
+    end: 50%, 75%
+- waitForAnimationToEnd:
+    timeout: 4000
+- tapOn: "Offer test"
+- extendedWaitUntil:
+    visible: "Angebote"
+    timeout: 10000
+- tapOn:
+    point: 50%, 35%
+- waitForAnimationToEnd:
+    timeout: 4000
+# Scroll to Kontakt
+- swipe:
+    start: 50%, 80%
+    end: 50%, 20%
+- swipe:
+    start: 50%, 80%
+    end: 50%, 20%
+- waitForAnimationToEnd:
+    timeout: 1500
+- assertVisible: "Kontakt"
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110304_01_kontakt_section
+# Coord-tap Telephone row. Hierarchy reports bounds [15,385][387,445]
+# on a 402x873 viewport → centre x=50%, y=48%.
+- tapOn:
+    point: 50%, 48%
+- waitForAnimationToEnd:
+    timeout: 5000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110304_02_after_phone_tap

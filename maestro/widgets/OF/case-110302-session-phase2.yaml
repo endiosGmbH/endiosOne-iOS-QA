@@ -1,0 +1,31 @@
+appId: de.endios.one
+name: "[OF] 110302 session phase 2 — Offline: refresh home, open Feed"
+tags:
+  - offers
+# State preserved from phase 1. We do NOT relaunch the app — it stays foreground.
+# Pull-to-refresh and observe what the offline tile shows; tap the tile.
+---
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110302s_04_home_offline_before_ptr
+- swipe:
+    start: 50%, 25%
+    end: 50%, 75%
+- waitForAnimationToEnd:
+    timeout: 6000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110302s_05_home_offline_after_ptr
+# Other widgets must remain interactive — assert at least one widget tile is still visible
+- runFlow:
+    when:
+      visible: "Offer test"
+    commands:
+      - tapOn: "Offer test"
+      - waitForAnimationToEnd:
+          timeout: 6000
+      - takeScreenshot: /tmp/verify-widget/run-widget-of/110302s_06_feed_offline
+      - runFlow:
+          when:
+            visible: "Back"
+          commands:
+            - tapOn: "Back"
+            - waitForAnimationToEnd:
+                timeout: 2000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110302s_07_home_offline_after_feed

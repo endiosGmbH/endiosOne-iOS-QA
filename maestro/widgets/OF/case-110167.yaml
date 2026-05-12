@@ -1,0 +1,10 @@
+appId: de.endios.one
+name: "[OF] 110167 — Business rule: future-only, closest-date first"
+---
+- launchApp:
+    clearState: false
+- tapOn: "Offer test"
+- extendedWaitUntil:
+    visible: "Angebote"
+    timeout: 10000
+- takeScreenshot: /tmp/verify-widget/OF/case-110167/step_1_feed

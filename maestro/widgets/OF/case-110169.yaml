@@ -1,0 +1,22 @@
+appId: de.endios.one
+name: "[OF] 110169 — Map view toggle and pin → detail"
+---
+- launchApp:
+    clearState: false
+- tapOn: "Offer test"
+- extendedWaitUntil:
+    visible: "Angebote"
+    timeout: 10000
+- takeScreenshot: /tmp/verify-widget/OF/case-110169/step_1_feed
+- tapOn: "Kartenansicht"
+- waitForAnimationToEnd:
+    timeout: 5000
+- takeScreenshot: /tmp/verify-widget/OF/case-110169/step_2_map_view
+- tapOn: "Offers"
+- waitForAnimationToEnd:
+    timeout: 5000
+- takeScreenshot: /tmp/verify-widget/OF/case-110169/step_3_after_pin_tap
+- tapOn: "Overview"
+- waitForAnimationToEnd:
+    timeout: 5000
+- takeScreenshot: /tmp/verify-widget/OF/case-110169/step_4_back_to_feed

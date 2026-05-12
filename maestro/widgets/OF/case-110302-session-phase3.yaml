@@ -1,0 +1,23 @@
+appId: de.endios.one
+name: "[OF] 110302 session phase 3 — Recovery: dashboard recovers, Feed loads"
+tags:
+  - offers
+# App still in foreground from phase 2. Wi-Fi just came back on.
+# Pull-to-refresh and re-enter the Feed.
+---
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110302s_08_home_recovery_before_ptr
+- swipe:
+    start: 50%, 25%
+    end: 50%, 75%
+- waitForAnimationToEnd:
+    timeout: 6000
+- takeScreenshot: /tmp/verify-widget/run-widget-of/110302s_09_home_recovered
+- runFlow:
+    when:
+      visible: "Offer test"
+    commands:
+      - tapOn: "Offer test"
+      - extendedWaitUntil:
+          visible: "Angebote"
+          timeout: 10000
+      - takeScreenshot: /tmp/verify-widget/run-widget-of/110302s_10_feed_recovered
