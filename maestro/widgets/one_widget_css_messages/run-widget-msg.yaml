@@ -1,0 +1,496 @@
+appId: de.endios.one
+---
+# CSS Message [MSG] — Canonical /run-widget flow (v13.1 — Datei4.zip recovery + CSS tap).
+# TestRail section 12953. Covers 26 cases. Sim: iPhone 16 Pro / iOS 18.4.
+#
+# v10 changes (after hierarchy probe confirmed selectors):
+#   1. Datei1.docx (C116431) now in CASE 5 detail block — Safari handoff is
+#      recovered via `tapOn: "Return to endios one Debug"` (confirmed in
+#      Safari a11y tree). No more deferred-to-end segment.
+#   2. Datei4.zip (110563) likewise tapped in CASE 5 detail with Download +
+#      Return-to-app — single-pass flow.
+#   3. C116430 PDF share-print: share sheet opens (step 7 captured); Print
+#      and Cancel taps inside UIActivityViewController stay manual (confirmed
+#      opaque to XCUITest via hierarchy probe — 0 share-sheet items in 1302-
+#      line dump). Share sheet dismissed via outside-tap so flow continues.
+#   4. Removed redundant self-heal blocks and tightened waits — flow runs ~30s
+#      faster than v9.1 (target ~2m45s).
+#
+# Tile layout (NEVER tap when "Invoice QA" is visible):
+#   Invoice QA   x=4-48%  y=8-22%
+#   Mitteilungen bell  index:0 / siren index:1 — row y=39-54%
+
+- launchApp:
+    clearState: true
+    clearKeychain: true
+- runFlow:
+    when:
+      visible: "Don't Allow"
+    commands:
+      - tapOn: "Don't Allow"
+- runFlow:
+    when:
+      visible: "Allow"
+    commands:
+      - tapOn: "Allow"
+- runFlow:
+    when:
+      visible: "Ask App Not to Track"
+    commands:
+      - tapOn: "Ask App Not to Track"
+- waitForAnimationToEnd:
+    timeout: 2500
+
+- tapOn:
+    text: "CSS"
+- waitForAnimationToEnd:
+    timeout: 1500
+
+# Baseline pull-to-refresh — the ONLY sanctioned refresh
+- swipe:
+    start: "50%, 25%"
+    end: "50%, 75%"
+- waitForAnimationToEnd:
+    timeout: 2500
+
+# === 110543 + 110544 — CSS dashboard tiles
+- takeScreenshot: 110543-110544-css-tab-tiles
+
+# === 110546 + 110565 — Open Mitteilungen siren + spinner
+- tapOn:
+    text: "Mitteilungen"
+    index: 1
+- takeScreenshot: 110565-initial-spinner-mid-tap
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: 110565-initial-spinner-settled
+
+# === 110545+110547+110548+110549+110550+110551 — list overview
+- takeScreenshot: 110545-110547-110548-110549-110550-110551-list-top
+
+# === 110552 — CASE 8 (Neueste, y=30) → PDF viewer
+- tapOn:
+    point: "50%, 30%"
+- waitForAnimationToEnd:
+    timeout: 2500
+- takeScreenshot: 110552-case8-latest-pdf-result
+# Close PDF — guarded coord tap (5%, 8% hits X-icon area; safe because not on dashboard)
+- runFlow:
+    when:
+      notVisible: "Invoice QA"
+    commands:
+      - tapOn:
+          point: "5%, 8%"
+      - waitForAnimationToEnd:
+          timeout: 800
+# Self-heal if drifted
+- runFlow:
+    when:
+      visible: "Invoice QA"
+    commands:
+      - tapOn:
+          text: "Mitteilungen"
+          index: 1
+      - waitForAnimationToEnd:
+          timeout: 2500
+
+# Position mid-scroll
+- swipe:
+    start: "50%, 70%"
+    end: "50%, 30%"
+- waitForAnimationToEnd:
+    timeout: 800
+- swipe:
+    start: "50%, 70%"
+    end: "50%, 30%"
+- waitForAnimationToEnd:
+    timeout: 800
+- takeScreenshot: 110549-110550-list-mid
+
+# === 110554 + 110567 — CASE 2 (y=30 mid) — preview Base64 + Anhänge BUG
+- tapOn:
+    point: "50%, 30%"
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: 110554-case2-just-text-preview-base64
+- takeScreenshot: 110567-anhaenge-on-no-attachments
+- runFlow:
+    when:
+      visible: "Zurück"
+    commands:
+      - tapOn:
+          text: "Zurück"
+      - waitForAnimationToEnd:
+          timeout: 800
+- runFlow:
+    when:
+      visible: "Invoice QA"
+    commands:
+      - tapOn:
+          text: "Mitteilungen"
+          index: 1
+      - waitForAnimationToEnd:
+          timeout: 2500
+      - swipe:
+          start: "50%, 70%"
+          end: "50%, 30%"
+      - waitForAnimationToEnd:
+          timeout: 800
+      - swipe:
+          start: "50%, 70%"
+          end: "50%, 30%"
+      - waitForAnimationToEnd:
+          timeout: 800
+
+# === 110557 + C116430 — CASE 1 SINGLE_FILE (y=45) → PDF viewer + share-sheet open
+- tapOn:
+    point: "50%, 45%"
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: 110557-110559-pdf-viewer-via-case1
+
+# C116430 share button tap — PDF viewer share icon by accessibility text
+# (hierarchy probe: accessibilityText="share" lowercase, bounds [350,56][394,100]
+# in iPhone 16 Pro points → center 92.5%, 8.9%). Earlier 92%, 5% coord hit
+# the status bar, not the button.
+# Note: iOS share sheet contents (Print, Cancel) are NOT in Maestro's a11y tree
+# (confirmed via probe — 1302-line dump returned 0 share-sheet items).
+# Step 7 captures the share sheet open as proof the button works; steps 8-9
+# (Print → Cancel preview) require MANUAL verification.
+- runFlow:
+    when:
+      notVisible: "Invoice QA"
+    commands:
+      - tapOn: "share"
+      # waitForAnimationToEnd returns at ~400ms — share sheet slide-in is
+      # still in progress. Force a fixed 2.5s wait via swipe-as-pause.
+      - swipe:
+          start: "50%, 95%"
+          end: "50%, 95%"
+          duration: 2500
+      - takeScreenshot: C116430-step7-share-sheet
+      # v12: tap Print row at y≈85% (measured from user screenshot — share sheet
+      # actions are deeper in the screen than v11 estimated). Coord tap because
+      # share sheet contents are opaque to Maestro a11y.
+      - tapOn:
+          point: "50%, 85%"
+      # Print Options screen takes ~1.5s to animate up.
+      - swipe:
+          start: "50%, 95%"
+          end: "50%, 95%"
+          duration: 2000
+      - takeScreenshot: C116430-step8-print-preview
+      # Cancel button on Print Options screen — IS in Maestro a11y tree
+      # (confirmed working with `tapOn: "Cancel"` in v12 run).
+      # Note: do NOT chain a coord-fallback runFlow after this — the Cancel
+      # tap dismisses the modal, then "Cancel" becomes notVisible, which
+      # would fire a 2nd tap at 10%,11% (X-close area on PDF) and overshoot
+      # to the list instead of staying on the PDF viewer.
+      - tapOn:
+          text: "Cancel"
+      - waitForAnimationToEnd:
+          timeout: 1500
+      - takeScreenshot: C116430-step9-cancel-returned
+
+# Close PDF
+- runFlow:
+    when:
+      notVisible: "Invoice QA"
+    commands:
+      - tapOn:
+          point: "5%, 8%"
+      - waitForAnimationToEnd:
+          timeout: 800
+- takeScreenshot: C116430-step10-back-on-list
+- runFlow:
+    when:
+      visible: "Invoice QA"
+    commands:
+      - tapOn:
+          text: "Mitteilungen"
+          index: 1
+      - waitForAnimationToEnd:
+          timeout: 2500
+      - swipe:
+          start: "50%, 70%"
+          end: "50%, 30%"
+      - waitForAnimationToEnd:
+          timeout: 800
+      - swipe:
+          start: "50%, 70%"
+          end: "50%, 30%"
+      - waitForAnimationToEnd:
+          timeout: 800
+
+# === 110555 + 110559 — CASE 3 (y=60) → detail + Datei1.pdf tap
+- tapOn:
+    point: "50%, 60%"
+- waitForAnimationToEnd:
+    timeout: 2500
+- takeScreenshot: 110555-case3-text-singlefile-preview-url
+- runFlow:
+    when:
+      visible: "Datei1.pdf"
+    commands:
+      - tapOn:
+          text: "Datei1.pdf"
+      - waitForAnimationToEnd:
+          timeout: 2500
+- takeScreenshot: 110559-case3-pdf-row-tap-result
+# Close PDF + detail
+- runFlow:
+    when:
+      notVisible: "Invoice QA"
+    commands:
+      - tapOn:
+          point: "5%, 8%"
+      - waitForAnimationToEnd:
+          timeout: 800
+- runFlow:
+    when:
+      visible: "Zurück"
+    commands:
+      - tapOn:
+          text: "Zurück"
+      - waitForAnimationToEnd:
+          timeout: 800
+- runFlow:
+    when:
+      visible: "Invoice QA"
+    commands:
+      - tapOn:
+          text: "Mitteilungen"
+          index: 1
+      - waitForAnimationToEnd:
+          timeout: 2500
+      - swipe:
+          start: "50%, 70%"
+          end: "50%, 30%"
+      - waitForAnimationToEnd:
+          timeout: 800
+      - swipe:
+          start: "50%, 70%"
+          end: "50%, 30%"
+      - waitForAnimationToEnd:
+          timeout: 800
+
+# === 110553 — CASE 4 (y=75) → Just Text detail
+- tapOn:
+    point: "50%, 75%"
+- waitForAnimationToEnd:
+    timeout: 2500
+- takeScreenshot: 110553-case4-just-text-detail
+- runFlow:
+    when:
+      visible: "Zurück"
+    commands:
+      - tapOn:
+          text: "Zurück"
+      - waitForAnimationToEnd:
+          timeout: 800
+- runFlow:
+    when:
+      visible: "Invoice QA"
+    commands:
+      - tapOn:
+          text: "Mitteilungen"
+          index: 1
+      - waitForAnimationToEnd:
+          timeout: 2500
+      - swipe:
+          start: "50%, 70%"
+          end: "50%, 30%"
+      - waitForAnimationToEnd:
+          timeout: 800
+      - swipe:
+          start: "50%, 70%"
+          end: "50%, 30%"
+      - waitForAnimationToEnd:
+          timeout: 800
+
+# === 110556 + 110560 + 110561 + 110562 + 110563 + C116431 — CASE 5 detail
+- tapOn:
+    point: "50%, 85%"
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: 110556-case5-multiple-files-detail
+
+# === 110560 + C116431 — Datei1.docx → docx viewer → Share → Safari → Download → Return
+- runFlow:
+    when:
+      visible: "Datei1.docx"
+    commands:
+      - tapOn:
+          text: "Datei1.docx"
+      # Long swipe-as-pause to let WKWebView render docx body (~20s)
+      - swipe:
+          start: "50%, 95%"
+          end: "50%, 95%"
+          duration: 12000
+      - swipe:
+          start: "50%, 95%"
+          end: "50%, 95%"
+          duration: 8000
+      - takeScreenshot: 110560-datei1-docx-viewer
+      # C116431 share-print — docx share button at y≈9% per hierarchy probe
+      - tapOn:
+          point: "92%, 9%"
+      - waitForAnimationToEnd:
+          timeout: 3500
+      - takeScreenshot: C116431-step7-safari-download-dialog
+      # Tap Download in Safari dialog (a11y-reachable)
+      - runFlow:
+          when:
+            visible: "Download"
+          commands:
+            - tapOn:
+                text: "Download"
+            - waitForAnimationToEnd:
+                timeout: 2000
+            - takeScreenshot: C116431-step8-download-tapped
+      # Return to app via the "Return to endios one Debug" indicator
+      - runFlow:
+          when:
+            visible: "Return to endios one Debug"
+          commands:
+            - tapOn:
+                text: "Return to endios one Debug"
+            - waitForAnimationToEnd:
+                timeout: 2500
+            # Return-to-app puts us back on the docx viewer (still on nav
+            # stack). Close it via Zurück to return to CASE 5 detail.
+            - runFlow:
+                when:
+                  visible: "Zurück"
+                commands:
+                  - tapOn:
+                      text: "Zurück"
+                  - waitForAnimationToEnd:
+                      timeout: 1200
+
+# === 110561 — Datei2.jpg
+- runFlow:
+    when:
+      visible: "Datei2.jpg"
+    commands:
+      - tapOn:
+          text: "Datei2.jpg"
+      - waitForAnimationToEnd:
+          timeout: 2500
+      - takeScreenshot: 110561-datei2-jpg-viewer
+      - runFlow:
+          when:
+            visible: "Done"
+          commands:
+            - tapOn:
+                text: "Done"
+            - waitForAnimationToEnd:
+                timeout: 800
+      - runFlow:
+          when:
+            notVisible: "Invoice QA"
+          commands:
+            - tapOn:
+                point: "5%, 8%"
+            - waitForAnimationToEnd:
+                timeout: 800
+
+# === 110562 — Datei3.mp3
+- runFlow:
+    when:
+      visible: "Datei3.mp3"
+    commands:
+      - tapOn:
+          text: "Datei3.mp3"
+      - waitForAnimationToEnd:
+          timeout: 2500
+      - takeScreenshot: 110562-datei3-mp3-audio-player
+      - runFlow:
+          when:
+            visible: "Zurück"
+          commands:
+            - tapOn:
+                text: "Zurück"
+            - waitForAnimationToEnd:
+                timeout: 800
+
+# === 110563 — Datei4.zip → Safari → Download → Return-to-app
+# Note: Safari is already in background from the earlier .docx handoff, so the
+# "Return to endios one Debug" indicator is NOT shown on this second handoff.
+# Use `launchApp clearState: false` to foreground the app instead.
+- runFlow:
+    when:
+      visible: "Datei4.zip"
+    commands:
+      - tapOn:
+          text: "Datei4.zip"
+      - waitForAnimationToEnd:
+          timeout: 3000
+      - takeScreenshot: 110563-datei4-zip-handler
+      - runFlow:
+          when:
+            visible: "Download"
+          commands:
+            - tapOn:
+                text: "Download"
+            - waitForAnimationToEnd:
+                timeout: 2000
+            - takeScreenshot: 110563-datei4-zip-download-tapped
+      # Recover from Safari — indicator not present, use launchApp to foreground.
+      # The app resumes on the Product tab (last-known state), so tap CSS to
+      # ensure the bell tile case (110564) sees the CSS dashboard.
+      - launchApp:
+          clearState: false
+          clearKeychain: false
+      - waitForAnimationToEnd:
+          timeout: 2500
+      - runFlow:
+          when:
+            visible: "CSS"
+          commands:
+            - tapOn:
+                text: "CSS"
+            - waitForAnimationToEnd:
+                timeout: 1500
+
+# Close CASE 5 detail → list
+- runFlow:
+    when:
+      visible: "Zurück"
+    commands:
+      - tapOn:
+          text: "Zurück"
+      - waitForAnimationToEnd:
+          timeout: 1000
+
+# === 110558 — Back to CSS tab via list "Back"
+- runFlow:
+    when:
+      visible: "Back"
+      notVisible: "Invoice QA"
+    commands:
+      - tapOn:
+          text: "Back"
+      - waitForAnimationToEnd:
+          timeout: 1000
+- takeScreenshot: 110558-back-on-css-tab
+
+# === 110564 — Bell tile empty state
+- runFlow:
+    when:
+      visible: "Invoice QA"
+    commands:
+      - tapOn:
+          text: "Mitteilungen"
+          index: 0
+      - waitForAnimationToEnd:
+          timeout: 3000
+      - takeScreenshot: 110564-bell-empty-state-settled
+      - runFlow:
+          when:
+            visible: "Back"
+          commands:
+            - tapOn:
+                text: "Back"
+            - waitForAnimationToEnd:
+                timeout: 1000
