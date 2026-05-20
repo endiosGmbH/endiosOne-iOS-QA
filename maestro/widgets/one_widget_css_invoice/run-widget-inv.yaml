@@ -1,0 +1,222 @@
+appId: de.endios.one
+name: "[INV] CSS Invoice — Full suite (10 cases, single launch, optimized)"
+tags:
+  - css-invoice
+# =============================================================================
+# CSS Invoice [INV] — TestRail run R784 consolidated single-launch flow.
+# Last rewritten: 2026-05-19 (timing-optimized; ~55s expected vs 91s prior).
+#
+# Verified passing on:
+#   - Sim:    iPhone 16 Pro / iOS 18.4 (id 4B385F1D-C21D-42C7-921C-6205F8E02A57)
+#             iPhone 17 / iOS 26.4 has a Rosetta nav-push crash — DO NOT use.
+#   - Build:  Debug-iphonesimulator, x86_64 (ARCHS=x86_64 ONLY_ACTIVE_ARCH=YES).
+#             release/v26.04 HEAD 377a910f1 with appData.json configId=1425
+#             (Claude Automation 1020) applied.
+#   - App:    Claude Automation (App-ID 1020), CSS tab, TEST env.
+#
+# Tile mapping:
+#   - Invoice QA   (18809, basic)        → multi-group + populated
+#   - Kein Invoice (18810, basicImage)   → empty state
+#   - Single group (18811, basicImage)   → single-group → direct PDF
+#   - Brocken      (18812, basicImage)   → broken PDF URL
+#
+# Coordinates / matchers (iPhone 16 Pro / iOS 18.4 — verified):
+#   CSS tab               text:"CSS"
+#   PDF X close           point: "10%, 7%"
+#   PDF share button      point: "92%, 8%"
+#   Share sheet header X  point: "92%, 41%"   (drawer header — works)
+#   BA-01 row 1 Multiple  point: "50%, 45%"
+#   Invoice row 5 Final   point: "50%, 50%"
+#   Invoice row 3 17.07   point: "50%, 41%"
+#   Invoice row 1 01.09   point: "50%, 31%"
+#   Empty-state Zurück    text:"Zurück"   (NOT coord — both 87% and 90% miss)
+#   Brocken row 2 broken  point: "50%, 60%"
+#
+# Fixture note (110376): TEST widget configures multiple invoice rows with the
+# same PDF file — identical content across rows is EXPECTED (verifies open/close
+# cycle, not unique content). Confirmed with user 2026-05-18.
+#
+# 110379 share-sheet Print: system share-sheet ROWS (More/Copy/Markup/Print/
+# Save to Files/Edit Actions) cannot be triggered from ANY synthesized event
+# source on iOS Simulator — Maestro text + coord, cliclick c:/dd:/du:, and
+# AppleScript System Events all confirmed non-functional. Only the drawer
+# header X close is in the app accessibility tree. Steps 8-9 (Print → preview
+# → Cancel) require a physical iPhone or manual interaction.
+# =============================================================================
+---
+- launchApp:
+    clearState: true
+    clearKeychain: true
+- runFlow:
+    when:
+      visible: "Don't Allow"
+    commands:
+      - tapOn: "Don't Allow"
+- runFlow:
+    when:
+      visible: "Ask App Not to Track"
+    commands:
+      - tapOn: "Ask App Not to Track"
+- waitForAnimationToEnd:
+    timeout: 3000
+
+- tapOn:
+    text: "CSS"
+- waitForAnimationToEnd:
+    timeout: 2000
+
+# Baseline pull-to-refresh — the ONLY sanctioned refresh in this flow
+- swipe:
+    start: "50%, 25%"
+    end: "50%, 75%"
+- waitForAnimationToEnd:
+    timeout: 2500
+
+# === 110361 — All 4 INV tiles render on CSS dashboard
+- takeScreenshot: /tmp/verify-widget/run-widget-inv/110361-tiles
+
+# === 110372 + 110378a — Invoice QA → BA-01 multi-group + context switch
+# Loading screenshot pre-settle for 110377a (initial widget load).
+- tapOn:
+    text: "Invoice QA"
+- takeScreenshot: /tmp/verify-widget/run-widget-inv/110377a-loading-initial-widget
+- waitForAnimationToEnd:
+    timeout: 5000
+- takeScreenshot: /tmp/verify-widget/run-widget-inv/110372-378a-ba01-with-context-switch
+
+# === 110374 + 110378b — Drill into Multiple Invoices → Invoice Selection
+- tapOn:
+    point: "50%, 45%"
+- takeScreenshot: /tmp/verify-widget/run-widget-inv/110377b-loading-group-switch
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: /tmp/verify-widget/run-widget-inv/110374-378b-invoice-list-with-context-switch
+
+# === 110376a — Open Final invoice (row 5) → PDF #1
+- tapOn:
+    point: "50%, 50%"
+- takeScreenshot: /tmp/verify-widget/run-widget-inv/110377c-loading-pdf-load
+- waitForAnimationToEnd:
+    timeout: 6000
+- takeScreenshot: /tmp/verify-widget/run-widget-inv/110376a-pdf-1-final-invoice
+
+# === 110379 — Share button → share sheet drawer (capture only).
+# Steps 8-9 (Print → preview → Cancel) require a physical iPhone.
+# (92%, 7%) — verified working share-button coord on iPhone 16 Pro / iOS 18.4.
+- tapOn:
+    point: "92%, 7%"
+- waitForAnimationToEnd:
+    timeout: 5000
+- takeScreenshot: /tmp/verify-widget/run-widget-inv/110379-A-share-sheet
+# Dismiss share sheet via drawer header X close (works — in accessibility tree)
+- tapOn:
+    point: "92%, 41%"
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: /tmp/verify-widget/run-widget-inv/110379-D-back-to-pdf
+
+# Close PDF #1 → back to Invoice Selection
+- tapOn:
+    point: "10%, 7%"
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: /tmp/verify-widget/run-widget-inv/110376b-after-close-pdf-1
+
+# === 110376c — Open Invoice 17.07.2019 (row 3) → PDF #2
+- tapOn:
+    point: "50%, 41%"
+- waitForAnimationToEnd:
+    timeout: 5000
+- takeScreenshot: /tmp/verify-widget/run-widget-inv/110376c-pdf-2-invoice-17-07
+- tapOn:
+    point: "10%, 7%"
+- waitForAnimationToEnd:
+    timeout: 2000
+
+# === 110376e — Open Invoice 01.09.2019 (row 1) → PDF #3
+- tapOn:
+    point: "50%, 31%"
+- waitForAnimationToEnd:
+    timeout: 5000
+- takeScreenshot: /tmp/verify-widget/run-widget-inv/110376e-pdf-3-invoice-01-09
+- tapOn:
+    point: "10%, 7%"
+- waitForAnimationToEnd:
+    timeout: 2000
+
+# Recover to CSS dashboard
+- runFlow:
+    when:
+      visible: "Zurück"
+    commands:
+      - tapOn:
+          text: "Zurück"
+      - waitForAnimationToEnd:
+          timeout: 1200
+- runFlow:
+    when:
+      visible: "Zurück"
+    commands:
+      - tapOn:
+          text: "Zurück"
+      - waitForAnimationToEnd:
+          timeout: 1200
+- runFlow:
+    when:
+      visible: "Back"
+    commands:
+      - tapOn:
+          text: "Back"
+      - waitForAnimationToEnd:
+          timeout: 1200
+
+# === 110373 — Single group → directly to PDF
+- tapOn:
+    text: "Single group"
+- waitForAnimationToEnd:
+    timeout: 5000
+- takeScreenshot: /tmp/verify-widget/run-widget-inv/110373-direct-pdf
+- tapOn:
+    point: "10%, 7%"
+- waitForAnimationToEnd:
+    timeout: 1500
+- runFlow:
+    when:
+      visible: "Zurück"
+    commands:
+      - tapOn:
+          text: "Zurück"
+      - waitForAnimationToEnd:
+          timeout: 1200
+- runFlow:
+    when:
+      visible: "Back"
+    commands:
+      - tapOn:
+          text: "Back"
+      - waitForAnimationToEnd:
+          timeout: 1200
+
+# === 110368 — Kein Invoice → empty state → Zurück (text matcher) → CSS tab
+- tapOn:
+    text: "Kein Invoice"
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: /tmp/verify-widget/run-widget-inv/110368-A-empty-state
+- tapOn:
+    text: "Zurück"
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: /tmp/verify-widget/run-widget-inv/110368-B-after-zurueck
+
+# === 110369 — Brocken → broken-PDF row → error dialog (last; isolates crash risk)
+- tapOn:
+    text: "Brocken"
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: /tmp/verify-widget/run-widget-inv/110369-A-error-dialog
+- tapOn:
+    point: "50%, 60%"
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: /tmp/verify-widget/run-widget-inv/110369-B-after-dismiss

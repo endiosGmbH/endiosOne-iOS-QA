@@ -1,0 +1,56 @@
+appId: de.endios.one
+---
+# Focused fallback for 110369 — Broken PDF dialog via Brocken tile.
+# Brocken opens BA-01 with 2 contract groups: "Example: 0 Invoices" + "Example: 1 Invoice, broken PDF URL".
+# Tap the broken-PDF group (row 2, center ~y=54%) → invoice list (or directly to PDF if single invoice).
+# Expected: PDF download fails → native iOS error dialog appears.
+- launchApp:
+    clearState: true
+    clearKeychain: true
+- runFlow:
+    when:
+      visible: "Don't Allow"
+    commands:
+      - tapOn: "Don't Allow"
+- runFlow:
+    when:
+      visible: "Ask App Not to Track"
+    commands:
+      - tapOn: "Ask App Not to Track"
+- waitForAnimationToEnd:
+    timeout: 4000
+- tapOn:
+    point: "85%, 96%"
+- waitForAnimationToEnd:
+    timeout: 3000
+- swipe:
+    start: "50%, 25%"
+    end: "50%, 75%"
+- waitForAnimationToEnd:
+    timeout: 4000
+- tapOn:
+    text: "Brocken"
+- waitForAnimationToEnd:
+    timeout: 6000
+- takeScreenshot: 110369-A-brocken-ba01
+
+# Tap the broken-PDF contract group (row 2). Earlier 54% landed on row 1 → empty state.
+# Row 2 ("Example: 1 Invoice, broken PDF URL") is lower; try ~60%.
+- tapOn:
+    point: "50%, 60%"
+- waitForAnimationToEnd:
+    timeout: 6000
+- takeScreenshot: 110369-B-after-broken-group-tap
+
+# If we landed on invoice list, tap the only invoice row (~y=33%)
+# If we went directly to PDF, this tap may hit something else.
+- tapOn:
+    point: "50%, 33%"
+- waitForAnimationToEnd:
+    timeout: 6000
+- takeScreenshot: 110369-C-after-invoice-tap
+
+# Capture whatever final state appears (error dialog expected)
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: 110369-D-final-state

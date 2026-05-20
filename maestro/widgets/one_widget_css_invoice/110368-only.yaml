@@ -1,0 +1,33 @@
+appId: de.endios.one
+---
+# Focused fallback for 110368 — Empty state via Kein Invoice tile.
+- launchApp:
+    clearState: true
+    clearKeychain: true
+- runFlow:
+    when:
+      visible: "Don't Allow"
+    commands:
+      - tapOn: "Don't Allow"
+- runFlow:
+    when:
+      visible: "Ask App Not to Track"
+    commands:
+      - tapOn: "Ask App Not to Track"
+- waitForAnimationToEnd:
+    timeout: 4000
+- tapOn:
+    point: "85%, 96%"
+- waitForAnimationToEnd:
+    timeout: 3000
+- swipe:
+    start: "50%, 25%"
+    end: "50%, 75%"
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: 110368-A-tiles
+- tapOn:
+    text: "Kein Invoice"
+- waitForAnimationToEnd:
+    timeout: 6000
+- takeScreenshot: 110368-B-empty-state

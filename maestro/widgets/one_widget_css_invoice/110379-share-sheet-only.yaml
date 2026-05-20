@@ -1,0 +1,45 @@
+appId: de.endios.one
+---
+# Drive the app to PDF #1 → tap share → leave sheet open for cliclick takeover.
+- launchApp:
+    clearState: true
+    clearKeychain: true
+- runFlow:
+    when:
+      visible: "Don't Allow"
+    commands:
+      - tapOn: "Don't Allow"
+- runFlow:
+    when:
+      visible: "Ask App Not to Track"
+    commands:
+      - tapOn: "Ask App Not to Track"
+- waitForAnimationToEnd:
+    timeout: 4000
+- tapOn:
+    text: "CSS"
+- waitForAnimationToEnd:
+    timeout: 3000
+- swipe:
+    start: "50%, 25%"
+    end: "50%, 75%"
+- waitForAnimationToEnd:
+    timeout: 4000
+- tapOn:
+    text: "Invoice QA"
+- waitForAnimationToEnd:
+    timeout: 6000
+- tapOn:
+    point: "50%, 45%"
+- waitForAnimationToEnd:
+    timeout: 6000
+- tapOn:
+    point: "50%, 50%"
+- waitForAnimationToEnd:
+    timeout: 6000
+- takeScreenshot: 110379-pre-share
+- tapOn:
+    point: "92%, 8%"
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: 110379-A-share-sheet
