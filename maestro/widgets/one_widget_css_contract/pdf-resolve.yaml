@@ -1,0 +1,81 @@
+appId: de.endios.one
+---
+# =============================================================================
+# CSS Contract [CT] — focused PDF-chain resolution flow
+# Clears the 5 Unclear cases from the consolidated run:
+#   116540 DocumentListView (via PDF tile 18866)   116541 PDF viewer from DocList
+#   116542 back to DocList                          116533 PDF viewer (overview route)
+#   116534 share sheet
+# Tile bounds verified: canonical (17%,60%), PDF tile (17%,75%).
+# DocList PDF row center (50%,28%); Overview Dokumente row (56%,83%) after 2 scrolls.
+# =============================================================================
+- launchApp:
+    appId: "de.endios.one"
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd: { timeout: 4000 }
+- runFlow:
+    when: { visible: "Überspringen" }
+    commands:
+      - tapOn: "Überspringen"
+      - waitForAnimationToEnd: { timeout: 1500 }
+- tapOn: { text: "CSS" }
+- waitForAnimationToEnd: { timeout: 4000 }
+- swipe: { start: "50%, 25%", end: "50%, 75%" }
+- waitForAnimationToEnd: { timeout: 3000 }
+
+# ---- Route B: PDF tile (18866) -> DocumentListView ----
+- tapOn: { point: "17%, 75%" }
+- waitForAnimationToEnd: { timeout: 5000 }
+- runFlow:
+    when: { visible: "WEITER" }
+    commands:
+      - tapOn: "WEITER"
+      - waitForAnimationToEnd: { timeout: 5000 }
+- takeScreenshot: /tmp/verify-widget/run-widget-ct/116540-doclist-resolved
+# tap the PDF row by coord (text-tap won't fire didSelectRow)
+- tapOn: { point: "50%, 28%" }
+- waitForAnimationToEnd: { timeout: 8000 }
+- takeScreenshot: /tmp/verify-widget/run-widget-ct/116541-pdfviewer-resolved
+# close PDF viewer back to DocList
+- runFlow:
+    when: { visible: "Schließen" }
+    commands:
+      - tapOn: "Schließen"
+      - waitForAnimationToEnd: { timeout: 3000 }
+- takeScreenshot: /tmp/verify-widget/run-widget-ct/116542-back-doclist-resolved
+
+# ---- Route A: canonical Verträge -> Overview -> Dokumente row PDF ----
+- launchApp:
+    appId: "de.endios.one"
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd: { timeout: 4000 }
+- runFlow:
+    when: { visible: "Überspringen" }
+    commands:
+      - tapOn: "Überspringen"
+      - waitForAnimationToEnd: { timeout: 1500 }
+- tapOn: { text: "CSS" }
+- waitForAnimationToEnd: { timeout: 4000 }
+- swipe: { start: "50%, 25%", end: "50%, 75%" }
+- waitForAnimationToEnd: { timeout: 3000 }
+- tapOn: { point: "17%, 60%" }
+- waitForAnimationToEnd: { timeout: 5000 }
+- runFlow:
+    when: { visible: "WEITER" }
+    commands:
+      - tapOn: "WEITER"
+      - waitForAnimationToEnd: { timeout: 5000 }
+- tapOn: { text: "Test Regenwasser" }
+- waitForAnimationToEnd: { timeout: 5000 }
+- scroll
+- scroll
+- waitForAnimationToEnd: { timeout: 2000 }
+- tapOn: { point: "56%, 83%" }
+- waitForAnimationToEnd: { timeout: 8000 }
+- takeScreenshot: /tmp/verify-widget/run-widget-ct/116533-pdfviewer-resolved
+# share button top-right of PDF viewer
+- tapOn: { point: "92%, 9%" }
+- waitForAnimationToEnd: { timeout: 5000 }
+- takeScreenshot: /tmp/verify-widget/run-widget-ct/116534-sharesheet-resolved

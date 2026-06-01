@@ -1,0 +1,154 @@
+appId: de.endios.one
+---
+# =============================================================================
+# CSS Contract [CT] — focused flow for 116529-116532 change-payment chain
+#
+# Sanctioned secondary flow (main flow blocked by crash on Abschlag row tap).
+# Strategy: fresh app launch each attempt; if the modal appears, capture it
+# and exercise OK/Cancel. If app crashes (home screen shown), document and
+# proceed to next case via relaunch.
+# =============================================================================
+
+# ---------- 116529 + 116530: tap Abschlag, screenshot modal, tap OK -------
+- launchApp:
+    appId: "de.endios.one"
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd:
+    timeout: 4000
+- runFlow:
+    when:
+      visible: "Skip"
+    commands:
+      - tapOn: "Skip"
+      - waitForAnimationToEnd:
+          timeout: 1500
+- runFlow:
+    when:
+      visible: "Überspringen"
+    commands:
+      - tapOn: "Überspringen"
+      - waitForAnimationToEnd:
+          timeout: 1500
+- tapOn:
+    text: "CSS"
+- waitForAnimationToEnd:
+    timeout: 4000
+- swipe:
+    start: "50%, 25%"
+    end: "50%, 75%"
+- waitForAnimationToEnd:
+    timeout: 3000
+- tapOn:
+    point: "18%, 53%"
+- waitForAnimationToEnd:
+    timeout: 5000
+- runFlow:
+    when:
+      visible: "WEITER"
+    commands:
+      - tapOn: "WEITER"
+      - waitForAnimationToEnd:
+          timeout: 4000
+- tapOn:
+    text: "Test Regenwasser"
+- waitForAnimationToEnd:
+    timeout: 5000
+- takeScreenshot: /tmp/verify-widget/run-widget-ct/116529-pre-tap-overview
+
+# Tap Abschlag row — center of cell at coord (50%, 41%) (bounds [75,344][372,381]).
+- tapOn:
+    point: "50%, 41%"
+- waitForAnimationToEnd:
+    timeout: 5000
+- takeScreenshot: /tmp/verify-widget/run-widget-ct/116529-post-tap-modal-or-crash
+
+# If the modal opened, OK is visible — tap it to navigate to Budget Billing
+- runFlow:
+    when:
+      visible: "OK"
+    commands:
+      - tapOn: "OK"
+      - waitForAnimationToEnd:
+          timeout: 6000
+- takeScreenshot: /tmp/verify-widget/run-widget-ct/116530-budget-billing-after-ok
+
+# ---------- 116531: Back from Budget Billing to Overview ------------------
+- runFlow:
+    when:
+      visible: "Back"
+    commands:
+      - tapOn: "Back"
+      - waitForAnimationToEnd:
+          timeout: 3000
+- takeScreenshot: /tmp/verify-widget/run-widget-ct/116531-back-on-overview
+
+# ---------- 116532: relaunch fresh, tap Abschlag, tap Cancel -------------
+# Use a second launch because if the first tap didn't crash, the alert is
+# already gone; if it did crash, we need to re-enter the flow anyway.
+- launchApp:
+    appId: "de.endios.one"
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd:
+    timeout: 4000
+- runFlow:
+    when:
+      visible: "Skip"
+    commands:
+      - tapOn: "Skip"
+      - waitForAnimationToEnd:
+          timeout: 1500
+- runFlow:
+    when:
+      visible: "Überspringen"
+    commands:
+      - tapOn: "Überspringen"
+      - waitForAnimationToEnd:
+          timeout: 1500
+- tapOn:
+    text: "CSS"
+- waitForAnimationToEnd:
+    timeout: 4000
+- swipe:
+    start: "50%, 25%"
+    end: "50%, 75%"
+- waitForAnimationToEnd:
+    timeout: 3000
+- tapOn:
+    point: "18%, 53%"
+- waitForAnimationToEnd:
+    timeout: 5000
+- runFlow:
+    when:
+      visible: "WEITER"
+    commands:
+      - tapOn: "WEITER"
+      - waitForAnimationToEnd:
+          timeout: 4000
+- tapOn:
+    text: "Test Regenwasser"
+- waitForAnimationToEnd:
+    timeout: 5000
+- tapOn:
+    point: "50%, 41%"
+- waitForAnimationToEnd:
+    timeout: 5000
+- takeScreenshot: /tmp/verify-widget/run-widget-ct/116532-modal-attempt2
+
+# Tap Cancel/Abbrechen to dismiss modal
+- runFlow:
+    when:
+      visible: "Abbrechen"
+    commands:
+      - tapOn: "Abbrechen"
+      - waitForAnimationToEnd:
+          timeout: 3000
+- runFlow:
+    when:
+      visible: "Cancel"
+    commands:
+      - tapOn: "Cancel"
+      - waitForAnimationToEnd:
+          timeout: 3000
+- takeScreenshot: /tmp/verify-widget/run-widget-ct/116532-after-cancel

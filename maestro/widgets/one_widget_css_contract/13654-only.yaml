@@ -1,0 +1,213 @@
+appId: de.endios.one
+---
+# =============================================================================
+# CSS Contract [CT] — focused secondary flow for subsection 13654 (v2)
+# Sanctioned second launch (per /run-widget skill spec).
+#
+# v1 → v2 changes (per user FIX IT direction):
+# - 116543: add WEITER tap after Nocontract tile so the actual empty-state
+#   renders (v1 captured the Willkommen intro by mistake).
+# - 116540/116541: "Verträge PDF" tile lands on regular Selection — drill into
+#   first contract row → scroll to Dokumente → tap PDF row at (50%, 82%) to
+#   reach the actual PDF viewer instead of giving up on the Selection screen.
+# - 116542: dismiss tries Fertig first (German Done), then Done, then coord.
+#
+# Tile mapping on CSS tab (post-baseline-PTR):
+#   "Verträge"                (18%, 53%) — canonical
+#   "Verträge Nocontract"     (50%, 53%)
+#   "Verträge nocontext,no…"  (82%, 53%)
+#   "Verträge PDF"            (18%, 66%)
+# =============================================================================
+
+- launchApp:
+    appId: "de.endios.one"
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd:
+    timeout: 4000
+- runFlow:
+    when:
+      visible: "Skip"
+    commands:
+      - tapOn: "Skip"
+      - waitForAnimationToEnd:
+          timeout: 1500
+- runFlow:
+    when:
+      visible: "Überspringen"
+    commands:
+      - tapOn: "Überspringen"
+      - waitForAnimationToEnd:
+          timeout: 1500
+- tapOn:
+    text: "CSS"
+- waitForAnimationToEnd:
+    timeout: 4000
+- swipe:
+    start: "50%, 25%"
+    end: "50%, 75%"
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: /tmp/verify-widget/run-widget-ct/13654-00-css-tab-baseline
+
+# =============================================================================
+# 116540 / 116541 / 116542 — "Verträge PDF" tile flow
+# Tile lands on regular Selection; drill into first contract → scroll to
+# Dokumente → tap PDF row to reach PDF viewer.
+# =============================================================================
+- tapOn:
+    point: "18%, 66%"
+- waitForAnimationToEnd:
+    timeout: 5000
+- runFlow:
+    when:
+      visible: "WEITER"
+    commands:
+      - tapOn: "WEITER"
+      - waitForAnimationToEnd:
+          timeout: 4000
+- takeScreenshot: /tmp/verify-widget/run-widget-ct/116540-pdf-document-screen
+
+# Drill into first contract
+- tapOn:
+    text: "Test Regenwasser"
+    optional: true
+- waitForAnimationToEnd:
+    timeout: 5000
+# Scroll down to surface Dokumente section (2x scroll, same as main flow)
+- scroll
+- waitForAnimationToEnd:
+    timeout: 1500
+- scroll
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: /tmp/verify-widget/run-widget-ct/116540-after-drill-pdf-doc-section
+# Tap PDF row at (56%, 83%) — 8s wait for PDF sheet animation
+- tapOn:
+    point: "56%, 83%"
+- waitForAnimationToEnd:
+    timeout: 8000
+- takeScreenshot: /tmp/verify-widget/run-widget-ct/116541-pdf-viewer-from-doclist
+
+# Dismiss PDF viewer — close button is "Schließen" at coord (7%, 9%)
+- runFlow:
+    when:
+      visible: "Schließen"
+    commands:
+      - tapOn: "Schließen"
+      - waitForAnimationToEnd:
+          timeout: 3000
+- tapOn:
+    point: "7%, 9%"
+    optional: true
+- waitForAnimationToEnd:
+    timeout: 2500
+- takeScreenshot: /tmp/verify-widget/run-widget-ct/116542-back-on-pdf-doc-screen
+
+# Recover to CSS tab — single Back to Selection, then single Back to Tab
+- runFlow:
+    when:
+      visible: "Zurück"
+    commands:
+      - tapOn: "Zurück"
+      - waitForAnimationToEnd:
+          timeout: 2000
+- runFlow:
+    when:
+      visible: "Back"
+    commands:
+      - tapOn: "Back"
+      - waitForAnimationToEnd:
+          timeout: 2500
+- takeScreenshot: /tmp/verify-widget/run-widget-ct/13654-after-116542-recover
+
+# =============================================================================
+# 116543 — "Verträge Nocontract" tile → no-contract Welcome screen
+# Tap WEITER on Willkommen to reach the actual no-contract empty state.
+# =============================================================================
+- tapOn:
+    point: "50%, 53%"
+- waitForAnimationToEnd:
+    timeout: 5000
+- runFlow:
+    when:
+      visible: "WEITER"
+    commands:
+      - tapOn: "WEITER"
+      - waitForAnimationToEnd:
+          timeout: 4000
+- takeScreenshot: /tmp/verify-widget/run-widget-ct/116543-no-contract-screen
+
+# Recover to CSS tab
+- runFlow:
+    when:
+      visible: "Zurück"
+    commands:
+      - tapOn: "Zurück"
+      - waitForAnimationToEnd:
+          timeout: 2000
+- runFlow:
+    when:
+      visible: "Back"
+    commands:
+      - tapOn: "Back"
+      - waitForAnimationToEnd:
+          timeout: 2500
+- takeScreenshot: /tmp/verify-widget/run-widget-ct/13654-after-116543-recover
+
+# =============================================================================
+# 116544 + 116545 — "Verträge nocontext,nobutton" tile
+# =============================================================================
+- tapOn:
+    point: "82%, 53%"
+- waitForAnimationToEnd:
+    timeout: 5000
+- runFlow:
+    when:
+      visible: "WEITER"
+    commands:
+      - tapOn: "WEITER"
+      - waitForAnimationToEnd:
+          timeout: 4000
+- takeScreenshot: /tmp/verify-widget/run-widget-ct/116544-selection-no-kundennummer
+
+- tapOn:
+    text: "Test Regenwasser"
+    optional: true
+- waitForAnimationToEnd:
+    timeout: 5000
+- takeScreenshot: /tmp/verify-widget/run-widget-ct/116545-overview-top-no-button
+- scroll
+- waitForAnimationToEnd:
+    timeout: 1500
+- scroll
+- waitForAnimationToEnd:
+    timeout: 1500
+- scroll
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: /tmp/verify-widget/run-widget-ct/116545-overview-bottom-no-button
+
+# Final cleanup back to CSS tab
+- runFlow:
+    when:
+      visible: "Zurück"
+    commands:
+      - tapOn: "Zurück"
+      - waitForAnimationToEnd:
+          timeout: 1500
+- runFlow:
+    when:
+      visible: "Zurück"
+    commands:
+      - tapOn: "Zurück"
+      - waitForAnimationToEnd:
+          timeout: 1500
+- runFlow:
+    when:
+      visible: "Back"
+    commands:
+      - tapOn: "Back"
+      - waitForAnimationToEnd:
+          timeout: 1500
+- takeScreenshot: /tmp/verify-widget/run-widget-ct/13654-99-final-on-css-tab

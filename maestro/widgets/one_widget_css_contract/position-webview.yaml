@@ -1,0 +1,17 @@
+appId: de.endios.one
+---
+- launchApp: { appId: "de.endios.one", clearState: true, clearKeychain: true }
+- waitForAnimationToEnd: { timeout: 4000 }
+- tapOn: { text: "CSS" }
+- waitForAnimationToEnd: { timeout: 4000 }
+- swipe: { start: "50%, 25%", end: "50%, 75%" }
+- waitForAnimationToEnd: { timeout: 3000 }
+- tapOn: { point: "17%, 60%" }
+- waitForAnimationToEnd: { timeout: 5000 }
+- runFlow:
+    when: { visible: "WEITER" }
+    commands: [ { tapOn: "WEITER" }, { waitForAnimationToEnd: { timeout: 4000 } } ]
+- tapOn: { text: "Test Regenwasser" }
+- waitForAnimationToEnd: { timeout: 5000 }
+- tapOn: { text: "WEITERE PRODUKTE" }
+- waitForAnimationToEnd: { timeout: 8000 }

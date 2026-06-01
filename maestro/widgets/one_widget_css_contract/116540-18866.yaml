@@ -1,0 +1,67 @@
+appId: de.endios.one
+---
+# =============================================================================
+# CSS Contract [CT] — 116540 verified against widget 18866 "Contracts Pdf"
+#
+# Verified tile bounds (via Maestro hierarchy dump):
+#   Verträge PDF tile = [3,593][133,724] → center (17%, 75%)
+# Tap on this tile + WEITER on Willkommen → DocumentListView (PDF Document
+# screen) WITHOUT going through ContractList Selection or Contract Overview.
+# This is exactly what 116540 expects.
+#
+# Earlier flows used (18%, 66%) which is in the gap between rows — that tap
+# accidentally hit the canonical Verträge tile (bounds [3,461][133,591]).
+# =============================================================================
+
+- launchApp:
+    appId: "de.endios.one"
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd:
+    timeout: 4000
+- runFlow:
+    when:
+      visible: "Skip"
+    commands:
+      - tapOn: "Skip"
+      - waitForAnimationToEnd:
+          timeout: 1500
+- runFlow:
+    when:
+      visible: "Überspringen"
+    commands:
+      - tapOn: "Überspringen"
+      - waitForAnimationToEnd:
+          timeout: 1500
+- tapOn:
+    text: "CSS"
+- waitForAnimationToEnd:
+    timeout: 4000
+- swipe:
+    start: "50%, 25%"
+    end: "50%, 75%"
+- waitForAnimationToEnd:
+    timeout: 3000
+
+# Tap Verträge PDF tile at the CORRECT coord — (17%, 75%)
+- tapOn:
+    point: "17%, 75%"
+- waitForAnimationToEnd:
+    timeout: 5000
+- takeScreenshot: /tmp/verify-widget/run-widget-ct/18866-willkommen
+- runFlow:
+    when:
+      visible: "WEITER"
+    commands:
+      - tapOn: "WEITER"
+      - waitForAnimationToEnd:
+          timeout: 5000
+- takeScreenshot: /tmp/verify-widget/run-widget-ct/116540-pdf-document-screen-18866
+
+# Tap the PDF row to verify it opens the PDF viewer
+- tapOn:
+    text: "Vertrag PDF-Dokument"
+    optional: true
+- waitForAnimationToEnd:
+    timeout: 6000
+- takeScreenshot: /tmp/verify-widget/run-widget-ct/116541-pdf-viewer-from-18866

@@ -1,0 +1,135 @@
+appId: de.endios.one
+---
+# =============================================================================
+# CSS Contract [CT] — focused flow for 116519 re-test on widget 18862 (v2)
+#
+# User reports widget 18862 SHOULD render an address line under each contract
+# row in the Selection screen. The dashboard has 4 known Verträge tiles
+# ({canonical, Nocontract, nocontext, PDF}) — one of them is widget 18862.
+#
+# v1 → v2: removed the dashboard-scroll inventory step (scrollUntilVisible
+# "Invoice QA" UP was flaky in 4s timeout). We already know there are only
+# 4 Verträge tiles (confirmed in attempt1 dashboard screenshots), so just
+# tap each one directly and screenshot the Selection list.
+#
+# The user can compare the four 18862-tile*-selection-list screenshots and
+# identify which tile renders the address line under each contract row.
+# =============================================================================
+
+- launchApp:
+    appId: "de.endios.one"
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd:
+    timeout: 4000
+- runFlow:
+    when:
+      visible: "Skip"
+    commands:
+      - tapOn: "Skip"
+      - waitForAnimationToEnd:
+          timeout: 1500
+- runFlow:
+    when:
+      visible: "Überspringen"
+    commands:
+      - tapOn: "Überspringen"
+      - waitForAnimationToEnd:
+          timeout: 1500
+- tapOn:
+    text: "CSS"
+- waitForAnimationToEnd:
+    timeout: 4000
+- swipe:
+    start: "50%, 25%"
+    end: "50%, 75%"
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: /tmp/verify-widget/run-widget-ct/18862-00-css-tab-baseline
+
+# ---------- Tile A: "Verträge" (canonical, 18%, 53%) ------------------------
+- tapOn:
+    point: "18%, 53%"
+- waitForAnimationToEnd:
+    timeout: 5000
+- runFlow:
+    when:
+      visible: "WEITER"
+    commands:
+      - tapOn: "WEITER"
+      - waitForAnimationToEnd:
+          timeout: 4000
+- takeScreenshot: /tmp/verify-widget/run-widget-ct/18862-tileA-vertraege-canonical-selection
+- runFlow:
+    when:
+      visible: "Back"
+    commands:
+      - tapOn: "Back"
+      - waitForAnimationToEnd:
+          timeout: 2500
+
+# ---------- Tile B: "Verträge Nocontract" (50%, 53%) -----------------------
+- tapOn:
+    point: "50%, 53%"
+- waitForAnimationToEnd:
+    timeout: 5000
+- runFlow:
+    when:
+      visible: "WEITER"
+    commands:
+      - tapOn: "WEITER"
+      - waitForAnimationToEnd:
+          timeout: 4000
+- takeScreenshot: /tmp/verify-widget/run-widget-ct/18862-tileB-nocontract-selection
+- runFlow:
+    when:
+      visible: "Back"
+    commands:
+      - tapOn: "Back"
+      - waitForAnimationToEnd:
+          timeout: 2500
+
+# ---------- Tile C: "Verträge nocontext,no…" (82%, 53%) --------------------
+- tapOn:
+    point: "82%, 53%"
+- waitForAnimationToEnd:
+    timeout: 5000
+- runFlow:
+    when:
+      visible: "WEITER"
+    commands:
+      - tapOn: "WEITER"
+      - waitForAnimationToEnd:
+          timeout: 4000
+- takeScreenshot: /tmp/verify-widget/run-widget-ct/18862-tileC-nocontext-selection
+- runFlow:
+    when:
+      visible: "Back"
+    commands:
+      - tapOn: "Back"
+      - waitForAnimationToEnd:
+          timeout: 2500
+
+# ---------- Tile D: "Verträge PDF" (18%, 66%) ------------------------------
+- tapOn:
+    point: "18%, 66%"
+- waitForAnimationToEnd:
+    timeout: 5000
+- runFlow:
+    when:
+      visible: "WEITER"
+    commands:
+      - tapOn: "WEITER"
+      - waitForAnimationToEnd:
+          timeout: 4000
+- takeScreenshot: /tmp/verify-widget/run-widget-ct/18862-tileD-pdf-selection
+- runFlow:
+    when:
+      visible: "Back"
+    commands:
+      - tapOn: "Back"
+      - waitForAnimationToEnd:
+          timeout: 2500
+
+# ---------- Final state ----------------------------------------------------
+- takeScreenshot: /tmp/verify-widget/run-widget-ct/18862-99-final-on-css-tab
