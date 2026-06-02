@@ -2,7 +2,12 @@
 
 Maestro UI test automation **and** TestRail-mirrored test cases for the **endios One** mobile app (iOS & Android).
 
-Each widget is verified by running a consolidated Maestro flow against a booted simulator/emulator, screenshotting one tile per TestRail case, and checking the rendered UI against the case's expected result. TestRail is read **read-only** — runs never write results back.
+Each widget is verified in two layers:
+
+1. **Codebase check** — the widget's TestRail cases are read against the iOS source (Foundation models, widget implementation, resolved config) to confirm the expected behavior is actually implemented and the config drives it as the case describes.
+2. **Maestro run** — a consolidated flow runs against a booted simulator/emulator, screenshotting one tile per TestRail case, and the rendered UI is compared to the case's expected result.
+
+TestRail is **read-only** — runs never write results back.
 
 ## Repository Structure
 
@@ -56,16 +61,17 @@ All widgets live under TestRail project `endiosOne` (5) · suite `Master` (468).
 
 This repo is driven by the QA skills rather than run by hand:
 
-- **`/verify-widget <WIDGET>`** — verifies a widget's TestRail cases against the iOS codebase and Maestro runs.
+- **`/verify-widget <WIDGET>`** — verifies a widget's TestRail cases against **both** the iOS codebase and the Maestro runs: it reads the source/resolved config to confirm each case's behavior is implemented, then backs that up with a simulator run.
 - **`/run-widget <WIDGET>`** — runs a widget's entire TestRail suite in a **single consolidated Maestro flow**: one app launch, a different tile per case, and a table report at the end.
 - **`/run-refresh-testrail-and-simulator`** — hard-refresh TestRail + the iOS simulator before any verify / run.
 
 The pattern for every widget:
 
 1. Pull the latest TestRail cases → snapshot into `testcases/<CODE>.md`.
-2. Build/maintain the consolidated `run-widget-<code>.yaml` (one dashboard tile per case).
-3. Run it against the canonical sim, capturing one screenshot per case.
-4. Compare each screenshot against the case's expected result; record Pass/Fail in the per-widget `README.md` runbook.
+2. **Check the codebase** — trace each case's expected behavior through the iOS source and the resolved widget config; flag any case the code can't satisfy.
+3. Build/maintain the consolidated `run-widget-<code>.yaml` (one dashboard tile per case).
+4. Run it against the canonical sim, capturing one screenshot per case.
+5. Compare each screenshot against the case's expected result; record Pass/Fail (and whether it's a code gap vs. a sim flake) in the per-widget `README.md` runbook.
 
 ## Running Tests
 
