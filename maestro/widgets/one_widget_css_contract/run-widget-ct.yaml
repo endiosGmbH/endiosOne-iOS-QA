@@ -1,23 +1,33 @@
 appId: de.endios.one
 ---
 # =============================================================================
-# CSS Contract [CT] — full suite, single-launch consolidated flow (v5)
+# CSS Contract [CT] — full suite, single-launch consolidated flow
+# v17 (2026-06-02) — corrected coords + DocList PDF route + ordered to keep
+# Safari last (Safari is undismissable on sim → would break back-nav).
 #
-# Tile mapping on CSS tab:
-#   "Verträge"                (18%, 53%) — canonical
-#   "Verträge Nocontract"     (50%, 53%)
-#   "Verträge nocontext,no…"  (82%, 53%)
-#   "Verträge PDF"            (18%, 66%)
+# TARGET DEVICE: iPhone 16 Pro / iOS 18.4  (UDID BD791DDE-CE86-4ADA-AE09-EDAF6A647CE8)
+# Run:
+#   $HOME/.maestro/bin/maestro --udid <udid> test maestro/widgets/one_widget_css_contract/run-widget-ct.yaml \
+#     --format junit --output /tmp/verify-widget/run-widget-ct/
 #
-# v6 → v7 changes (after reading WidgetContractsCSS source):
-# - Cells use `combinedAccessibilityTraits = .button` so the WHOLE row is a
-#   single a11y button labeled with its title+subtitle. Tap by TEXT, not coord.
-# - 116529/116532: tap "Abschlag" (budget billing row subtitle) → triggers
-#   UIAlertController via showPopup(). Cancel="Abbrechen", confirm="OK".
-# - 116533/116541: tap "PDF-Dokument" (Dokumente section subtitle) → opens
-#   PDF viewer via coordinatorDelegate.showPDF().
-# - 116527 wait extended to 15s for SFSafariViewController content load.
-# - 116539 Safari-end dismiss: Maestro native `- back` + Fertig + swipe cascade.
+# TILE MAP (CSS tab, AFTER pull-to-refresh — bounds verified 2026-05-26):
+#   "Verträge" canonical          (17%, 60%)  bounds [3,461][133,591]
+#   "Verträge Nocontract"         (50%, 60%)  bounds [135,461][266,591]
+#   "Verträge nocontext,nobutton" (83%, 60%)  bounds [268,461][399,591]
+#   "Verträge PDF" (widget 18866) (17%, 75%)  bounds [3,593][133,724]
+#
+# DEVICE-ONLY CASES (NOT exercised here — captured pre-state, mark 🚫 Blocked):
+#   116528 Safari close, 116529-116532 Abschlag modal, 116534 share sheet,
+#   116535/116536 Print. These crash or use separate-process system views under
+#   Rosetta on iPhone 16 Pro. Resolve on iPhone 17 Pro (6DA2CF14) via the
+#   AppleScript + cliclick recipe — see memory project_css_contract_widget.
+#
+# HARD RULES (see memory):
+#   - NEVER tap the Abschlag row on sim — guaranteed crash, takes flow down.
+#   - PDF viewer reached via the "Verträge PDF" tile → DocumentListView row,
+#     NOT the canonical overview Dokumente row (that opens WEITERE PRODUKTE).
+#   - Open WEITERE PRODUKTE (Safari) LAST — it cannot be dismissed on sim.
+#   - PDF dismiss = "Schließen" text tap only, no coord fallback.
 # =============================================================================
 
 - launchApp:
@@ -44,6 +54,7 @@ appId: de.endios.one
     text: "CSS"
 - waitForAnimationToEnd:
     timeout: 4000
+# Pull-to-refresh so the tile grid settles into its canonical 60%/75% layout.
 - swipe:
     start: "50%, 25%"
     end: "50%, 75%"
@@ -52,16 +63,15 @@ appId: de.endios.one
 - takeScreenshot: /tmp/verify-widget/run-widget-ct/00-css-tab-baseline
 
 # =============================================================================
-# Subsection 13652 — Widget Tile & Configuration   (3 cases)
+# Subsection 13652 — Widget Tile & Configuration   (116513-116515)
 # =============================================================================
 - takeScreenshot: /tmp/verify-widget/run-widget-ct/116513-vertraege-tile-image
 - takeScreenshot: /tmp/verify-widget/run-widget-ct/116514-vertraege-tile-title
 
 - tapOn:
-    point: "18%, 53%"
+    point: "17%, 60%"
 - waitForAnimationToEnd:
     timeout: 5000
-- takeScreenshot: /tmp/verify-widget/run-widget-ct/116515a-willkommen-on-tile-tap
 - runFlow:
     when:
       visible: "WEITER"
@@ -72,7 +82,7 @@ appId: de.endios.one
 - takeScreenshot: /tmp/verify-widget/run-widget-ct/116515-selection-nav-title
 
 # =============================================================================
-# Subsection 13653 — Main Flow (24 cases, reordered)
+# Subsection 13653 — Selection screen content   (116516-116520)
 # =============================================================================
 - takeScreenshot: /tmp/verify-widget/run-widget-ct/116516-selection-screen-opened
 - takeScreenshot: /tmp/verify-widget/run-widget-ct/116517-selection-headline-description
@@ -80,7 +90,7 @@ appId: de.endios.one
 - takeScreenshot: /tmp/verify-widget/run-widget-ct/116519-address-label
 - takeScreenshot: /tmp/verify-widget/run-widget-ct/116520-contract-list
 
-# ---- 116521 Tap Test Regenwasser → Contract Overview ---------------------
+# ---- 116521-116524 Tap Test Regenwasser → Contract Overview --------------
 - tapOn:
     text: "Test Regenwasser"
 - waitForAnimationToEnd:
@@ -90,22 +100,12 @@ appId: de.endios.one
 - takeScreenshot: /tmp/verify-widget/run-widget-ct/116523-price-info
 - takeScreenshot: /tmp/verify-widget/run-widget-ct/116524-contract-info
 
-# ---- 116529-116532 BLOCKED — Abschlag tap crashes the simulator app -------
-# Verified via probe + simctl log: tapping the Abschlag row (any coord in its
-# bounds) crashes the app process (`launchd_sim: service has crashed`).
-# Likely the Rosetta/UIAlertController issue noted in memory. The cases that
-# follow (open modal → OK → BB → Back → Cancel) cannot be exercised here.
-# Snapshot the Overview as evidence and continue without triggering the tap,
-# so the rest of Main Flow + 13654 can still run cleanly.
-- takeScreenshot: /tmp/verify-widget/run-widget-ct/116529-overview-pre-crash-tap-blocked
-- takeScreenshot: /tmp/verify-widget/run-widget-ct/116530-overview-pre-crash-tap-blocked
-- takeScreenshot: /tmp/verify-widget/run-widget-ct/116531-overview-pre-crash-tap-blocked
-- takeScreenshot: /tmp/verify-widget/run-widget-ct/116532-overview-pre-crash-tap-blocked
+# ---- 116529-116532 🚫 BLOCKED on sim — Abschlag tap crashes the app -------
+# Do NOT tap the Abschlag row here. Capture the overview as pre-tap evidence;
+# resolve the modal chain on iPhone 17 Pro (see memory recipe).
+- takeScreenshot: /tmp/verify-widget/run-widget-ct/116529-116532-abschlag-blocked-sim
 
-# ---- 116525 + 116526 Scroll to surface Dokumente section ----------------
-# Two `- scroll` commands reliably move the content down on this overview
-# (scrollUntilVisible didn't trigger when the element is present in hierarchy
-# but below the fold — Maestro considered it "found").
+# ---- 116525 + 116526 Scroll to surface Dokumente section -----------------
 - scroll
 - waitForAnimationToEnd:
     timeout: 1500
@@ -115,140 +115,7 @@ appId: de.endios.one
 - takeScreenshot: /tmp/verify-widget/run-widget-ct/116525-documents-section
 - takeScreenshot: /tmp/verify-widget/run-widget-ct/116526-action-button-visible
 
-# ---- 116533 Tap PDF row in Dokumente → PDF viewer ------------------------
-# After 2 scrolls, Vertrag PDF-Dokument row is at y~83%. Tap (56%, 83%) +
-# 8s wait. Then assert PDF state by checking "Schließen" or fullscreen PDF.
-- tapOn:
-    point: "56%, 83%"
-- waitForAnimationToEnd:
-    timeout: 8000
-- takeScreenshot: /tmp/verify-widget/run-widget-ct/116533-pdf-viewer-opened
-
-# ---- 116534 Tap Share button → share sheet -------------------------------
-# Wait 8s so the iOS share sheet finishes its slide-up animation BEFORE
-# screenshot. v11/v14 captured the in-between (fullscreen PDF) at 6s.
-- tapOn:
-    point: "92%, 9%"
-- waitForAnimationToEnd:
-    timeout: 8000
-- takeScreenshot: /tmp/verify-widget/run-widget-ct/116534-share-sheet
-
-# ---- 116535 Tap Print row in share sheet → print view --------------------
-# Print row in share sheet appears around y=72% on iPhone 16 Pro layout.
-# Try text first, then coord fallback. Note: per memory project_css_invoice_widget,
-# Print on simulator may not render a print preview — case may be Blocked.
-- runFlow:
-    when:
-      visible: "Print"
-    commands:
-      - tapOn: "Print"
-      - waitForAnimationToEnd:
-          timeout: 5000
-- runFlow:
-    when:
-      visible: "Drucken"
-    commands:
-      - tapOn: "Drucken"
-      - waitForAnimationToEnd:
-          timeout: 5000
-# Coord fallback if text taps didn't fire
-- tapOn:
-    point: "50%, 72%"
-    optional: true
-- waitForAnimationToEnd:
-    timeout: 4000
-- takeScreenshot: /tmp/verify-widget/run-widget-ct/116535-print-view
-
-# ---- 116536 Cancel print view → back to share sheet ---------------------
-- runFlow:
-    when:
-      visible: "Abbrechen"
-    commands:
-      - tapOn: "Abbrechen"
-      - waitForAnimationToEnd:
-          timeout: 3000
-- runFlow:
-    when:
-      visible: "Cancel"
-    commands:
-      - tapOn: "Cancel"
-      - waitForAnimationToEnd:
-          timeout: 3000
-- takeScreenshot: /tmp/verify-widget/run-widget-ct/116536-after-print-cancel
-
-# ---- 116537 Close PDF viewer → back to Contract Overview -----------------
-# PDF viewer X close button is labeled "Schließen" (German Close), bounds
-# [8,56][49,100] → coord (7%, 9%). Dismiss share sheet first if visible.
-- runFlow:
-    when:
-      visible: "Save to Files"
-    commands:
-      - tapOn:
-          point: "50%, 6%"
-          optional: true
-      - waitForAnimationToEnd:
-          timeout: 1500
-      - swipe:
-          start: "50%, 5%"
-          end: "50%, 95%"
-      - waitForAnimationToEnd:
-          timeout: 2000
-- runFlow:
-    when:
-      visible: "Schließen"
-    commands:
-      - tapOn: "Schließen"
-      - waitForAnimationToEnd:
-          timeout: 3000
-# REMOVED: optional (7%, 9%) coord fallback was navigating BACK to Selection
-# when PDF was already dismissed (it hit the Zurück button at [0,56][84,100]
-# on the Overview). Trust the Schließen tap to land.
-- waitForAnimationToEnd:
-    timeout: 2000
-- takeScreenshot: /tmp/verify-widget/run-widget-ct/116537-back-on-overview-after-pdf
-
-# ---- 116527 Tap action button (WEITERE PRODUKTE) → web view --------------
-# Extend wait to 15s so SFSafariViewController has time to load page content.
-- runFlow:
-    when:
-      visible: "WEITERE PRODUKTE"
-    commands:
-      - tapOn: "WEITERE PRODUKTE"
-      - waitForAnimationToEnd:
-          timeout: 15000
-- takeScreenshot: /tmp/verify-widget/run-widget-ct/116527-webview-opened
-
-# ---- 116528 Dismiss webview → back to Contract Overview ------------------
-# Multi-strategy: Fertig (DE) → Done (EN) → coord (5%, 3%) → swipe-down-from-top.
-# Order changed: in DE sim, Fertig is the actual label — Done check ran first
-# and missed in v4 because the text isn't there.
-- runFlow:
-    when:
-      visible: "Fertig"
-    commands:
-      - tapOn: "Fertig"
-      - waitForAnimationToEnd:
-          timeout: 3000
-- runFlow:
-    when:
-      visible: "Done"
-    commands:
-      - tapOn: "Done"
-      - waitForAnimationToEnd:
-          timeout: 3000
-- tapOn:
-    point: "5%, 3%"
-    optional: true
-- waitForAnimationToEnd:
-    timeout: 2500
-- swipe:
-    start: "50%, 3%"
-    end: "50%, 90%"
-- waitForAnimationToEnd:
-    timeout: 3000
-- takeScreenshot: /tmp/verify-widget/run-widget-ct/116528-back-on-overview-after-done
-
-# ---- 116538 Back from Contract Overview → Contract Selection -------------
+# ---- 116538 Back: Overview → Selection  (do BEFORE opening Safari) --------
 - runFlow:
     when:
       visible: "Zurück"
@@ -258,24 +125,7 @@ appId: de.endios.one
           timeout: 2500
 - takeScreenshot: /tmp/verify-widget/run-widget-ct/116538-back-on-selection
 
-# ---- 116539 Back from Contract Selection → CSS Tab -----------------------
-# If a stale Safari is still on top (carryover from 116528), use Maestro's
-# native `- back` command which closes the topmost modal/sheet (works for
-# SFSafariViewController where text-based "Fertig"/"Done" taps fail).
-- runFlow:
-    when:
-      visible: "Fertig"
-    commands:
-      - back
-      - waitForAnimationToEnd:
-          timeout: 2000
-- runFlow:
-    when:
-      visible: "Done"
-    commands:
-      - back
-      - waitForAnimationToEnd:
-          timeout: 2000
+# ---- 116539 Back: Selection → CSS Tab ------------------------------------
 - runFlow:
     when:
       visible: "Back"
@@ -286,9 +136,10 @@ appId: de.endios.one
 - takeScreenshot: /tmp/verify-widget/run-widget-ct/116539-back-on-css-tab
 
 # =============================================================================
-# Subsection 13654 — Alternative Flows & Negative Scenarios (6 cases)
+# 116540 / 116533 / 116541 / 116537 / 116542 — PDF via "Verträge PDF" tile
+# Tile (17%,75%) → WEITER routes DIRECTLY to DocumentListView (widget 18866),
+# skipping Selection + Overview. DocList row "Vertrag PDF-Dokument" at (50%,28%).
 # =============================================================================
-
 - scrollUntilVisible:
     element:
       text: "Invoice QA"
@@ -297,10 +148,8 @@ appId: de.endios.one
     centerElement: false
 - waitForAnimationToEnd:
     timeout: 1500
-
-# ---- 116540 PDF Document screen ------------------------------------------
 - tapOn:
-    point: "18%, 66%"
+    point: "17%, 75%"
 - waitForAnimationToEnd:
     timeout: 5000
 - runFlow:
@@ -312,34 +161,38 @@ appId: de.endios.one
           timeout: 4000
 - takeScreenshot: /tmp/verify-widget/run-widget-ct/116540-pdf-document-screen
 
-# ---- 116541 Tap PDF row → PDF viewer -------------------------------------
+# ---- 116533 / 116541 Tap DocList row → in-app PDF viewer -----------------
 - tapOn:
-    point: "50%, 45%"
+    point: "50%, 28%"
 - waitForAnimationToEnd:
-    timeout: 6000
-- takeScreenshot: /tmp/verify-widget/run-widget-ct/116541-pdf-viewer-from-doclist
+    timeout: 8000
+- takeScreenshot: /tmp/verify-widget/run-widget-ct/116533-116541-pdf-viewer-opened
 
-# ---- 116542 Close PDF viewer → PDF Document screen -----------------------
-- runFlow:
-    when:
-      visible: "Done"
-    commands:
-      - tapOn: "Done"
-      - waitForAnimationToEnd:
-          timeout: 2500
-- runFlow:
-    when:
-      visible: "Fertig"
-    commands:
-      - tapOn: "Fertig"
-      - waitForAnimationToEnd:
-          timeout: 2500
+# ---- 116534 🚫 BLOCKED on sim — share sheet does not present -------------
+# Tap the share button to capture the attempt; UIActivityViewController is a
+# separate-process system view that won't render under Maestro on iPhone 16 Pro.
 - tapOn:
-    point: "8%, 8%"
+    point: "92%, 9%"
     optional: true
 - waitForAnimationToEnd:
-    timeout: 2500
-- takeScreenshot: /tmp/verify-widget/run-widget-ct/116542-back-on-pdf-doc-screen
+    timeout: 4000
+- takeScreenshot: /tmp/verify-widget/run-widget-ct/116534-116536-sharesheet-print-blocked-sim
+# Dismiss anything that did slide up before continuing.
+- swipe:
+    start: "50%, 5%"
+    end: "50%, 95%"
+- waitForAnimationToEnd:
+    timeout: 2000
+
+# ---- 116537 / 116542 Close PDF viewer (Schließen) → back to DocList ------
+- runFlow:
+    when:
+      visible: "Schließen"
+    commands:
+      - tapOn: "Schließen"
+      - waitForAnimationToEnd:
+          timeout: 3000
+- takeScreenshot: /tmp/verify-widget/run-widget-ct/116537-116542-back-on-doclist
 
 # Recover to CSS tab
 - runFlow:
@@ -358,9 +211,13 @@ appId: de.endios.one
 - waitForAnimationToEnd:
     timeout: 1500
 
-# ---- 116543 No-Contract screen -------------------------------------------
+# =============================================================================
+# Subsection 13654 — Alternative Flows & Negative Scenarios
+# =============================================================================
+
+# ---- 116543 No-Contract empty-state screen -------------------------------
 - tapOn:
-    point: "50%, 53%"
+    point: "50%, 60%"
 - waitForAnimationToEnd:
     timeout: 5000
 - runFlow:
@@ -371,7 +228,6 @@ appId: de.endios.one
       - waitForAnimationToEnd:
           timeout: 4000
 - takeScreenshot: /tmp/verify-widget/run-widget-ct/116543-no-contract-screen
-
 # Recover to CSS tab
 - runFlow:
     when:
@@ -389,9 +245,9 @@ appId: de.endios.one
 - waitForAnimationToEnd:
     timeout: 1500
 
-# ---- 116544 + 116545 Verträge nocontext,nobutton tile --------------------
+# ---- 116544 + 116545 nocontext,nobutton tile -----------------------------
 - tapOn:
-    point: "82%, 53%"
+    point: "83%, 60%"
 - waitForAnimationToEnd:
     timeout: 5000
 - runFlow:
@@ -402,13 +258,11 @@ appId: de.endios.one
       - waitForAnimationToEnd:
           timeout: 4000
 - takeScreenshot: /tmp/verify-widget/run-widget-ct/116544-selection-no-kundennummer
-# Tap first contract row to open overview
 - tapOn:
     point: "50%, 50%"
     optional: true
 - waitForAnimationToEnd:
     timeout: 5000
-- takeScreenshot: /tmp/verify-widget/run-widget-ct/116544-overview-no-kundennummer
 - scroll
 - waitForAnimationToEnd:
     timeout: 1500
@@ -419,8 +273,7 @@ appId: de.endios.one
 - waitForAnimationToEnd:
     timeout: 1500
 - takeScreenshot: /tmp/verify-widget/run-widget-ct/116545-overview-no-action-button
-
-# Final cleanup back to CSS tab
+# Recover to CSS tab
 - runFlow:
     when:
       visible: "Zurück"
@@ -435,4 +288,48 @@ appId: de.endios.one
       - tapOn: "Back"
       - waitForAnimationToEnd:
           timeout: 2000
-- takeScreenshot: /tmp/verify-widget/run-widget-ct/99-final-on-css-tab
+- scrollUntilVisible:
+    element:
+      text: "Invoice QA"
+    direction: UP
+    timeout: 4000
+    centerElement: false
+- waitForAnimationToEnd:
+    timeout: 1500
+
+# =============================================================================
+# 116527 / 116528 — WEITERE PRODUKTE webview  (RUN LAST — Safari traps flow)
+# Re-enter canonical contract, open the action button. SFSafariViewController
+# cannot be dismissed on sim, so this is the final step; 116528 is 🚫 Blocked.
+# =============================================================================
+- tapOn:
+    point: "17%, 60%"
+- waitForAnimationToEnd:
+    timeout: 5000
+- runFlow:
+    when:
+      visible: "WEITER"
+    commands:
+      - tapOn: "WEITER"
+      - waitForAnimationToEnd:
+          timeout: 4000
+- tapOn:
+    text: "Test Regenwasser"
+- waitForAnimationToEnd:
+    timeout: 5000
+- scroll
+- waitForAnimationToEnd:
+    timeout: 1500
+- scroll
+- waitForAnimationToEnd:
+    timeout: 1500
+- runFlow:
+    when:
+      visible: "WEITERE PRODUKTE"
+    commands:
+      - tapOn: "WEITERE PRODUKTE"
+      - waitForAnimationToEnd:
+          timeout: 15000
+- takeScreenshot: /tmp/verify-widget/run-widget-ct/116527-webview-opened
+# 116528 Safari close (X / Done) is undismissable on sim — capture & stop.
+- takeScreenshot: /tmp/verify-widget/run-widget-ct/116528-safari-close-blocked-sim
