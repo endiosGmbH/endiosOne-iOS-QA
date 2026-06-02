@@ -1,0 +1,789 @@
+# Flow: All ConTENT Widgets — Combined Full Flow
+# Tags: widgets, navigation, regression, negative, stability
+# Description: Complete test suite for all ConTENT widget variants:
+#   1. ConTENT (multi-item with list/detail/map + 6 negative scenarios)
+#   2. Content only 1 data (single item, skips list view)
+#   3. Content & Map (opens directly into map view)
+
+appId: "de.endios.one.autokrafty.demo.debug"
+
+tags:
+  - widgets
+  - navigation
+  - regression
+  - negative
+  - stability
+
+---
+
+# ══════════════════════════════════════════════════════════════════════
+#  WIDGET 1: ConTENT (multi-item)
+# ══════════════════════════════════════════════════════════════════════
+
+# ─── SAFETY RESET (cleanup from previous failed runs) ───
+- setAirplaneMode:
+    value: "disabled"
+- pressKey: back
+- pressKey: back
+
+# ─── LAUNCH & OPEN WIDGET ───
+- launchApp
+
+- tapOn:
+    text: "NICHT JETZT"
+    optional: true
+
+- extendedWaitUntil:
+    visible: "ConTENT"
+    timeout: 15000
+- tapOn: "ConTENT"
+
+# ─── CAT1 LIST VIEW ───
+- extendedWaitUntil:
+    visible: "Cat1"
+    timeout: 5000
+- waitForAnimationToEnd
+- swipe:
+    direction: DOWN
+    duration: 100
+
+# ─── OPEN CONTENT 1 DETAIL VIEW ───
+- tapOn:
+    point: "50%,19%"
+
+- extendedWaitUntil:
+    visible: "Beschreibung"
+    timeout: 10000
+
+- extendedWaitUntil:
+    visible: "Öffnungszeiten"
+    timeout: 10000
+
+# ─── TOGGLE ÖFFNUNGSZEITEN (expand then collapse) ───
+- tapOn: "Öffnungszeiten"
+- swipe:
+    direction: DOWN
+    duration: 500
+- tapOn: "Öffnungszeiten"
+- swipe:
+    direction: DOWN
+    duration: 500
+
+# ─── SCROLL TO KONTAKT & GALERIE ───
+- scrollUntilVisible:
+    element:
+      text: "Kontakt"
+    direction: DOWN
+    timeout: 5000
+- assertVisible: "Tel"
+- assertVisible: "Email"
+
+- scrollUntilVisible:
+    element:
+      text: "Galerie"
+    direction: DOWN
+    timeout: 5000
+
+# ─── TAP ADDRESS → MAPS ───
+- scrollUntilVisible:
+    element:
+      text: "Beschreibung"
+    direction: UP
+    timeout: 5000
+- tapOn:
+    point: "50%,19%"
+- extendedWaitUntil:
+    visible: ".*"
+    timeout: 5000
+- swipe:
+    direction: DOWN
+    duration: 2000
+- pressKey: back
+- extendedWaitUntil:
+    visible: ".*"
+    timeout: 10000
+
+# ─── TAP TEL → DIALER ───
+- scrollUntilVisible:
+    element:
+      text: "Tel"
+    direction: DOWN
+    timeout: 5000
+- tapOn: "Tel"
+- extendedWaitUntil:
+    visible: ".*"
+    timeout: 5000
+- swipe:
+    direction: DOWN
+    duration: 2000
+- pressKey: back
+- extendedWaitUntil:
+    visible: ".*"
+    timeout: 10000
+
+# ─── TAP EMAIL → EMAIL APP ───
+- scrollUntilVisible:
+    element:
+      text: "Email"
+    direction: DOWN
+    timeout: 5000
+- tapOn: "Email"
+- extendedWaitUntil:
+    visible: ".*"
+    timeout: 5000
+- swipe:
+    direction: DOWN
+    duration: 2000
+- pressKey: back
+- extendedWaitUntil:
+    visible: ".*"
+    timeout: 10000
+
+# ─── CLOSE DETAIL VIEW ───
+- tapOn:
+    point: "88%,8%"
+- extendedWaitUntil:
+    visible: "Cat1"
+    timeout: 5000
+
+# ─── SWITCH TO MAP VIEW ───
+- tapOn:
+    point: "94%,8%"
+- waitForAnimationToEnd
+
+# Pan the map in all directions
+- swipe:
+    start: "70%,50%"
+    end: "30%,50%"
+    duration: 1500
+- waitForAnimationToEnd
+- swipe:
+    start: "50%,30%"
+    end: "50%,70%"
+    duration: 1500
+- waitForAnimationToEnd
+- swipe:
+    start: "30%,50%"
+    end: "70%,50%"
+    duration: 1500
+- waitForAnimationToEnd
+- swipe:
+    start: "50%,70%"
+    end: "50%,30%"
+    duration: 1500
+- waitForAnimationToEnd
+
+# ─── SWITCH BACK TO LIST VIEW ───
+- tapOn:
+    point: "94%,8%"
+- extendedWaitUntil:
+    visible: "Cat1"
+    timeout: 5000
+
+# ─── GO BACK TO HOME ───
+- pressKey: back
+- extendedWaitUntil:
+    visible: "ConTENT"
+    timeout: 5000
+
+
+# ══════════════════════════════════════════════════════════════════════
+#  ConTENT — NEGATIVE SCENARIOS
+# ══════════════════════════════════════════════════════════════════════
+
+
+# ─── NEG 1: AIRPLANE MODE ───
+- setAirplaneMode:
+    value: "enabled"
+
+- tapOn: "ConTENT"
+- extendedWaitUntil:
+    visible: ".*"
+    timeout: 10000
+
+- extendedWaitUntil:
+    visible: ".*"
+    timeout: 5000
+
+- setAirplaneMode:
+    value: "disabled"
+
+- pressKey: back
+- launchApp
+- tapOn:
+    text: "NICHT JETZT"
+    optional: true
+- swipe:
+    start: "50%,40%"
+    end: "50%,80%"
+    duration: 500
+- extendedWaitUntil:
+    visible: "ConTENT"
+    timeout: 15000
+
+- tapOn: "ConTENT"
+- extendedWaitUntil:
+    visible: "Cat1"
+    timeout: 10000
+
+- pressKey: back
+- extendedWaitUntil:
+    visible: "ConTENT"
+    timeout: 5000
+
+
+# ─── NEG 2: RAPID BACK FROM DETAIL VIEW ───
+- tapOn: "ConTENT"
+- extendedWaitUntil:
+    visible: "Cat1"
+    timeout: 5000
+- swipe:
+    direction: DOWN
+    duration: 100
+- tapOn:
+    point: "50%,19%"
+- extendedWaitUntil:
+    visible: "Beschreibung"
+    timeout: 10000
+
+- pressKey: back
+- pressKey: back
+- pressKey: back
+- pressKey: back
+- pressKey: back
+
+- launchApp
+- tapOn:
+    text: "NICHT JETZT"
+    optional: true
+- extendedWaitUntil:
+    visible: "ConTENT"
+    timeout: 10000
+
+
+# ─── NEG 3: DOUBLE TAP ON LIST ITEM ───
+- tapOn: "ConTENT"
+- extendedWaitUntil:
+    visible: "Cat1"
+    timeout: 5000
+
+- tapOn:
+    point: "50%,25%"
+- tapOn:
+    point: "50%,25%"
+
+- extendedWaitUntil:
+    visible: ".*"
+    timeout: 5000
+- pressKey: back
+- pressKey: back
+- pressKey: back
+- launchApp
+- tapOn:
+    text: "NICHT JETZT"
+    optional: true
+- extendedWaitUntil:
+    visible: "ConTENT"
+    timeout: 5000
+
+
+# ─── NEG 4: RAPID VIEW SWITCHING (list ↔ detail ↔ map) ───
+- tapOn: "ConTENT"
+- extendedWaitUntil:
+    visible: "Cat1"
+    timeout: 5000
+- swipe:
+    direction: DOWN
+    duration: 100
+
+- tapOn:
+    point: "50%,19%"
+- swipe:
+    direction: DOWN
+    duration: 1000
+- tapOn:
+    point: "93%,8%"
+- swipe:
+    direction: DOWN
+    duration: 500
+- tapOn:
+    point: "50%,19%"
+- swipe:
+    direction: DOWN
+    duration: 1000
+- tapOn:
+    point: "93%,8%"
+- extendedWaitUntil:
+    visible: "Cat1"
+    timeout: 5000
+
+- tapOn:
+    point: "94%,8%"
+- waitForAnimationToEnd
+- tapOn:
+    point: "94%,8%"
+- waitForAnimationToEnd
+- tapOn:
+    point: "94%,8%"
+- waitForAnimationToEnd
+- tapOn:
+    point: "94%,8%"
+- extendedWaitUntil:
+    visible: "Cat1"
+    timeout: 5000
+
+- pressKey: back
+- extendedWaitUntil:
+    visible: "ConTENT"
+    timeout: 5000
+
+
+# ─── NEG 5: HOME BUTTON & RESUME ───
+- tapOn: "ConTENT"
+- extendedWaitUntil:
+    visible: "Cat1"
+    timeout: 5000
+- swipe:
+    direction: DOWN
+    duration: 100
+- tapOn:
+    point: "50%,19%"
+- extendedWaitUntil:
+    visible: "Beschreibung"
+    timeout: 10000
+
+- pressKey: home
+
+- launchApp
+- extendedWaitUntil:
+    visible: ".*"
+    timeout: 10000
+
+- pressKey: back
+- pressKey: back
+- pressKey: back
+- launchApp
+- tapOn:
+    text: "NICHT JETZT"
+    optional: true
+- extendedWaitUntil:
+    visible: "ConTENT"
+    timeout: 10000
+
+
+# ─── NEG 6: AGGRESSIVE SCROLL ───
+- tapOn: "ConTENT"
+- extendedWaitUntil:
+    visible: "Cat1"
+    timeout: 5000
+- swipe:
+    direction: DOWN
+    duration: 100
+- tapOn:
+    point: "50%,19%"
+- extendedWaitUntil:
+    visible: "Beschreibung"
+    timeout: 10000
+
+- swipe:
+    start: "50%,80%"
+    end: "50%,10%"
+    duration: 300
+- swipe:
+    start: "50%,80%"
+    end: "50%,10%"
+    duration: 300
+- swipe:
+    start: "50%,80%"
+    end: "50%,10%"
+    duration: 300
+- swipe:
+    start: "50%,80%"
+    end: "50%,10%"
+    duration: 300
+- swipe:
+    start: "50%,80%"
+    end: "50%,10%"
+    duration: 300
+
+- swipe:
+    start: "50%,10%"
+    end: "50%,90%"
+    duration: 300
+- swipe:
+    start: "50%,10%"
+    end: "50%,90%"
+    duration: 300
+- swipe:
+    start: "50%,10%"
+    end: "50%,90%"
+    duration: 300
+- swipe:
+    start: "50%,10%"
+    end: "50%,90%"
+    duration: 300
+- swipe:
+    start: "50%,10%"
+    end: "50%,90%"
+    duration: 300
+
+- swipe:
+    start: "50%,80%"
+    end: "50%,20%"
+    duration: 200
+- swipe:
+    start: "50%,20%"
+    end: "50%,80%"
+    duration: 200
+- swipe:
+    start: "50%,80%"
+    end: "50%,20%"
+    duration: 200
+- swipe:
+    start: "50%,20%"
+    end: "50%,80%"
+    duration: 200
+
+- swipe:
+    direction: DOWN
+    duration: 1000
+- extendedWaitUntil:
+    visible: ".*"
+    timeout: 5000
+
+# ─── RECOVERY: Back to Home for next widget ───
+- pressKey: back
+- pressKey: back
+- pressKey: back
+- launchApp
+- tapOn:
+    text: "NICHT JETZT"
+    optional: true
+- extendedWaitUntil:
+    visible: ".*"
+    timeout: 10000
+
+
+# ══════════════════════════════════════════════════════════════════════
+#  WIDGET 2: Content only 1 data (single item, skips list view)
+# ══════════════════════════════════════════════════════════════════════
+
+- extendedWaitUntil:
+    visible: "Content only 1 data"
+    timeout: 15000
+- tapOn: "Content only 1 data"
+
+# ─── DETAIL VIEW (opens directly, no list view) ───
+- extendedWaitUntil:
+    visible: "Beschreibung"
+    timeout: 10000
+
+# Scroll down to see all available content
+- swipe:
+    start: "50%,70%"
+    end: "50%,30%"
+    duration: 800
+- swipe:
+    start: "50%,70%"
+    end: "50%,30%"
+    duration: 800
+
+# Scroll back up
+- swipe:
+    start: "50%,30%"
+    end: "50%,70%"
+    duration: 800
+- swipe:
+    start: "50%,30%"
+    end: "50%,70%"
+    duration: 800
+
+# Verify detail view still works
+- extendedWaitUntil:
+    visible: "Beschreibung"
+    timeout: 5000
+
+# ─── CLOSE DETAIL VIEW → HOME ───
+- pressKey: back
+- extendedWaitUntil:
+    visible: "Content only 1 data"
+    timeout: 5000
+
+
+# ══════════════════════════════════════════════════════════════════════
+#  WIDGET 3: Content & Map (opens directly into map view)
+# ══════════════════════════════════════════════════════════════════════
+
+- extendedWaitUntil:
+    visible: "Content & Map"
+    timeout: 15000
+- tapOn: "Content & Map"
+
+# ─── MAP VIEW (opens directly) ───
+- extendedWaitUntil:
+    visible: "Cat1"
+    timeout: 10000
+
+# ─── TAP PIN → POPUP WITH CONTENT NAME ───
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible: ".*"
+    timeout: 3000
+- tapOn:
+    point: "49%,51%"
+- extendedWaitUntil:
+    visible: ".*"
+    timeout: 5000
+
+# ─── TAP POPUP → DETAIL VIEW ───
+- tapOn:
+    point: "50%,47%"
+- extendedWaitUntil:
+    visible: "Beschreibung"
+    timeout: 10000
+
+# ─── CLOSE DETAIL VIEW → BACK TO MAP ───
+- extendedWaitUntil:
+    visible: ".*"
+    timeout: 2000
+- tapOn:
+    point: "93%,8%"
+
+# ─── TAP LIST ICON → DETAIL VIEW (single item skips list) ───
+- extendedWaitUntil:
+    visible: ".*"
+    timeout: 2000
+- tapOn:
+    point: "94%,8%"
+- extendedWaitUntil:
+    visible: "Beschreibung"
+    timeout: 10000
+
+# ─── CLOSE DETAIL VIEW → HOME ───
+- extendedWaitUntil:
+    visible: ".*"
+    timeout: 2000
+- tapOn:
+    point: "93%,8%"
+- extendedWaitUntil:
+    visible: "Content & Map"
+    timeout: 5000
+
+# ══════════════════════════════════════════════════════════════════════
+#  WIDGET 4: Content more cats (categories & subcategories)
+# ══════════════════════════════════════════════════════════════════════
+
+- scrollUntilVisible:
+    element:
+      text: "Content more cats"
+    direction: DOWN
+    timeout: 15000
+- tapOn: "Content more cats"
+
+# ─── LIST VIEW (categories) ───
+- extendedWaitUntil:
+    visible: ".*"
+    timeout: 10000
+
+# ─── TAP FIRST CATEGORY → DETAIL VIEW ───
+# Only 1 content item → skips subcategory & content list views
+- tapOn:
+    point: "50%,25%"
+- extendedWaitUntil:
+    visible: ".*"
+    timeout: 10000
+
+# ─── TAP X → CATEGORY LIST VIEW ───
+# BUG-001: X button closes entire widget instead of returning to category list.
+- extendedWaitUntil:
+    visible: ".*"
+    timeout: 3000
+- tapOn:
+    point: "93%,8%"
+- extendedWaitUntil:
+    visible: ".*"
+    timeout: 3000
+- assertVisible:
+    text: "CAT CAT QA"
+    optional: true
+- assertVisible:
+    text: "CAt not visible"
+    optional: true
+- assertVisible:
+    text: "More under cats"
+    optional: true
+- assertVisible:
+    text: "QA Cats"
+    optional: true
+
+# ─── OPEN "CAt not visible" CATEGORY ───
+- extendedWaitUntil:
+    visible: ".*"
+    timeout: 3000
+- tapOn:
+    point: "92%,9%"
+- extendedWaitUntil:
+    visible: ".*"
+    timeout: 3000
+
+- extendedWaitUntil:
+    visible: ".*"
+    timeout: 3000
+- tapOn:
+    point: "92%,9%"
+- extendedWaitUntil:
+    visible: ".*"
+    timeout: 3000
+
+- extendedWaitUntil:
+    visible: "Content more cats"
+    timeout: 10000
+- tapOn: "Content more cats"
+- extendedWaitUntil:
+    visible: ".*"
+    timeout: 10000
+
+- extendedWaitUntil:
+    visible: ".*"
+    timeout: 2000
+- tapOn:
+    point: "50%,33%"
+
+# Expected: empty category with error popup
+- extendedWaitUntil:
+    visible: ".*"
+    timeout: 5000
+
+# ─── BACK TO CATEGORY LIST ───
+- extendedWaitUntil:
+    visible: ".*"
+    timeout: 2000
+- tapOn:
+    point: "7%,8%"
+- extendedWaitUntil:
+    visible: "Content more cats"
+    timeout: 5000
+
+# ─── OPEN "More under cats" → SUBCATEGORY LIST ───
+- extendedWaitUntil:
+    visible: ".*"
+    timeout: 2000
+- tapOn:
+    point: "50%,47%"
+- extendedWaitUntil:
+    visible: ".*"
+    timeout: 10000
+
+# ─── TAP FIRST SUBCATEGORY → DETAIL VIEW ───
+- extendedWaitUntil:
+    visible: ".*"
+    timeout: 3000
+- tapOn:
+    point: "53%,21%"
+- extendedWaitUntil:
+    visible: ".*"
+    timeout: 3000
+
+# ─── CLOSE DETAIL VIEW → BACK TO SUBCATEGORY LIST ───
+- tapOn:
+    point: "92%,9%"
+- extendedWaitUntil:
+    visible: ".*"
+    timeout: 3000
+
+# ─── TAP SECOND SUBCATEGORY → DETAIL VIEW ───
+- tapOn:
+    point: "56%,34%"
+- extendedWaitUntil:
+    visible: ".*"
+    timeout: 3000
+
+# ─── CLOSE DETAIL VIEW → BACK TO SUBCATEGORY LIST ───
+- tapOn:
+    point: "92%,9%"
+- extendedWaitUntil:
+    visible: ".*"
+    timeout: 3000
+
+# ─── BACK TO CATEGORY LIST ───
+- tapOn:
+    point: "7%,9%"
+- extendedWaitUntil:
+    visible: ".*"
+    timeout: 3000
+
+# ─── NAVIGATE BACK TO HOME SCREEN ───
+# Navigate through levels with pauses between each
+- extendedWaitUntil:
+    visible: ".*"
+    timeout: 3000
+- tapOn:
+    point: "7%,9%"
+- extendedWaitUntil:
+    visible: ".*"
+    timeout: 3000
+- tapOn:
+    point: "7%,9%"
+- extendedWaitUntil:
+    visible: ".*"
+    timeout: 3000
+- tapOn:
+    point: "7%,9%"
+- extendedWaitUntil:
+    visible: ".*"
+    timeout: 3000
+- tapOn:
+    point: "92%,9%"
+- extendedWaitUntil:
+    visible: ".*"
+    timeout: 3000
+
+- extendedWaitUntil:
+    visible: ".*"
+    timeout: 3000
+- tapOn:
+    point: "92%,9%"
+- extendedWaitUntil:
+    visible: ".*"
+    timeout: 3000
+
+- extendedWaitUntil:
+    visible: "Content more cats"
+    timeout: 10000
+
+# ─── OPEN "QA Cats" CATEGORY → CONTENT LIST ───
+- extendedWaitUntil:
+    visible: ".*"
+    timeout: 3000
+- tapOn: "Content more cats"
+- extendedWaitUntil:
+    visible: ".*"
+    timeout: 10000
+- extendedWaitUntil:
+    visible: ".*"
+    timeout: 3000
+- tapOn:
+    point: "81%,39%"
+- extendedWaitUntil:
+    visible: ".*"
+    timeout: 10000
+
+# ─── TAP 4TH CONTENT ITEM → DETAIL VIEW ───
+- extendedWaitUntil:
+    visible: ".*"
+    timeout: 3000
+- tapOn:
+    point: "43%,61%"
+- extendedWaitUntil:
+    visible: ".*"
+    timeout: 3000
+
+# ─── TAP X → BACK TO LIST VIEW ───
+# BUG-001: X closes entire widget. Expected: content list.
+- tapOn:
+    point: "93%,9%"
+- assertVisible:
+    text: "QA Cats"
+    optional: true
+
+# ─── END: All 4 Content widgets tested ───

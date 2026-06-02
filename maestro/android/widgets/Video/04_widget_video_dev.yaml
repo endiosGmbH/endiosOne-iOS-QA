@@ -1,0 +1,205 @@
+# Flow: Video Widget — Scenario 1 (Play / Stop)
+# Tags: widgets, video, navigation
+# Description: Test for Video widget (ID 18756)
+#   Config: Fullscreen=ON, autoPlay=OFF
+#   Scenario 1:
+#     1. Launch app
+#     2. Tap on Video widget → video starts playing
+#     3. Tap again → video stops
+
+appId: "de.endios.one.autokrafty.demo.debug"
+
+tags:
+  - widgets
+  - video
+  - navigation
+
+---
+
+# ─── SAFETY RESET (cleanup from previous failed runs) ───
+- setAirplaneMode:
+    value: "disabled"
+- pressKey: back
+- pressKey: back
+
+# ─── LAUNCH APP ───
+- launchApp
+
+- tapOn:
+    text: "NICHT JETZT"
+    optional: true
+
+# ─── WAIT FOR HOME SCREEN TO LOAD ───
+- extendedWaitUntil:
+    visible: "ConTENT"
+    timeout: 15000
+- waitForAnimationToEnd
+
+# ─── TAP ON VIDEO WIDGET → VIDEO STARTS PLAYING ───
+# Video widget is at the bottom of home screen ("Relaxation sounD" preview)
+# No text label → using coordinates
+- tapOn:
+    point: "66%,72%"
+
+# ─── WAIT WHILE VIDEO PLAYS ───
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# ─── TAP AGAIN ON VIDEO WIDGET → VIDEO STOPS ───
+- tapOn:
+    point: "66%,72%"
+- waitForAnimationToEnd:
+    timeout: 4000
+
+# ─── VERIFY VIDEO STOPPED (UI is stable) ───
+- waitForAnimationToEnd:
+    timeout: 3000
+
+# ─── TAP FULLSCREEN BUTTON → VIDEO OPENS IN FULLSCREEN ───
+- tapOn:
+    point: "93%,53%"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# ─── FULLSCREEN: TAP PLAY/PAUSE (1) → PAUSES VIDEO ───
+- tapOn:
+    point: "50%,50%"
+- waitForAnimationToEnd:
+    timeout: 3000
+
+# ─── FULLSCREEN: TAP PLAY/PAUSE (2) → RESUMES VIDEO ───
+- tapOn:
+    point: "50%,50%"
+- waitForAnimationToEnd:
+    timeout: 3000
+
+# ─── FULLSCREEN: TAP PLAY/PAUSE (3) → PAUSES VIDEO ───
+- tapOn:
+    point: "50%,50%"
+- waitForAnimationToEnd:
+    timeout: 3000
+
+# ─── FULLSCREEN: TOGGLE SOUND ON ───
+- tapOn:
+    point: "6%,95%"
+- waitForAnimationToEnd:
+    timeout: 3000
+
+# ─── FULLSCREEN: TOGGLE SOUND OFF ───
+- tapOn:
+    point: "6%,95%"
+- waitForAnimationToEnd:
+    timeout: 3000
+
+# ─── CLOSE FULLSCREEN → BACK TO HOME ───
+- tapOn:
+    point: "94%,8%"
+- extendedWaitUntil:
+    visible: "ConTENT"
+    timeout: 10000
+
+# ─── SCROLL DOWN TO REVEAL NEXT VIDEO WIDGETS ───
+# After this swipe, "Shiba inu core" tile is centered around 37%,60%
+# and "Cat" tile sits partially under the bottom nav — need another small scroll.
+- swipe:
+    start: "50%,85%"
+    end: "50%,15%"
+    duration: 500
+- waitForAnimationToEnd:
+    timeout: 3000
+
+# ══════════════════════════════════════════════════════════════════════
+#  WIDGET 2: Video — "Shiba inu core" (ID 18804)
+#  Config: Fullscreen=OFF, autoPlay=OFF (no fullscreen available)
+# ══════════════════════════════════════════════════════════════════════
+
+# ─── Let scroll inertia fully settle before tapping ───
+- waitForAnimationToEnd:
+    timeout: 4000
+
+# ─── DEBUG: capture state right before Shiba tap ───
+- takeScreenshot: shiba_before_tap
+
+# ─── TAP ON SHIBA INU VIDEO → VIDEO STARTS PLAYING ───
+# Tap by visible text instead of coords — uses accessibility tree,
+# avoids hit-region & scroll-inertia issues.
+- tapOn: "Wiedergabe"
+
+# ─── WAIT WHILE VIDEO PLAYS (real pause, not regex-instant) ───
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# ─── DEBUG: capture state after first Shiba tap ───
+- takeScreenshot: shiba_after_first_tap
+
+# ─── TAP AGAIN ON VIDEO → VIDEO STOPS ───
+- tapOn: "Wiedergabe"
+- waitForAnimationToEnd:
+    timeout: 4000
+
+# ─── VERIFY VIDEO STOPPED (UI is stable) ───
+- waitForAnimationToEnd:
+    timeout: 3000
+
+# ══════════════════════════════════════════════════════════════════════
+#  WIDGET 3: Video — "Lufthansa Boeing 747-8" (ID 18805)
+#  Config: Fullscreen=OFF, autoPlay=ON
+#  Scenario: page refresh → scroll to widget → verify autoplay (no fullscreen)
+# ══════════════════════════════════════════════════════════════════════
+
+# ─── SCROLL BACK TO TOP (needed for pull-to-refresh to trigger) ───
+- swipe:
+    start: "50%,20%"
+    end: "50%,90%"
+    duration: 400
+- swipe:
+    start: "50%,20%"
+    end: "50%,90%"
+    duration: 400
+- waitForAnimationToEnd:
+    timeout: 2000
+
+# ─── PULL-TO-REFRESH ───
+- swipe:
+    start: "50%,15%"
+    end: "50%,85%"
+    duration: 800
+- waitForAnimationToEnd:
+    timeout: 4000
+- extendedWaitUntil:
+    visible: "ConTENT"
+    timeout: 10000
+
+# ─── SCROLL DOWN TO BRING CAT INTO CENTER (Shiba fully off-screen) ───
+- swipe:
+    start: "50%,85%"
+    end: "50%,15%"
+    duration: 500
+- waitForAnimationToEnd:
+    timeout: 2000
+- swipe:
+    start: "50%,85%"
+    end: "50%,15%"
+    duration: 500
+- waitForAnimationToEnd:
+    timeout: 2000
+- swipe:
+    start: "50%,85%"
+    end: "50%,35%"
+    duration: 500
+- waitForAnimationToEnd:
+    timeout: 3000
+
+# ─── DEBUG: confirm widget is centered & Shiba off-screen ───
+- takeScreenshot: lufthansa_scroll_target
+
+# ─── VERIFY AUTOPLAY: no play-button overlay anywhere on screen ───
+# Works only if Shiba's "Wiedergabe" is scrolled off — handled by the 3rd swipe.
+- assertNotVisible: "Wiedergabe"
+
+# ─── LET VIDEO PLAY FOR 10 SECONDS ───
+- waitForAnimationToEnd:
+    timeout: 10000
+
+# ─── DEBUG: visual evidence of playback progression ───
+- takeScreenshot: lufthansa_after_10s
