@@ -3,76 +3,69 @@ name: "[IMG] Image Widget — full suite (single launch, Android)"
 tags:
   - image-widget
 # =============================================================================
-# Consolidated SINGLE-LAUNCH flow for the Image Widget [IMG] — TestRail §12911.
-# Android port of the iOS /run-widget pattern. App: Claude Automation (App-ID
-# 1020, configId 1425), TEST env. Package: de.endios.one.claudeautomation.demo.debug
-# Widget: oneWidgetImage 4.1.24-RC (source: oneWidgetImage-Android @ develop).
+# Consolidated SINGLE-LAUNCH flow — Image [IMG], TestRail §12911 (Android).
+# App: Claude Automation (App-ID 1020, configId 1425), TEST. Updated: 2026-06-05.
+# 14 cases in scope. 119770 is iOS-only and EXCLUDED from Android runs entirely
+# (user rule 2026-06-05) — not run, not reported, not counted as Blocked.
 #
-# DESIGN (per request):
-#   * Functional cases run FIRST, each on a NON-crashing image tile.
-#   * The rotatingRhythm=0 crash tile (18742) is exercised DEAD LAST as the
-#     dedicated bug repro (AGENCY-7584), so a crash there cannot block anything.
-#
-# TILE MAPPING (config 1425, Product tab):
-#   18741 "Bild clickable"       textBottom 4x4  rhythm 10  clickable   url2 only
-#   18742 "Bild testing"         textBottom 8x4  rhythm 0   clickable   url1/2/3   <-- BUG tile, LAST
-#   18763 "Bild" (plain,no title) plain 4x4      rhythm ""  clickable   url1/2/3   <-- viewer+swipe
-#   18784 "Images not clickable" textTop 4x8     rhythm 4   notClickable url1/2/3  <-- rotation + notClickable
-#   18785 "Invalid url" (plain)  plain 2x4       rhythm ""  clickable   404/bad-domain
+# TILE MAPPING (config 1425 fetched 2026-06-05, Product tab):
+#   18741 "Bild clickable"        4x4  rhythm10 clickable    1 url (url2 only)
+#   18742 "Bild testing"          8x4  rhythm'' clickable    3 urls  <- rhythm now EMPTY (was 0 =
+#         AGENCY-7584 crash). Code: isAutoSwipeEnabled=false when blank -> static. Kept LAST as
+#         regression check on the former crash tile.
+#   18763 (plain, title "Bild")   4x4  no-rhythm clickable   3 urls  <- viewer/swipe/share (tap by coord 50%,10%)
+#   18784 "Images not clickable"  4x8  rhythm4  notClickable 3 urls
+#   18785 "Invalid url"           2x4  no-rhythm clickable   invalid urls (renders fully BLANK —
+#         find by content-desc "Invalid url", never visually)
 #
 # Case -> tile:
-#   110108 rendering variants   -> baseline screenshots (plain 18763 / textBottom 18741 / textTop 18784)
-#   110127 rotation @ rhythm    -> 18784  (non-zero, 3 images)
-#   110114 tap opens viewer     -> 18763  (plain, 3 images, clickable)
-#   110295 swipe cycles images  -> 18763  (in viewer from 110114)
-#   110115 close viewer -> Home -> Back from 18763 viewer
-#   110116 tap blocked          -> 18784  (notClickable=true)
-#   110117 invalid url no crash -> 18785
-#   BUG  AGENCY-7584            -> 18742  (rhythm=0 -> StackOverflowError) — LAST
+#   110108 variants -> baseline    110127 rotation -> 18784     110114/110295/110115 viewer -> 18763
+#   110116 notClickable -> 18784   110117 invalid -> 18785
+#   Share[14020] 119766/767/768/769/771/772/773 -> 18763 viewer + chooser
+#   AGENCY-7584 regression check -> 18742 (LAST)
 #
-# PRECONDITION (test data): tile 18742 (rhythm=0) MUST be placed so it is NOT
-# visible on initial Product render (e.g. last position / scrolled off-screen),
-# otherwise the app crashes on load and blocks every case. This flow only scrolls
-# to 18742 in the final BUG step.
+# SHARE POLICY (user 2026-06-05): Gmail (119768) + WhatsApp (119769) are NAVIGATION-ONLY —
+# assert the target app's screen appears, screenshot, return. No account/composer/attachment checks.
 #
-# SELECTOR NOTES: text-bearing tiles (18741/18742/18784) match by visible text.
-# Plain tiles (18763/18785) expose no visible title — matched by content-desc
-# ("Bild" / "Invalid url"); confirm/adjust on first run if a tile isn't found.
+# 110127 ROTATION CAVEAT: auto-rotation is DISABLED while any accessibility connection is
+# active (BaseTileViewHolder.kt:59) and Maestro's UiAutomation counts as one -> the two rotation
+# screenshots below will be byte-identical BY DESIGN. Verify rotation post-run via adb only:
+#   adb shell input swipe (re-attach tile), then 4x `adb exec-out screencap -p` 5s apart,
+#   crop tile band y250..480 and compare hashes (confirmed cycling 2026-06-05).
 #
-# SCREENSHOTS: /tmp/verify-widget/run-widget-img/. If Maestro takeScreenshot
-# returns stale frames on this emulator, capture with `adb exec-out screencap -p`.
+# ANDROID NOTES: notifications pre-granted (permissions.all: allow). Viewer is the foundation
+# media viewer; share icon top-right ~"90%,5%". The OS share sheet reorders targets per use ->
+# tap chooser targets by TEXT, never coordinate. Plain tiles (18763/18785) have no text/desc ->
+# 18763 tapped by coordinate. Top-edge scrolls use centerElement:false. Maestro takeScreenshot
+# goes STALE after external-app excursions -> recapture evidence via adb exec-out screencap.
+# Share payload is the image URL (link), shown as text in the chooser. After an external-app
+# share (WhatsApp/Gmail) the app is resumed via launchApp(no clearState) — the only sanctioned
+# extra launches, for returning from the OS share target. Viewer re-entry after a resume can
+# race -> guarded retry + extendedWaitUntil(notVisible dashboard anchor) before any viewer swipe.
 # =============================================================================
 ---
-# ---- ONE app launch for the whole run ----
 - launchApp:
     appId: de.endios.one.claudeautomation.demo.debug
     clearState: true
-    permissions:
-      all: allow            # pre-grant POST_NOTIFICATIONS etc. -> no permission dialog
-- waitForAnimationToEnd:
-    timeout: 8000
-
-# Fallback dialog dismissal (curly + straight apostrophe) in case the grant is ignored
+    permissions: { all: allow }
+- waitForAnimationToEnd: { timeout: 8000 }
 - runFlow:
     when: { visible: "Don’t allow" }
     commands: [ { tapOn: "Don’t allow" }, { waitForAnimationToEnd: { timeout: 1500 } } ]
 - runFlow:
     when: { visible: "Don't allow" }
     commands: [ { tapOn: "Don't allow" }, { waitForAnimationToEnd: { timeout: 1500 } } ]
-
-# Wait (cold start fetches config 1425 + tile images over network)
 - extendedWaitUntil:
     visible: "Images not clickable"
     timeout: 40000
-- waitForAnimationToEnd:
-    timeout: 3000
+- waitForAnimationToEnd: { timeout: 3000 }
 
-# === 110108 — Tile rendering: plain / textBottom / textTop variants ===
-- assertVisible: "Bild clickable"          # textBottom (18741)
-- assertVisible: "Images not clickable"    # textTop (18784)
+# === 110108 Tile rendering variants ===
+- assertVisible: "Bild clickable"
+- assertVisible: "Images not clickable"
 - takeScreenshot: /tmp/verify-widget/run-widget-img/01_tiles_variants
 
-# === 110127 — Rotation follows rotatingRhythm (18784, rhythm 4, 3 images) ===
+# === 110127 Rotation (18784, rhythm 4) — see ROTATION CAVEAT in header ===
 - scrollUntilVisible:
     element: { text: "Images not clickable" }
     direction: DOWN
@@ -81,65 +74,10 @@ tags:
     waitToSettleTimeoutMs: 800
     timeout: 10000
 - takeScreenshot: /tmp/verify-widget/run-widget-img/02_rotation_frame_a
-- waitForAnimationToEnd:
-    timeout: 10000                          # > 2x rhythm(4s) -> expect image change
+- waitForAnimationToEnd: { timeout: 10000 }
 - takeScreenshot: /tmp/verify-widget/run-widget-img/02b_rotation_frame_b
 
-# === 110114 — Tap opens image viewer (18763 plain, 3 imgs, notClickable=false) ===
-# 18763 is a PLAIN tile: no visible title AND empty content-desc -> not selectable by
-# text/desc. It is the top-middle tile (view_pager bounds [362,71][710,419]) -> tap by
-# coordinate. First scroll the top row into view via 18741 (which has a content-desc).
-- scrollUntilVisible:
-    element: { text: "Bild clickable" }
-    direction: UP
-    centerElement: false                     # top-edge element: do NOT center (Maestro fails to center top items)
-    visibilityPercentage: 10
-    waitToSettleTimeoutMs: 800
-    timeout: 10000
-- tapOn:
-    point: "50%, 10%"                        # 18763 plain tile (top-middle)
-- waitForAnimationToEnd:
-    timeout: 4000
-- takeScreenshot: /tmp/verify-widget/run-widget-img/03_viewer_opened
-
-# === 110295 — Swipe in viewer cycles images in order (url1 -> url2 -> url3) ===
-- swipe: { start: "85%, 50%", end: "15%, 50%", duration: 400 }
-- waitForAnimationToEnd: { timeout: 1500 }
-- takeScreenshot: /tmp/verify-widget/run-widget-img/04_viewer_next
-- swipe: { start: "15%, 50%", end: "85%, 50%", duration: 400 }
-- waitForAnimationToEnd: { timeout: 1500 }
-- takeScreenshot: /tmp/verify-widget/run-widget-img/04b_viewer_prev
-
-# === 110115 — Close viewer returns to Home/Product ===
-- back
-- waitForAnimationToEnd: { timeout: 2000 }
-- assertVisible: "Images not clickable"     # back on dashboard
-- takeScreenshot: /tmp/verify-widget/run-widget-img/05_back_on_product
-
-# === 110116 — Tap blocked when notClickable=true (18784) ===
-- scrollUntilVisible:
-    element: { text: "Images not clickable" }
-    direction: DOWN
-    centerElement: true
-    visibilityPercentage: 40
-    waitToSettleTimeoutMs: 800
-    timeout: 10000
-- tapOn: "Images not clickable"
-- waitForAnimationToEnd: { timeout: 2500 }
-- assertVisible: "Images not clickable"     # no viewer opened -> still on dashboard
-- takeScreenshot: /tmp/verify-widget/run-widget-img/06_notclickable_no_viewer
-
-# === 110117 — Negative: invalid/unreachable URL does not crash (18785) ===
-- scrollUntilVisible:
-    element: { text: "Invalid url" }         # plain tile content-desc
-    direction: DOWN
-    centerElement: true
-    visibilityPercentage: 40
-    waitToSettleTimeoutMs: 800
-    timeout: 10000
-- takeScreenshot: /tmp/verify-widget/run-widget-img/07_invalid_url_state
-# scroll the invalid tile OFF-screen (up to top) then BACK to it — deterministic,
-# avoids pull-to-refresh from free swipes near the top
+# === 110114 Tap opens viewer (18763 plain, top-middle, tap by coordinate) ===
 - scrollUntilVisible:
     element: { text: "Bild clickable" }
     direction: UP
@@ -147,6 +85,106 @@ tags:
     visibilityPercentage: 10
     waitToSettleTimeoutMs: 800
     timeout: 10000
+- tapOn: { point: "50%, 10%" }
+- waitForAnimationToEnd: { timeout: 4000 }
+- takeScreenshot: /tmp/verify-widget/run-widget-img/03_viewer_opened
+
+# === 110295 Swipe cycles images in viewer (full url1 -> url2 -> url3 -> back) ===
+- swipe: { start: "85%, 50%", end: "15%, 50%", duration: 400 }
+- waitForAnimationToEnd: { timeout: 1500 }
+- takeScreenshot: /tmp/verify-widget/run-widget-img/04_viewer_url2
+- swipe: { start: "85%, 50%", end: "15%, 50%", duration: 400 }
+- waitForAnimationToEnd: { timeout: 1500 }
+- takeScreenshot: /tmp/verify-widget/run-widget-img/04b_viewer_url3
+- swipe: { start: "15%, 50%", end: "85%, 50%", duration: 400 }
+- waitForAnimationToEnd: { timeout: 1500 }
+- takeScreenshot: /tmp/verify-widget/run-widget-img/04c_viewer_back_url2
+- swipe: { start: "15%, 50%", end: "85%, 50%", duration: 400 }
+- waitForAnimationToEnd: { timeout: 1500 }
+- takeScreenshot: /tmp/verify-widget/run-widget-img/04d_viewer_back_url1
+
+# === Share [14020] — exercised inside the viewer that is now open (on url1) ===
+# 119766 share icon present (top-right)
+- takeScreenshot: /tmp/verify-widget/run-widget-img/20_share_icon_present
+# 119767 opens native chooser
+- tapOn: { point: "90%, 5%" }
+- assertVisible: "WhatsApp"                 # chooser open (target listed)
+- takeScreenshot: /tmp/verify-widget/run-widget-img/21_share_sheet
+# 119769 NAVIGATION-ONLY: WhatsApp screen appears, then return to our app
+- tapOn: "WhatsApp"
+- assertVisible:
+    text: ".*(Agree and continue|Welcome to WhatsApp|WhatsApp).*"
+- takeScreenshot: /tmp/verify-widget/run-widget-img/22_whatsapp
+- pressKey: Back
+- launchApp: { appId: de.endios.one.claudeautomation.demo.debug }
+- waitForAnimationToEnd: { timeout: 4000 }
+- assertVisible: "Bild clickable"
+
+# 119768 NAVIGATION-ONLY: Gmail screen appears (re-open viewer + share, tap Gmail by TEXT)
+- tapOn: { point: "50%, 10%" }
+- waitForAnimationToEnd: { timeout: 3000 }
+- runFlow:
+    when: { visible: "Bild clickable" }
+    commands:
+      - tapOn: { point: "50%, 10%" }
+      - waitForAnimationToEnd: { timeout: 3000 }
+- extendedWaitUntil:
+    notVisible: "Bild clickable"
+    timeout: 8000
+- tapOn: { point: "90%, 5%" }
+- assertVisible: "WhatsApp"
+- tapOn: "Gmail"
+- assertVisible:
+    text: ".*(Welcome to Gmail|Gmail|SKIP).*"
+- takeScreenshot: /tmp/verify-widget/run-widget-img/23_gmail
+- pressKey: Back
+- launchApp: { appId: de.endios.one.claudeautomation.demo.debug }
+- waitForAnimationToEnd: { timeout: 4000 }
+- assertVisible: "Bild clickable"
+
+# 119773 share acts on currently displayed image (URL tracks the frame)
+# Re-entry guard: tap can fail to register right after an external-app resume ->
+# retry once, then require the dashboard to be GONE (viewer open) before swiping,
+# else the swipe lands on the dashboard and switches tabs (observed 2026-06-05).
+- tapOn: { point: "50%, 10%" }
+- waitForAnimationToEnd: { timeout: 3000 }
+- runFlow:
+    when: { visible: "Bild clickable" }
+    commands:
+      - tapOn: { point: "50%, 10%" }
+      - waitForAnimationToEnd: { timeout: 3000 }
+- extendedWaitUntil:
+    notVisible: "Bild clickable"
+    timeout: 8000
+- swipe: { start: "85%, 50%", end: "15%, 50%", duration: 400 }
+- waitForAnimationToEnd: { timeout: 1500 }
+- tapOn: { point: "90%, 5%" }
+- assertVisible:
+    text: ".*137cfa29.*"                    # url2 (displayed frame) == shared link
+- takeScreenshot: /tmp/verify-widget/run-widget-img/24_share_current_frame
+# 119772 cancel share sheet -> back to viewer
+- pressKey: Back
+- waitForAnimationToEnd: { timeout: 1500 }
+- takeScreenshot: /tmp/verify-widget/run-widget-img/25_share_cancelled
+# close viewer -> dashboard (110115 close-to-home)
+- pressKey: Back
+- waitForAnimationToEnd: { timeout: 2000 }
+- assertVisible: "Images not clickable"
+
+# 119771 + 110116 notClickable exposes no viewer/share (tap 18784)
+- scrollUntilVisible:
+    element: { text: "Images not clickable" }
+    direction: UP
+    centerElement: false
+    visibilityPercentage: 10
+    waitToSettleTimeoutMs: 800
+    timeout: 10000
+- tapOn: "Images not clickable"
+- waitForAnimationToEnd: { timeout: 2500 }
+- assertVisible: "Images not clickable"
+- takeScreenshot: /tmp/verify-widget/run-widget-img/26_notclickable_no_share
+
+# === 110117 Invalid URL no crash (18785 — tile renders BLANK, match by text/desc only) ===
 - scrollUntilVisible:
     element: { text: "Invalid url" }
     direction: DOWN
@@ -154,21 +192,14 @@ tags:
     visibilityPercentage: 10
     waitToSettleTimeoutMs: 800
     timeout: 10000
-- assertVisible: "Invalid url"               # app still alive, tile still in layout
-- takeScreenshot: /tmp/verify-widget/run-widget-img/07b_invalid_url_after_scroll
+- takeScreenshot: /tmp/verify-widget/run-widget-img/07_invalid_url_state
+- assertVisible: "Invalid url"
 
 # =============================================================================
-# === BUG REPRO — AGENCY-7584 — MUST BE THE LAST STEP (crashes the app) ========
-# Tile 18742 "Bild testing" has rotatingRhythm=0. Scrolling it into view starts
-# its CountDownTimer(0,0) -> onFinish recurses (BaseTileViewHolder.kt:50/51/168)
-# -> StackOverflowError -> whole-app crash. Expected. Nothing runs after this.
-# A crash here == bug reproduced (PASS for the bug case). If it does NOT crash,
-# the rhythm=0 guard was fixed -> note it.
-# =============================================================================
+# === REGRESSION CHECK — former AGENCY-7584 crash tile (18742, rhythm now '') — LAST
+# Code says blank rhythm => no auto-swipe => no crash expected. Verify it renders statically.
+# If the dashboard ever sets rotatingRhythm=0 again, this step becomes the crash repro.
 - takeScreenshot: /tmp/verify-widget/run-widget-img/08_before_bug_tile
-# Direction depends on where 18742 sits on the dashboard. Per the precondition it
-# should be LAST (scroll DOWN); in the current config 1425 it is at the top-right
-# (scroll UP). Using UP + no-center to match the current layout.
 - scrollUntilVisible:
     element: { text: "Bild testing" }
     direction: UP
@@ -177,4 +208,4 @@ tags:
     waitToSettleTimeoutMs: 800
     timeout: 10000
 - waitForAnimationToEnd: { timeout: 3000 }
-- takeScreenshot: /tmp/verify-widget/run-widget-img/09_bug_rhythm0_result
+- takeScreenshot: /tmp/verify-widget/run-widget-img/09_bug_rhythm_empty_result
