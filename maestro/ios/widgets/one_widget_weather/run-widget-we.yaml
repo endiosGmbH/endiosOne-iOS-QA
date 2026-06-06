@@ -1,0 +1,396 @@
+appId: de.endios.one
+name: "[WE] Weather — all-in-one 11-case suite flow"
+tags:
+  - weather
+  - run-widget
+
+# ===========================================================================
+# SINGLE all-in-one flow for the entire Weather suite (suite-id 12897, 11 cases
+# as of 2026-06-02 — 110051 was removed from TestRail). Run with ONE command:
+#   maestro --device <ios-udid> test maestro/widgets/WE/run-widget-we.yaml
+# (--device is required — Maestro otherwise grabs a running Android emulator.
+#  Runs on iPhone 16 Pro / iOS 18.4; the x86_64 build won't drive on iOS 26.)
+#
+# Resolved config (configId 1425 / TEST) has FOUR Weather widget instances on
+# the Product page — used per case for tile variety:
+#   18746  overviewStrip   12x4   "Weather testing"  ← connector-driven preview
+#   18747  basicImage       4x4   "Wetter test"      ← Dashboard image asset
+#   18759  todayTile       12x8   "Test Weather"     ← large today card
+#   18803  contentBasic     8x8   "Weather QAs"      ← medium content basic
+#
+# Three sections, run in order from a SINGLE file:
+#   A. Happy path (110044/110055/110056/110045/110046/110047/110048/110049/110050)
+#      — one launch (permissions all:allow) + one pull-to-refresh baseline.
+#   B. 110053 no-crash [OP-15887] — issues THREE cold-start launchApp blocks +
+#      an in-session nav cycle (the sanctioned multi-launch exception; a launch
+#      crash cannot be proven from a single warm session).
+#   C. 110052 location denied — one launch with permissions location:deny
+#      (no external simctl revoke needed). Runs LAST so the denied state can't
+#      affect A/B; the next run's all:allow launch re-grants location.
+#
+# Notes carried from prior runs:
+#   - clearKeychain re-triggers the App Tracking Transparency prompt on the
+#     splash screen — every launch dismisses "Ask App Not to Track" first.
+#   - Day Detail's back button is the LIVE location name (San Francisco /
+#     Hamburg / …), so detail→feed back taps the chevron by coord (6%,7%).
+#   - Between-case repositioning uses direction-aware scrollUntilVisible; the
+#     only pull-to-refresh is the single baseline swipe in section A.
+# Timing: 1500ms anim settle, 4000ms feed load, 2000ms detail load.
+# ===========================================================================
+---
+- launchApp:
+    appId: de.endios.one
+    clearState: true
+    clearKeychain: true
+    permissions:
+      all: allow
+- waitForAnimationToEnd:
+    timeout: 2500
+# clearKeychain re-triggers the App Tracking Transparency prompt, which appears
+# on an UNPREDICTABLE delay after launch and blocks the dashboard from Maestro's
+# view. Poll for ~10s, dismissing "Ask App Not to Track" (and any system
+# permission prompt) whenever it shows, instead of a single early tap.
+- repeat:
+    times: 10
+    commands:
+      - runFlow:
+          when:
+            visible: "Ask App Not to Track"
+          commands:
+            - tapOn: "Ask App Not to Track"
+      - runFlow:
+          when:
+            visible: "Allow While Using App"
+          commands:
+            - tapOn: "Allow While Using App"
+      - waitForAnimationToEnd:
+          timeout: 1000
+- extendedWaitUntil:
+    visible:
+      text: "Auto"
+    timeout: 60000
+- waitForAnimationToEnd:
+    timeout: 2000
+
+# Baseline screenshot + ONE sanctioned pull-to-refresh
+- takeScreenshot: /tmp/verify-widget/run-widget-we/00_dashboard_top
+- swipe:
+    start: "50%, 25%"
+    end: "50%, 75%"
+- waitForAnimationToEnd:
+    timeout: 5000
+- takeScreenshot: /tmp/verify-widget/run-widget-we/00_dashboard_after_refresh
+
+# ---------------------------------------------------------------------------
+# 110044 + 110055 — Dashboard render across ALL FOUR Weather tiles
+# basicImage "Wetter test" is reliably labelled; the other three tiles render
+# connector-driven content (no fixed text label), so we step through the
+# Product tab and screenshot each viewport. Tiles are identified visually.
+# ---------------------------------------------------------------------------
+- scrollUntilVisible:
+    element:
+      text: "Wetter test"
+    direction: DOWN
+    timeout: 30000
+    visibilityPercentage: 30
+- takeScreenshot: /tmp/verify-widget/run-widget-we/110044_tile1_basicImage_wetter_test
+- takeScreenshot: /tmp/verify-widget/run-widget-we/110055_tile1_basicImage_light
+
+# Step down the Product tab — three viewports past "Wetter test" capture the
+# contentBasic, todayTile and overviewStrip variants in order.
+- scroll
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: /tmp/verify-widget/run-widget-we/110044_tile_viewport2
+
+- scroll
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: /tmp/verify-widget/run-widget-we/110044_tile_viewport3
+
+- scroll
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: /tmp/verify-widget/run-widget-we/110044_tile_viewport4
+
+- scroll
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: /tmp/verify-widget/run-widget-we/110044_tile_viewport5
+
+# ---------------------------------------------------------------------------
+# 110056 — Tap entry. Anchor back up to "Wetter test" centered (so the tile
+# is fully on screen and tapOn lands on its center, not a neighbour).
+# ---------------------------------------------------------------------------
+- scrollUntilVisible:
+    element:
+      text: "Wetter test"
+    direction: UP
+    timeout: 30000
+    visibilityPercentage: 100
+    centerElement: true
+- takeScreenshot: /tmp/verify-widget/run-widget-we/110056_pre_tap_wetter_test
+- tapOn: "Wetter test"
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: /tmp/verify-widget/run-widget-we/110056_feed_after_tap
+
+# ---------------------------------------------------------------------------
+# 110045 / 110047 — Feed View daily forecast top + UI compliance (light)
+# 110046 — Feed → Detail nav (next block)
+# ---------------------------------------------------------------------------
+- takeScreenshot: /tmp/verify-widget/run-widget-we/110045_feed_top__110047_light
+
+# ---------------------------------------------------------------------------
+# 110048 / 110049 / 110050 — Day Detail
+# Enter via right-side arrow on today card (coord tap proven reliable)
+# ---------------------------------------------------------------------------
+- tapOn:
+    point: "95%,13%"
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: /tmp/verify-widget/run-widget-we/110048_detail_top__110049_entry__110050_light
+
+# 110049 R-to-L swipe → next hours / next day
+- swipe:
+    start: "85%, 75%"
+    end: "15%, 75%"
+    duration: 600
+- waitForAnimationToEnd:
+    timeout: 1000
+- takeScreenshot: /tmp/verify-widget/run-widget-we/110049_detail_swipe_left__110048_advances
+
+# 110049 L-to-R swipe → back to earlier hours / earlier day
+- swipe:
+    start: "15%, 75%"
+    end: "85%, 75%"
+    duration: 600
+- waitForAnimationToEnd:
+    timeout: 1000
+- takeScreenshot: /tmp/verify-widget/run-widget-we/110049_detail_swipe_right
+
+# ---------------------------------------------------------------------------
+# 110046 — Back from Detail returns to Feed (NOT directly home)
+# Day Detail's back button is the parent screen title, which is the LIVE
+# location name (e.g. "San Francisco", "Hamburg") and changes daily — so tap
+# the back chevron by coordinate (top-left) instead of a hardcoded label.
+# ---------------------------------------------------------------------------
+- tapOn:
+    point: "6%, 7%"
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: /tmp/verify-widget/run-widget-we/110046_back_from_detail_to_feed
+
+# 110045 mid/bottom — scroll feed to capture full daily list
+- scroll
+- waitForAnimationToEnd:
+    timeout: 1000
+- takeScreenshot: /tmp/verify-widget/run-widget-we/110045_feed_mid
+- scroll
+- waitForAnimationToEnd:
+    timeout: 1000
+- takeScreenshot: /tmp/verify-widget/run-widget-we/110045_feed_bottom
+
+# 110046 — Back from Feed returns to dashboard
+- runFlow:
+    when:
+      visible: "Back"
+    commands:
+      - tapOn: "Back"
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: /tmp/verify-widget/run-widget-we/110046_back_to_dashboard
+
+# ===========================================================================
+# SECTION B — 110053  No-crash on widget open [OP-15887]
+# Three cold starts + an in-session nav cycle. Each cold start = its own
+# launchApp with clearState + clearKeychain (so it is a true cold start).
+# ===========================================================================
+
+# ---- Cold start #1 ----
+- launchApp:
+    appId: de.endios.one
+    clearState: true
+    clearKeychain: true
+    permissions:
+      all: allow
+- waitForAnimationToEnd:
+    timeout: 2500
+- repeat:
+    times: 10
+    commands:
+      - runFlow:
+          when:
+            visible: "Ask App Not to Track"
+          commands:
+            - tapOn: "Ask App Not to Track"
+      - waitForAnimationToEnd:
+          timeout: 1000
+- extendedWaitUntil:
+    visible:
+      text: "Auto"
+    timeout: 60000
+- scrollUntilVisible:
+    element:
+      text: "Wetter test"
+    direction: DOWN
+    timeout: 30000
+    visibilityPercentage: 30
+- tapOn: "Wetter test"
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: /tmp/verify-widget/run-widget-we/110053_coldstart1_feed
+
+# ---- Cold start #2 ----
+- launchApp:
+    appId: de.endios.one
+    clearState: true
+    clearKeychain: true
+    permissions:
+      all: allow
+- waitForAnimationToEnd:
+    timeout: 2500
+- repeat:
+    times: 10
+    commands:
+      - runFlow:
+          when:
+            visible: "Ask App Not to Track"
+          commands:
+            - tapOn: "Ask App Not to Track"
+      - waitForAnimationToEnd:
+          timeout: 1000
+- extendedWaitUntil:
+    visible:
+      text: "Auto"
+    timeout: 60000
+- scrollUntilVisible:
+    element:
+      text: "Wetter test"
+    direction: DOWN
+    timeout: 30000
+    visibilityPercentage: 30
+- tapOn: "Wetter test"
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: /tmp/verify-widget/run-widget-we/110053_coldstart2_feed
+
+# ---- Cold start #3 + in-session nav cycle (feed → detail → feed → home) ----
+- launchApp:
+    appId: de.endios.one
+    clearState: true
+    clearKeychain: true
+    permissions:
+      all: allow
+- waitForAnimationToEnd:
+    timeout: 2500
+- repeat:
+    times: 10
+    commands:
+      - runFlow:
+          when:
+            visible: "Ask App Not to Track"
+          commands:
+            - tapOn: "Ask App Not to Track"
+      - waitForAnimationToEnd:
+          timeout: 1000
+- extendedWaitUntil:
+    visible:
+      text: "Auto"
+    timeout: 60000
+- scrollUntilVisible:
+    element:
+      text: "Wetter test"
+    direction: DOWN
+    timeout: 30000
+    visibilityPercentage: 30
+- tapOn: "Wetter test"
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: /tmp/verify-widget/run-widget-we/110053_coldstart3_feed
+# into Day Detail via the today-card side arrow
+- tapOn:
+    point: "95%,13%"
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: /tmp/verify-widget/run-widget-we/110053_session_detail
+# back to Feed via the location chevron (coord — label is the live location)
+- tapOn:
+    point: "6%, 7%"
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: /tmp/verify-widget/run-widget-we/110053_session_back_feed
+# back to home
+- runFlow:
+    when:
+      visible: "Back"
+    commands:
+      - tapOn: "Back"
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: /tmp/verify-widget/run-widget-we/110053_session_back_home
+
+# ===========================================================================
+# SECTION C — 110052  Missing GPS permission handled  (RUN LAST)
+# Launch with location UNSET via Maestro permissions (Maestro rejects 'deny'
+# for location — iOS location has multiple states; 'unset' = not-determined,
+# which makes the app request location and surface the OS prompt). No external
+# simctl revoke needed. App must not crash / blank: it shows the feed with
+# last-known data and/or the OS location prompt.
+# NB: for a hard "Never/Denied" state instead of the prompt, run externally:
+#   xcrun simctl privacy <udid> revoke location de.endios.one
+# ===========================================================================
+- launchApp:
+    appId: de.endios.one
+    clearState: true
+    clearKeychain: true
+    permissions:
+      location: unset
+      notifications: allow
+- waitForAnimationToEnd:
+    timeout: 2500
+# With location unset the app surfaces BOTH the ATT prompt and the OS location
+# prompt on unpredictable delays. Poll ~12s, dismissing the ATT prompt AND
+# tapping "Don't Allow" on the location prompt (→ genuine DENIED state). The
+# fact that the app reaches the dashboard without crashing IS the 110052
+# "missing-permission handled" evidence.
+- repeat:
+    times: 12
+    commands:
+      - runFlow:
+          when:
+            visible: "Ask App Not to Track"
+          commands:
+            - tapOn: "Ask App Not to Track"
+      - runFlow:
+          when:
+            visible: "Don't Allow"
+          commands:
+            - tapOn: "Don't Allow"
+      - waitForAnimationToEnd:
+          timeout: 1000
+- extendedWaitUntil:
+    visible:
+      text: "Auto"
+    timeout: 60000
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: /tmp/verify-widget/run-widget-we/110052_dashboard_with_denied_location
+- scrollUntilVisible:
+    element:
+      text: "Wetter test"
+    direction: DOWN
+    timeout: 30000
+    visibilityPercentage: 30
+- tapOn: "Wetter test"
+- waitForAnimationToEnd:
+    timeout: 5000
+- takeScreenshot: /tmp/verify-widget/run-widget-we/110052_feed_with_denied_location
+- runFlow:
+    when:
+      visible: "Back"
+    commands:
+      - tapOn: "Back"
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: /tmp/verify-widget/run-widget-we/110052_after_back
