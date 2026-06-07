@@ -1,0 +1,49 @@
+appId: de.endios.one.claudeautomation.demo.debug
+name: "[WE] 110052 — location permission denied (focused secondary flow)"
+tags:
+  - weather-widget
+# Sanctioned second launch: 110052 requires the app to start WITHOUT location
+# permission, which the consolidated flow (permissions all allow) cannot do.
+# Verifies: no crash, clear permission/error state (OverviewViewModel.kt:72-78
+# requests permission in-widget), grant via OS prompt -> live forecast loads.
+---
+- launchApp:
+    appId: de.endios.one.claudeautomation.demo.debug
+    clearState: true
+    permissions:
+      all: allow
+      android.permission.ACCESS_FINE_LOCATION: deny
+      android.permission.ACCESS_COARSE_LOCATION: deny
+- waitForAnimationToEnd: { timeout: 8000 }
+- runFlow:
+    when: { visible: "Don’t allow" }
+    commands: [ { tapOn: "Don’t allow" }, { waitForAnimationToEnd: { timeout: 1500 } } ]
+- runFlow:
+    when: { visible: "Don't allow" }
+    commands: [ { tapOn: "Don't allow" }, { waitForAnimationToEnd: { timeout: 1500 } } ]
+- extendedWaitUntil:
+    visible: "Images not clickable"
+    timeout: 40000
+- scrollUntilVisible:
+    element: { text: "Wetter test" }
+    direction: DOWN
+    centerElement: true
+    visibilityPercentage: 40
+    waitToSettleTimeoutMs: 800
+    timeout: 20000
+- tapOn: "Wetter test"
+- waitForAnimationToEnd: { timeout: 5000 }
+# Expected: permission prompt (OS dialog) or in-widget error/empty state — NOT a crash/blank
+- takeScreenshot: /tmp/verify-widget/run-widget-we/10_perm_denied_state
+# Grant via the OS prompt if it is showing (English emulator locale)
+- runFlow:
+    when: { visible: "While using the app" }
+    commands:
+      - tapOn: "While using the app"
+      - waitForAnimationToEnd: { timeout: 3000 }
+- takeScreenshot: /tmp/verify-widget/run-widget-we/10b_after_grant
+# After grant the Feed View must load live forecast
+- extendedWaitUntil:
+    visible: { text: ".*Heute.*" }
+    timeout: 15000
+- takeScreenshot: /tmp/verify-widget/run-widget-we/10c_feed_after_grant

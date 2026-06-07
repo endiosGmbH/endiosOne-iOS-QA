@@ -1,0 +1,53 @@
+appId: de.endios.one.claudeautomation.demo.debug
+name: "[WE] 110053 — repeated cold-start widget open, OP-15887 (focused secondary flow)"
+tags:
+  - weather-widget
+# Sanctioned multi-launch flow: 110053 explicitly requires 3 cold starts (process
+# restarts) with a widget open each time — impossible inside the single-launch flow.
+# launchApp stopApp defaults to true -> each block is a cold start. State kept
+# (clearState false) so caches mirror a real repeated-launch scenario.
+---
+# --- cold start 1 ---
+- launchApp: { appId: de.endios.one.claudeautomation.demo.debug, clearState: false }
+- extendedWaitUntil: { visible: "Images not clickable", timeout: 40000 }
+- scrollUntilVisible:
+    element: { text: "Wetter test" }
+    direction: DOWN
+    centerElement: true
+    visibilityPercentage: 40
+    waitToSettleTimeoutMs: 800
+    timeout: 20000
+- tapOn: "Wetter test"
+- extendedWaitUntil: { visible: { text: ".*Heute.*" }, timeout: 15000 }
+- takeScreenshot: /tmp/verify-widget/run-widget-we/11_coldstart1_feed
+- pressKey: Back
+# --- cold start 2 ---
+- launchApp: { appId: de.endios.one.claudeautomation.demo.debug, clearState: false }
+- extendedWaitUntil: { visible: "Images not clickable", timeout: 40000 }
+- scrollUntilVisible:
+    element: { text: "Wetter test" }
+    direction: DOWN
+    centerElement: true
+    visibilityPercentage: 40
+    waitToSettleTimeoutMs: 800
+    timeout: 20000
+- tapOn: "Wetter test"
+- extendedWaitUntil: { visible: { text: ".*Heute.*" }, timeout: 15000 }
+- takeScreenshot: /tmp/verify-widget/run-widget-we/11b_coldstart2_feed
+- pressKey: Back
+# --- cold start 3 ---
+- launchApp: { appId: de.endios.one.claudeautomation.demo.debug, clearState: false }
+- extendedWaitUntil: { visible: "Images not clickable", timeout: 40000 }
+- scrollUntilVisible:
+    element: { text: "Wetter test" }
+    direction: DOWN
+    centerElement: true
+    visibilityPercentage: 40
+    waitToSettleTimeoutMs: 800
+    timeout: 20000
+- tapOn: "Wetter test"
+- extendedWaitUntil: { visible: { text: ".*Heute.*" }, timeout: 15000 }
+- takeScreenshot: /tmp/verify-widget/run-widget-we/11c_coldstart3_feed
+- pressKey: Back
+- waitForAnimationToEnd: { timeout: 2000 }
+- assertVisible: "Wetter test"

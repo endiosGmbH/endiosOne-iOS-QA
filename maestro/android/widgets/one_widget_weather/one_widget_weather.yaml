@@ -1,0 +1,176 @@
+appId: de.endios.one.claudeautomation.demo.debug
+name: "[WE] Weather Widget — full suite (single launch, Android)"
+tags:
+  - weather-widget
+# =============================================================================
+# Consolidated SINGLE-LAUNCH flow — Weather [WE], TestRail §12897 (Android).
+# App: Claude Automation (App-ID 1020, configId 1425), TEST. Created: 2026-06-06.
+# 11 cases. 110052 (location denied) + 110053 (3x cold start) need different launch
+# conditions -> sanctioned secondary flows 110052-only.yaml / 110053-only.yaml.
+# Live connector (accuweather) — no mock data; asserts target structure, not values.
+#
+# TILE MAPPING (config 1425 fetched 2026-06-06, Product tab, top -> bottom):
+#   18747 "Wetter test"     4x4  image tile + tileTitle override + nav title "Wetter"
+#   18746 "Weather testing" 4x12 strip, connector-driven
+#   18803 "Weather QAs"     8x8  connector-driven
+#   18759 "Test Weather"    8x12 connector-driven (station block + temps visible)
+#
+# Case -> tile:
+#   110044 tile config -> 18747 (dashboard image+tileTitle) vs 18803/18759 (connector preview)
+#   110055 icons/text  -> all four (baseline light; dark mode captured post-run via adb)
+#   110056 entry       -> 18747 "Wetter test" (repeated entry)
+#   110045-110050 feed/detail -> entered via 18759 "Test Weather"
+#   110053 session-flow part -> covered by 110056 + the feed/detail roundtrip here;
+#          cold-start part in 110053-only.yaml
+#
+# FEED ANCHOR: first day card always matches ".*Heute.*" ("Heute, dd.MM."). Day-2 card
+# is targeted by tomorrow's date regex — UPDATE THE DATE REGEX (07\.06\.) WHEN RE-RUNNING.
+# Dark-mode evidence (110055/110047/110050): post-run `adb shell cmd uimode night yes`
+# + adb screencaps (config change only — app process stays alive, no relaunch).
+# =============================================================================
+---
+- launchApp:
+    appId: de.endios.one.claudeautomation.demo.debug
+    clearState: true
+    permissions: { all: allow }
+- waitForAnimationToEnd: { timeout: 8000 }
+- runFlow:
+    when: { visible: "Don’t allow" }
+    commands: [ { tapOn: "Don’t allow" }, { waitForAnimationToEnd: { timeout: 1500 } } ]
+- runFlow:
+    when: { visible: "Don't allow" }
+    commands: [ { tapOn: "Don't allow" }, { waitForAnimationToEnd: { timeout: 1500 } } ]
+- extendedWaitUntil:
+    visible: "Images not clickable"
+    timeout: 40000
+- waitForAnimationToEnd: { timeout: 3000 }
+
+# === 110044 + 110055 — tile rendering: dashboard-configured vs connector-driven ===
+- scrollUntilVisible:
+    element: { text: "Wetter test" }
+    direction: DOWN
+    centerElement: true
+    visibilityPercentage: 40
+    waitToSettleTimeoutMs: 800
+    timeout: 20000
+- assertVisible: "Wetter test"          # 18747: dashboard tileTitle override renders
+- assertVisible: "Weather testing"      # 18746 strip present
+- takeScreenshot: /tmp/verify-widget/run-widget-we/01_tile_wettertest_strip
+- scrollUntilVisible:
+    element: { text: "Weather QAs" }
+    direction: DOWN
+    centerElement: true
+    visibilityPercentage: 40
+    waitToSettleTimeoutMs: 800
+    timeout: 20000
+- assertVisible: "Weather QAs"          # 18803 connector-driven preview
+- takeScreenshot: /tmp/verify-widget/run-widget-we/01b_tile_weatherqas
+- scrollUntilVisible:
+    element: { text: "Test Weather" }
+    direction: DOWN
+    centerElement: true
+    visibilityPercentage: 40
+    waitToSettleTimeoutMs: 800
+    timeout: 20000
+- assertVisible: "Test Weather"         # 18759 connector-driven preview + station block
+- takeScreenshot: /tmp/verify-widget/run-widget-we/01c_tile_testweather
+
+# === 110056 — tap opens Feed View, repeated entry stable (18747 "Wetter test") ===
+- scrollUntilVisible:
+    element: { text: "Wetter test" }
+    direction: UP
+    centerElement: true
+    visibilityPercentage: 40
+    waitToSettleTimeoutMs: 800
+    timeout: 20000
+- tapOn: "Wetter test"
+- extendedWaitUntil:
+    visible: { text: ".*Heute.*" }
+    timeout: 12000
+- takeScreenshot: /tmp/verify-widget/run-widget-we/02_feed_entry1
+- pressKey: Back
+- waitForAnimationToEnd: { timeout: 2000 }
+- assertVisible: "Wetter test"
+- tapOn: "Wetter test"                  # repeated entry
+- extendedWaitUntil:
+    visible: { text: ".*Heute.*" }
+    timeout: 12000
+- takeScreenshot: /tmp/verify-widget/run-widget-we/02b_feed_entry2
+- pressKey: Back
+- waitForAnimationToEnd: { timeout: 2000 }
+- assertVisible: "Wetter test"
+
+# === 110045 — Feed View daily cards render (entered via 18759 "Test Weather") ===
+- scrollUntilVisible:
+    element: { text: "Test Weather" }
+    direction: DOWN
+    centerElement: true
+    visibilityPercentage: 40
+    waitToSettleTimeoutMs: 800
+    timeout: 20000
+- tapOn: "Test Weather"
+- extendedWaitUntil:
+    visible: { text: ".*Heute.*" }
+    timeout: 12000
+- waitForAnimationToEnd: { timeout: 2000 }
+- takeScreenshot: /tmp/verify-widget/run-widget-we/03_feed_daily_top
+- scroll
+- waitForAnimationToEnd: { timeout: 1500 }
+- takeScreenshot: /tmp/verify-widget/run-widget-we/03b_feed_daily_scrolled
+- scrollUntilVisible:
+    element: { text: ".*Heute.*" }
+    direction: UP
+    centerElement: false
+    visibilityPercentage: 40
+    waitToSettleTimeoutMs: 800
+    timeout: 10000
+
+# === 110046 — tap day -> Day Detail -> back to Feed ===
+- tapOn:
+    text: ".*Heute.*"
+- waitForAnimationToEnd: { timeout: 5000 }
+- takeScreenshot: /tmp/verify-widget/run-widget-we/04_detail_day1
+- pressKey: Back
+- waitForAnimationToEnd: { timeout: 2000 }
+- assertVisible:
+    text: ".*Heute.*"                   # back lands on Feed, NOT home
+- takeScreenshot: /tmp/verify-widget/run-widget-we/04b_feed_after_back
+
+# === 110048 — hourly forecast content + different day refreshes ===
+- tapOn:
+    text: ".*Heute.*"
+- waitForAnimationToEnd: { timeout: 5000 }
+- takeScreenshot: /tmp/verify-widget/run-widget-we/05_hourly_top
+- scroll
+- waitForAnimationToEnd: { timeout: 1500 }
+- takeScreenshot: /tmp/verify-widget/run-widget-we/05b_hourly_scrolled
+- pressKey: Back
+- waitForAnimationToEnd: { timeout: 2000 }
+# Day 2 card tap — NOT tappable on Android BY DESIGN (OverviewScreen.kt:131 passes no
+# onClick to OverviewStripeItem; detail is today-only via GetTodayWeatherForecastDetailUseCase).
+# We tap it and assert we REMAIN on the Feed — documents the behaviour for 110048/110049.
+# Day-2 date regex ("Montag, 8.06." — no leading zero) — update when re-running.
+- tapOn:
+    text: '.*8\.06\..*'
+- waitForAnimationToEnd: { timeout: 2500 }
+- assertVisible:
+    text: ".*Heute.*"                   # still on Feed — future-day cards don't navigate
+- takeScreenshot: /tmp/verify-widget/run-widget-we/05c_day2_not_tappable
+
+# === 110049 — no day-switch control (none in code); Feed state preserved after detail-back
+# (evidence: 04b_feed_after_back vs 03_feed_daily_top) ===
+- takeScreenshot: /tmp/verify-widget/run-widget-we/06b_feed_state_preserved
+
+# === exit Feed -> home (110046 step 7 / 110053 session-flow) ===
+- pressKey: Back
+- waitForAnimationToEnd: { timeout: 2000 }
+- assertVisible: "Test Weather"
+# reopen once more within the session (110053 step 6)
+- tapOn: "Test Weather"
+- extendedWaitUntil:
+    visible: { text: ".*Heute.*" }
+    timeout: 12000
+- pressKey: Back
+- waitForAnimationToEnd: { timeout: 2000 }
+- assertVisible: "Test Weather"
+- takeScreenshot: /tmp/verify-widget/run-widget-we/07_home_final
