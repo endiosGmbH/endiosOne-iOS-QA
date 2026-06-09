@@ -32,7 +32,8 @@ endiosOne-mobile-QA/
 
 | Code | Widget | `widget-key` | TestRail section | iOS | Android |
 |------|--------|--------------|------------------|-----|---------|
-| `IMG` | Image | `one_widget_image` | [12911](https://endios.testrail.io/index.php?/suites/view/468&group_id=12911) | ✅ | 🚧 |
+| `IMG` | Image | `one_widget_image` | [12911](https://endios.testrail.io/index.php?/suites/view/468&group_id=12911) | ✅ | ✅ |
+| `WE`  | Weather | `one_widget_weather` | [12897](https://endios.testrail.io/index.php?/suites/view/468&group_id=12897) | ✅ | ✅ |
 | `NW`  | News | `one_widget_news` | [12902](https://endios.testrail.io/index.php?/suites/view/468&group_id=12902) | ✅ | — |
 | `OF`  | Offers | `one_widget_offers` | [12923](https://endios.testrail.io/index.php?/suites/view/468&group_id=12923) | ✅ | — |
 | `INV` | CSS Invoice | `one_widget_css_invoice` | [12945](https://endios.testrail.io/index.php?/suites/view/468&group_id=12945) | ✅ | — |
@@ -62,7 +63,8 @@ All widgets live under TestRail project `endiosOne` (5) · suite `Master` (468).
 This repo is driven by the QA skills rather than run by hand:
 
 - **`/verify-widget <WIDGET>`** — verifies a widget's TestRail cases against **both** the iOS codebase and the Maestro runs: it reads the source/resolved config to confirm each case's behavior is implemented, then backs that up with a simulator run.
-- **`/run-widget <WIDGET>`** — runs a widget's entire TestRail suite in a **single consolidated Maestro flow**: one app launch, a different tile per case, and a table report at the end.
+- **`/run-widget-iOS <WIDGET>`** — runs a widget's entire TestRail suite on **iOS** in a single consolidated Maestro flow: one app launch on the simulator, a different tile per case, and a table report at the end.
+- **`/run-widget-Android <WIDGET>`** — same single-launch consolidated suite run, but on an **Android** emulator/device.
 - **`/run-refresh-testrail-and-simulator`** — hard-refresh TestRail + the iOS simulator before any verify / run.
 
 The pattern for every widget:
@@ -89,7 +91,7 @@ $M --udid $U16 test maestro/ios/widgets/NW/run-widget-nw.yaml
 $M --udid $U16 test maestro/ios/widgets/OF/case-110169.yaml
 
 # Run an Android flow
-$M test maestro/android/widgets/IMG/run-widget-img.yaml
+$M test maestro/android/widgets/one_widget_image/run-widget-img.yaml
 ```
 
 Screenshots and JUnit reports are written to `/tmp/verify-widget/<run>/` (git-ignored — never committed).
