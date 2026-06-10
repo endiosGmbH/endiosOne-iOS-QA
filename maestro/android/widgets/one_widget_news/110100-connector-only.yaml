@@ -1,0 +1,25 @@
+appId: de.endios.one.claudeautomation.demo.debug
+tags:
+  - news-widget
+# 110100 — Connector/network unavailable shows error state without crash.
+# RUN ORCHESTRATION (Maestro can't toggle airplane):
+#   1. launch + load dashboard with network ON (this flow's first block)
+#   2. `adb shell cmd connectivity airplane-mode enable`
+#   3. resume this flow from the "AIRPLANE ON" marker (or run airplane-on, then tap RSS)
+# Simplest: run this whole flow; it loads the dashboard, then YOU toggle airplane
+# externally between the two runFlow gates. The run-script wrapper does this.
+---
+- launchApp: { appId: de.endios.one.claudeautomation.demo.debug, clearState: true, permissions: { all: allow } }
+- waitForAnimationToEnd: { timeout: 8000 }
+- runFlow:
+    when: { visible: "Don’t allow" }
+    commands: [ { tapOn: "Don’t allow" }, { waitForAnimationToEnd: { timeout: 1500 } } ]
+- extendedWaitUntil: { visible: "Images not clickable", timeout: 40000 }
+- waitForAnimationToEnd: { timeout: 3000 }
+- tapOn: "Auto"
+- waitForAnimationToEnd: { timeout: 3000 }
+# >>> airplane mode is enabled by the wrapper script before this tap <<<
+- tapOn: "RSS Feed"
+- waitForAnimationToEnd: { timeout: 6000 }
+- assertVisible: { text: ".*[Kk]eine.*[Ii]nternet.*|.*[Nn]etzwerk.*" }   # error dialog, no crash
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/E_100_connector_down

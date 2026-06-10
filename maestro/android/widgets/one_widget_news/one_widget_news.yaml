@@ -1,0 +1,171 @@
+appId: de.endios.one.claudeautomation.demo.debug
+name: "[NW] News Widget — full suite (Android, SINGLE LAUNCH)"
+tags:
+  - news-widget
+# =============================================================================
+# News [NW] full suite — Android. TestRail §12902 (project 5 / suite 468), 19 cases.
+# App: Claude Automation (configId 1425), TEST. Build: develop 4.1.32 / Foundation 5.5.12.
+#
+# *** SINGLE LAUNCH (one launchApp). ***
+# BUG-B (NewsAnalytics Koin crash) fires ONLY when the SAME News tile is opened a 2nd
+# time in a process. Verified: opening DIFFERENT tiles once each = no crash. So this
+# flow opens each News tile AT MOST ONCE; article<->list navigation within a session
+# does NOT re-open the tile. Recover with hardware Back only — never relaunch.
+#
+# RELIABILITY MODEL:
+# - TEXT-titled tiles (Testing QA / RSS Feed / No feed) -> reliable text taps + hard asserts.
+# - GALLERY/CAROUSEL tiles have NO text/desc selector -> coordinate taps. The dashboard
+#   layout/scroll is non-deterministic across runs, so these are BEST-EFFORT: wrapped so
+#   they never abort the flow (optional scrolls, screenshot-only). If a gallery case isn't
+#   captured, confirm it from the focused checks — do NOT treat a missed coord-tap as Fail.
+# - PRECONDITION: Chrome first-run completed once (else Custom Tab intercepted, 110088).
+#
+# TILE -> CASES (each opened once):
+#   dashboard            110082 (variants/strip subtitle), 110085 (rotation swipe)
+#   Gallery 18766 chevron->List   110084, 110107, 110087, 110089, 110090, 110101,
+#                                 + open article -> 110091, 110092, 110093, 110094, 110095
+#   Carousel/Gallery preview      110083 (preview opens Detail directly)
+#   Testing QA 18744 -> List -> "World news"   110257 (social), 110087 (manual)
+#   RSS Feed 18773 (Auto)   110088 (webview close-X), 110098 (dedup), 110089 (RSS layout)
+#   No feed 18772 (Auto)    110097 (empty state)
+#   110100 (connector down) -> 110100-connector-only.yaml (needs airplane toggle)
+# =============================================================================
+---
+- launchApp: { appId: de.endios.one.claudeautomation.demo.debug, clearState: true, permissions: { all: allow } }
+- waitForAnimationToEnd: { timeout: 8000 }
+- runFlow:
+    when: { visible: "Don’t allow" }
+    commands: [ { tapOn: "Don’t allow" }, { waitForAnimationToEnd: { timeout: 1500 } } ]
+- runFlow:
+    when: { visible: "Don't allow" }
+    commands: [ { tapOn: "Don't allow" }, { waitForAnimationToEnd: { timeout: 1500 } } ]
+- extendedWaitUntil: { visible: "Images not clickable", timeout: 40000 }
+- waitForAnimationToEnd: { timeout: 3000 }
+
+# === 110082 — tile variants render (dashboard; Strip subtitle "Qualiy") ===
+- scrollUntilVisible: { element: { text: "News 2" }, direction: DOWN, visibilityPercentage: 20, timeout: 18000, optional: true }
+- waitForAnimationToEnd: { timeout: 1200 }
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/01_82_tiles
+- scrollUntilVisible: { element: { text: "Qualiy" }, direction: DOWN, visibilityPercentage: 20, timeout: 15000, optional: true }
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/01_82_strip_subtitle
+
+# === 110085 — gallery/carousel rotation (horizontal swipe; tile stays put) ===
+- scrollUntilVisible: { element: { text: "News 2" }, direction: UP, centerElement: true, visibilityPercentage: 20, timeout: 18000, optional: true }
+- waitForAnimationToEnd: { timeout: 1200 }
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/02_85_rotate_before
+- swipe: { start: "90%, 50%", end: "45%, 50%" }      # gallery 18766 row (right of centered News 2)
+- waitForAnimationToEnd: { timeout: 1500 }
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/02_85_rotate_after
+
+# === Gallery 18766 chevron -> List View (BEST-EFFORT; single open) ===
+# 110084 chevron->List | 110107 filter | 110087/110089/110090/110101 | article -> 110091-110095
+- scrollUntilVisible: { element: { text: "News 2" }, direction: UP, centerElement: true, visibilityPercentage: 20, timeout: 18000, optional: true }
+- waitForAnimationToEnd: { timeout: 1200 }
+- tapOn: { point: "94%, 45%" }                       # 18766 chevron (top-right of gallery) -> List
+- waitForAnimationToEnd: { timeout: 5000 }
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/03_84_list_via_chevron
+- runFlow:
+    when: { visible: "Nachrichten" }                 # only if the chevron actually opened the List
+    commands:
+      - scroll
+      - waitForAnimationToEnd: { timeout: 1500 }
+      - takeScreenshot: /tmp/verify-widget/run-widget-nw/03_90_list_scrolled       # 110090
+      # 110107 — filter funnel (nav-bar top-right) -> Kategorien -> toggle -> close
+      - tapOn: { point: "93%, 6%" }
+      - waitForAnimationToEnd: { timeout: 2500 }
+      - takeScreenshot: /tmp/verify-widget/run-widget-nw/04_107_kategorien          # 110107
+      - runFlow:
+          when: { visible: { text: "Kategorien" } }
+          commands:
+            - tapOn: { point: "88%, 82%" }           # toggle a category OFF
+            - waitForAnimationToEnd: { timeout: 1200 }
+            - takeScreenshot: /tmp/verify-widget/run-widget-nw/04_107_filtered
+            - tapOn: { point: "88%, 82%" }           # toggle back ON
+            - waitForAnimationToEnd: { timeout: 1000 }
+            - tapOn: { point: "94%, 79%" }           # X close sheet
+            - waitForAnimationToEnd: { timeout: 1500 }
+      # open first article -> Detail (+ gallery)
+      - tapOn: { point: "50%, 30%" }
+      - waitForAnimationToEnd: { timeout: 5000 }
+      - takeScreenshot: /tmp/verify-widget/run-widget-nw/05_91_detail_fields        # 110091/110093/110095
+      - scroll
+      - waitForAnimationToEnd: { timeout: 1200 }
+      - takeScreenshot: /tmp/verify-widget/run-widget-nw/05_92_gallery_section      # 110092
+      - runFlow:
+          when: { visible: { text: "Galerie" } }
+          commands:
+            - tapOn: { point: "31%, 70%" }           # gallery image -> full-view
+            - waitForAnimationToEnd: { timeout: 2500 }
+            - takeScreenshot: /tmp/verify-widget/run-widget-nw/05_94_gallery_fullview  # 110094
+            - pressKey: Back
+            - waitForAnimationToEnd: { timeout: 1500 }
+      - tapOn: { point: "92%, 7%" }                  # 110093 Detail X close
+      - waitForAnimationToEnd: { timeout: 2500 }
+      - pressKey: Back                               # List -> dashboard (110101 Back)
+      - waitForAnimationToEnd: { timeout: 2500 }
+
+# === Carousel/Gallery preview -> Detail directly (110083, BEST-EFFORT) ===
+- scrollUntilVisible: { element: { text: "News 2" }, direction: DOWN, centerElement: true, visibilityPercentage: 20, timeout: 18000, optional: true }
+- waitForAnimationToEnd: { timeout: 1200 }
+- tapOn: { point: "66%, 52%" }                       # gallery preview -> Detail DIRECT
+- waitForAnimationToEnd: { timeout: 5000 }
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/06_83_preview_detail       # 110083 direct detail
+- runFlow:
+    when: { visible: "Beschreibung" }
+    commands:
+      # 110092/110094 — this preview-detail reliably has a Galerie; capture it + full-view
+      - scroll
+      - waitForAnimationToEnd: { timeout: 1200 }
+      - takeScreenshot: /tmp/verify-widget/run-widget-nw/06_92_gallery_section
+      - runFlow:
+          when: { visible: { text: "Galerie" } }
+          commands:
+            - tapOn: { point: "31%, 70%" }           # gallery image -> full-view viewer
+            - waitForAnimationToEnd: { timeout: 2500 }
+            - takeScreenshot: /tmp/verify-widget/run-widget-nw/06_94_gallery_fullview   # 110094
+            - pressKey: Back
+            - waitForAnimationToEnd: { timeout: 1500 }
+      - pressKey: Back
+      - waitForAnimationToEnd: { timeout: 2000 }
+
+# === Testing QA 18744 -> List -> "World news" article (110257 social, 110087 manual) ===
+- scrollUntilVisible: { element: { text: "Testing QA" }, direction: UP, visibilityPercentage: 30, timeout: 25000, optional: true }
+- tapOn: "Testing QA"
+- waitForAnimationToEnd: { timeout: 5000 }
+- assertVisible: "World news"                         # 110087 manual ContentHub in list
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/07_87_testingqa_list
+- tapOn: { text: "World news" }
+- waitForAnimationToEnd: { timeout: 5000 }
+- assertVisible: { text: "Soziale Medien" }           # 110257 social section renders
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/07_257_social
+- pressKey: Back
+- waitForAnimationToEnd: { timeout: 2000 }
+- pressKey: Back
+- waitForAnimationToEnd: { timeout: 2500 }
+
+# === RSS Feed 18773 (Auto) -> webview close-X (110088) + dedup (110098) + RSS layout (110089) ===
+- tapOn: "Auto"
+- waitForAnimationToEnd: { timeout: 3000 }
+- tapOn: "RSS Feed"
+- extendedWaitUntil: { visible: "tagesschau", timeout: 20000 }
+- waitForAnimationToEnd: { timeout: 2000 }
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/08_98_rss_list
+- scroll
+- waitForAnimationToEnd: { timeout: 1500 }
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/08_98_rss_scrolled
+- tapOn: { text: "tagesschau", index: 0 }
+- waitForAnimationToEnd: { timeout: 6000 }
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/08_88_customtab
+- tapOn: { point: "6%, 6%" }                          # Custom Tab "Close tab" (top-left)
+- waitForAnimationToEnd: { timeout: 3000 }
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/08_88_back_to_list
+- pressKey: Back
+- waitForAnimationToEnd: { timeout: 2500 }
+
+# === No feed 18772 (Auto) -> empty state (110097) ===
+- tapOn: "No feed"
+- waitForAnimationToEnd: { timeout: 5000 }
+- assertVisible: { text: ".*[Kk]eine.*[Nn]achrichten.*" }   # 110097 clean empty state
+- takeScreenshot: /tmp/verify-widget/run-widget-nw/09_97_empty_state
+- pressKey: Back
+- waitForAnimationToEnd: { timeout: 2000 }
